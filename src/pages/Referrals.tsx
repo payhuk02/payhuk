@@ -255,12 +255,12 @@ const Referrals = () => {
           
                 <div className="flex gap-2">
                   <div className="flex-1">
-              <input
-                type="text"
+                    <input
+                      type="text"
                       value={currentStats.referralLink}
-                readOnly
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-50 text-sm"
-              />
+                      readOnly
+                      className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 text-sm font-mono select-all hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-colors"
+                    />
             </div>
                   <Button onClick={copyToClipboard} className="gap-2">
                     {copied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
