@@ -26,8 +26,7 @@ DROP POLICY IF EXISTS "Enable read access for users on domains" ON public.domain
 CREATE POLICY "Enable read access for users on domains" ON public.domains
 FOR SELECT USING (
     auth.uid() = (SELECT user_id FROM public.stores WHERE id = store_id) OR -- L'utilisateur possède la boutique
-    store_id IS NULL OR -- Domaine global (si applicable)
-    EXISTS (SELECT 1 FROM public.admin_users WHERE admin_users.user_id = auth.uid()) -- Accès admin
+    store_id IS NULL -- Domaine global (si applicable)
 );
 
 -- Policy pour les utilisateurs authentifiés d'insérer des domaines
@@ -35,26 +34,23 @@ DROP POLICY IF EXISTS "Enable insert for authenticated users on domains" ON publ
 CREATE POLICY "Enable insert for authenticated users on domains" ON public.domains
 FOR INSERT WITH CHECK (
     auth.uid() = (SELECT user_id FROM public.stores WHERE id = store_id) OR
-    (store_id IS NULL AND EXISTS (SELECT 1 FROM public.admin_users WHERE admin_users.user_id = auth.uid()))
+    store_id IS NULL
 );
 
 -- Policy pour les utilisateurs authentifiés de mettre à jour leurs propres domaines
 DROP POLICY IF EXISTS "Enable update for users on domains" ON public.domains;
 CREATE POLICY "Enable update for users on domains" ON public.domains
 FOR UPDATE USING (
-    auth.uid() = (SELECT user_id FROM public.stores WHERE id = store_id) OR
-    EXISTS (SELECT 1 FROM public.admin_users WHERE admin_users.user_id = auth.uid())
+    auth.uid() = (SELECT user_id FROM public.stores WHERE id = store_id)
 ) WITH CHECK (
-    auth.uid() = (SELECT user_id FROM public.stores WHERE id = store_id) OR
-    EXISTS (SELECT 1 FROM public.admin_users WHERE admin_users.user_id = auth.uid())
+    auth.uid() = (SELECT user_id FROM public.stores WHERE id = store_id)
 );
 
 -- Policy pour les utilisateurs authentifiés de supprimer leurs propres domaines
 DROP POLICY IF EXISTS "Enable delete for users on domains" ON public.domains;
 CREATE POLICY "Enable delete for users on domains" ON public.domains
 FOR DELETE USING (
-    auth.uid() = (SELECT user_id FROM public.stores WHERE id = store_id) OR
-    EXISTS (SELECT 1 FROM public.admin_users WHERE admin_users.user_id = auth.uid())
+    auth.uid() = (SELECT user_id FROM public.stores WHERE id = store_id)
 );
 
 -- Trigger pour mettre à jour `updated_at`
