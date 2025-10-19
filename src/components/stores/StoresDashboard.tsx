@@ -53,6 +53,7 @@ export const StoresDashboard: React.FC = () => {
   const [showEditDialog, setShowEditDialog] = useState(false);
   const [showAnalytics, setShowAnalytics] = useState(false);
   const [storeStats, setStoreStats] = useState<Record<string, StoreStats>>({});
+  const [togglingStores, setTogglingStores] = useState<Set<string>>(new Set());
 
   // Charger les statistiques pour chaque boutique
   React.useEffect(() => {
@@ -77,7 +78,21 @@ export const StoresDashboard: React.FC = () => {
   };
 
   const handleToggleStatus = async (store: StoreType) => {
-    await toggleStoreStatus(store.id);
+    setTogglingStores(prev => new Set(prev).add(store.id));
+    
+    try {
+      const success = await toggleStoreStatus(store.id);
+      if (!success) {
+        // L'erreur est déjà gérée dans toggleStoreStatus
+        return;
+      }
+    } finally {
+      setTogglingStores(prev => {
+        const newSet = new Set(prev);
+        newSet.delete(store.id);
+        return newSet;
+      });
+    }
   };
 
   const openStorefront = (store: StoreType) => {
@@ -242,8 +257,15 @@ export const StoresDashboard: React.FC = () => {
                           Analytics
                         </DropdownMenuItem>
                         <DropdownMenuSeparator />
-                        <DropdownMenuItem onClick={() => handleToggleStatus(store)}>
-                          <Settings className="h-4 w-4 mr-2" />
+                        <DropdownMenuItem 
+                          onClick={() => handleToggleStatus(store)}
+                          disabled={togglingStores.has(store.id)}
+                        >
+                          {togglingStores.has(store.id) ? (
+                            <div className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin mr-2" />
+                          ) : (
+                            <Settings className="h-4 w-4 mr-2" />
+                          )}
                           {store.is_active ? 'Désactiver' : 'Activer'}
                         </DropdownMenuItem>
                         <DropdownMenuItem 

@@ -243,27 +243,48 @@ export const useMultiStores = () => {
   const toggleStoreStatus = async (storeId: string) => {
     try {
       const store = stores.find(s => s.id === storeId);
-      if (!store) return false;
+      if (!store) {
+        toast({
+          title: "Erreur",
+          description: "Boutique non trouvée",
+          variant: "destructive"
+        });
+        return false;
+      }
+
+      // Mettre à jour l'état local immédiatement pour un feedback instantané
+      const newStatus = !store.is_active;
+      setStores(prev => prev.map(s => 
+        s.id === storeId ? { ...s, is_active: newStatus } : s
+      ));
 
       const { data, error: updateError } = await supabase
         .from('stores')
         .update({ 
-          is_active: !store.is_active,
+          is_active: newStatus,
           updated_at: new Date().toISOString()
         })
         .eq('id', storeId)
+        .eq('user_id', (await supabase.auth.getUser()).data.user?.id) // Sécurité supplémentaire
         .select()
         .single();
 
-      if (updateError) throw updateError;
+      if (updateError) {
+        // Revenir à l'état précédent en cas d'erreur
+        setStores(prev => prev.map(s => 
+          s.id === storeId ? { ...s, is_active: store.is_active } : s
+        ));
+        throw updateError;
+      }
 
+      // Mettre à jour avec les données du serveur
       setStores(prev => prev.map(s => 
         s.id === storeId ? data : s
       ));
 
       toast({
-        title: store.is_active ? "Boutique désactivée" : "Boutique activée",
-        description: `Votre boutique est maintenant ${store.is_active ? 'désactivée' : 'activée'}.`
+        title: newStatus ? "Boutique activée" : "Boutique désactivée",
+        description: `Votre boutique "${store.name}" est maintenant ${newStatus ? 'active' : 'inactive'}.`,
       });
 
       return true;
@@ -271,7 +292,7 @@ export const useMultiStores = () => {
       logger.error('Error toggling store status:', err);
       toast({
         title: "Erreur",
-        description: "Impossible de modifier l'état de la boutique",
+        description: err.message || "Impossible de modifier l'état de la boutique",
         variant: "destructive"
       });
       return false;
