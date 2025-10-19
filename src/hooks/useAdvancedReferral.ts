@@ -193,8 +193,7 @@ export const useAdvancedReferral = () => {
           id,
           referred_id,
           status,
-          created_at,
-          commission_earned
+          created_at
         `)
         .eq('referrer_id', user.id);
 
@@ -284,8 +283,7 @@ export const useAdvancedReferral = () => {
           id,
           referred_id,
           status,
-          created_at,
-          commission_earned
+          created_at
         `)
         .eq('referrer_id', user.id)
         .order('created_at', { ascending: false });
@@ -325,7 +323,7 @@ export const useAdvancedReferral = () => {
             total_orders: totalOrders,
             total_spent: totalSpent,
             status: ref.status as 'active' | 'inactive' | 'pending',
-            commission_earned: ref.commission_earned || 0,
+            commission_earned: 0, // Calculé depuis referral_history si nécessaire
           };
         })
       );

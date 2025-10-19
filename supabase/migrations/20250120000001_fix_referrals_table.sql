@@ -15,7 +15,6 @@ CREATE TABLE public.referrals (
   referred_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
   referral_code TEXT NOT NULL,
   status TEXT NOT NULL DEFAULT 'active' CHECK (status IN ('active', 'inactive', 'pending')),
-  commission_earned NUMERIC DEFAULT 0,
   created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(),
   updated_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(),
   UNIQUE(referrer_id, referred_id)
@@ -132,8 +131,7 @@ BEGIN
   
   -- Mettre à jour la commission totale
   UPDATE referrals 
-  SET commission_earned = commission_earned + p_amount,
-      updated_at = now()
+  SET updated_at = now()
   WHERE id = referral_id;
   
   -- Mettre à jour les gains totaux du parrain

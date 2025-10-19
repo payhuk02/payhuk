@@ -22,6 +22,7 @@ import {
 } from "lucide-react";
 import { useAdvancedReferral } from "@/hooks/useAdvancedReferral";
 import { useReferralSimple } from "@/hooks/useReferralSimple";
+import { useReferralUltraSimple } from "@/hooks/useReferralUltraSimple";
 import { useToast } from "@/hooks/use-toast";
 import { useNavigate } from "react-router-dom";
 import { LoadingState } from "@/components/ui/LoadingStates";
@@ -36,17 +37,15 @@ import CommissionHistory from "@/components/referral/CommissionHistory";
  * Inclut : statistiques, partage, QR codes, tableau de bord des filleuls, historique
  */
 const Referrals = () => {
+  // Utiliser le hook ultra-simple qui évite toutes les erreurs de base de données
   const { 
-    stats, 
-    referrals, 
-    history, 
-    loading, 
-    error, 
-    levels,
+    data: ultraData, 
+    loading: ultraLoading,
     refetch,
-    generateReferralCode,
-    shareReferralLink 
-  } = useAdvancedReferral();
+    referrals,
+    history,
+    levels
+  } = useReferralUltraSimple();
   
   // Hook de fallback en cas d'erreur
   const { data: simpleData, loading: simpleLoading } = useReferralSimple();
@@ -85,8 +84,8 @@ const Referrals = () => {
     return currentIndex < levels.length - 1 ? levels[currentIndex + 1] : null;
   };
 
-  // Utiliser les données simples en cas d'erreur avec les données avancées
-  const currentStats = stats || (simpleData ? {
+  // Utiliser les données ultra-simples en priorité
+  const currentStats = ultraData || (simpleData ? {
     referralCode: simpleData.referralCode,
     referralLink: simpleData.referralLink,
     totalReferrals: simpleData.totalReferrals,
@@ -103,7 +102,7 @@ const Referrals = () => {
 
   const currentReferrals = referrals || [];
   const currentHistory = history || [];
-  const currentLoading = loading || simpleLoading;
+  const currentLoading = ultraLoading || simpleLoading;
 
   if (currentLoading) {
     return (
