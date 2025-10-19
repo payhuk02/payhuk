@@ -17,7 +17,7 @@ import { ProductAnalyticsTab } from "./tabs/ProductAnalyticsTab";
 import { ProductPixelsTab } from "./tabs/ProductPixelsTab";
 import { ProductVariantsTab } from "./tabs/ProductVariantsTab";
 import { ProductPromotionsTab } from "./tabs/ProductPromotionsTab";
-import { ProductFeatureTest } from "./tabs/ProductFeatureTest";
+import { PaymentSelection } from "@/components/payments/PaymentSelection";
 import { generateSlug } from "@/lib/store-utils";
 import "@/styles/product-creation.css";
 
@@ -557,8 +557,8 @@ export const ProductForm = ({ storeId, storeSlug, productId, initialData, onSucc
               <TabsTrigger value="promotions" className="product-tab-trigger">
                 Promotions
               </TabsTrigger>
-              <TabsTrigger value="test" className="product-tab-trigger">
-                Tests
+              <TabsTrigger value="payment" className="product-tab-trigger">
+                Paiements
               </TabsTrigger>
             </TabsList>
 
@@ -585,6 +585,7 @@ export const ProductForm = ({ storeId, storeSlug, productId, initialData, onSucc
               <ProductVisualTab
                 formData={formData}
                 updateFormData={updateFormData}
+                storeId={storeId}
               />
             </TabsContent>
 
@@ -592,6 +593,7 @@ export const ProductForm = ({ storeId, storeSlug, productId, initialData, onSucc
               <ProductFilesTab
                 formData={formData}
                 updateFormData={updateFormData}
+                storeId={storeId}
               />
             </TabsContent>
 
@@ -644,12 +646,34 @@ export const ProductForm = ({ storeId, storeSlug, productId, initialData, onSucc
               />
             </TabsContent>
 
-            <TabsContent value="test" className="mt-6">
-              <ProductFeatureTest
-                formData={formData}
-                updateFormData={updateFormData}
-              />
+            <TabsContent value="payment" className="mt-6">
+              <div className="space-y-6">
+                <div className="text-center">
+                  <h3 className="text-lg font-semibold mb-2">Configuration des paiements</h3>
+                  <p className="text-muted-foreground">
+                    Configurez les options de paiement pour ce produit
+                  </p>
+                </div>
+                
+                <PaymentSelection
+                  orderId="preview-order"
+                  customerId="preview-customer"
+                  storeId={storeId}
+                  totalAmount={Number(formData.price) || 0}
+                  productType={formData.product_type as 'physical' | 'digital' | 'service'}
+                  onPaymentMethodSelected={(method) => {
+                    console.log('Méthode de paiement sélectionnée:', method);
+                  }}
+                  onPaymentCreated={(payment) => {
+                    console.log('Paiement créé:', payment);
+                  }}
+                  onCancel={() => {
+                    console.log('Paiement annulé');
+                  }}
+                />
+              </div>
             </TabsContent>
+
           </Tabs>
         </CardContent>
       </Card>

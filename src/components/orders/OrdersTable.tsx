@@ -3,7 +3,7 @@ import { Card } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { MoreHorizontal, Eye, Trash2 } from "lucide-react";
+import { MoreHorizontal, Eye, Trash2, MessageSquare } from "lucide-react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { useToast } from "@/hooks/use-toast";
@@ -15,9 +15,10 @@ import { fr } from "date-fns/locale";
 interface OrdersTableProps {
   orders: Order[];
   onUpdate: () => void;
+  onOrderSelect?: (order: Order) => void;
 }
 
-export const OrdersTable = ({ orders, onUpdate }: OrdersTableProps) => {
+export const OrdersTable = ({ orders, onUpdate, onOrderSelect }: OrdersTableProps) => {
   const { toast } = useToast();
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
@@ -126,26 +127,37 @@ export const OrdersTable = ({ orders, onUpdate }: OrdersTableProps) => {
                     {format(new Date(order.created_at), "dd MMM yyyy", { locale: fr })}
                   </TableCell>
                   <TableCell className="text-right">
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" size="icon">
-                          <MoreHorizontal className="h-4 w-4" />
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end">
-                        <DropdownMenuItem>
-                          <Eye className="h-4 w-4 mr-2" />
-                          Voir détails
-                        </DropdownMenuItem>
-                        <DropdownMenuItem
-                          onClick={() => setDeleteId(order.id)}
-                          className="text-destructive"
-                        >
-                          <Trash2 className="h-4 w-4 mr-2" />
-                          Supprimer
-                        </DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
+                    <div className="flex items-center gap-2 justify-end">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => onOrderSelect?.(order)}
+                        className="gap-2"
+                      >
+                        <MessageSquare className="h-4 w-4" />
+                        Gérer
+                      </Button>
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button variant="ghost" size="icon">
+                            <MoreHorizontal className="h-4 w-4" />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                          <DropdownMenuItem onClick={() => onOrderSelect?.(order)}>
+                            <Eye className="h-4 w-4 mr-2" />
+                            Voir détails
+                          </DropdownMenuItem>
+                          <DropdownMenuItem
+                            onClick={() => setDeleteId(order.id)}
+                            className="text-destructive"
+                          >
+                            <Trash2 className="h-4 w-4 mr-2" />
+                            Supprimer
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    </div>
                   </TableCell>
                 </TableRow>
               ))}

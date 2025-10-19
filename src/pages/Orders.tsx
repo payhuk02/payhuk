@@ -9,12 +9,14 @@ import { useOrders } from "@/hooks/useOrders";
 import { CreateOrderDialog } from "@/components/orders/CreateOrderDialog";
 import { OrdersTable } from "@/components/orders/OrdersTable";
 import { OrderFilters } from "@/components/orders/OrderFilters";
+import { OrderManagement } from "@/components/integration/OrderManagement";
 import { Skeleton } from "@/components/ui/skeleton";
 
 const Orders = () => {
   const { store, loading: storeLoading } = useStore();
   const { orders, loading: ordersLoading, refetch } = useOrders(store?.id);
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
+  const [selectedOrder, setSelectedOrder] = useState<any>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [paymentStatusFilter, setPaymentStatusFilter] = useState<string>("all");
@@ -101,7 +103,11 @@ const Orders = () => {
                 </CardContent>
               </Card>
             ) : filteredOrders && filteredOrders.length > 0 ? (
-              <OrdersTable orders={filteredOrders} onUpdate={refetch} />
+              <OrdersTable 
+                orders={filteredOrders} 
+                onUpdate={refetch}
+                onOrderSelect={setSelectedOrder}
+              />
             ) : (
               <Card>
                 <CardContent className="flex flex-col items-center justify-center py-12">
@@ -129,6 +135,33 @@ const Orders = () => {
             onSuccess={refetch}
             storeId={store.id}
           />
+
+          {/* Order Management Modal */}
+          {selectedOrder && (
+            <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
+              <div className="bg-background rounded-lg max-w-6xl w-full max-h-[90vh] overflow-y-auto">
+                <OrderManagement
+                  orderId={selectedOrder.id}
+                  customerId={selectedOrder.customer_id}
+                  storeId={store.id}
+                  productId={selectedOrder.product_id}
+                  productType={selectedOrder.product_type || 'physical'}
+                  totalAmount={selectedOrder.total_amount}
+                  orderStatus={selectedOrder.status}
+                  conversationId={selectedOrder.conversation_id}
+                  escrowPaymentId={selectedOrder.escrow_payment_id}
+                />
+                <div className="p-4 border-t">
+                  <Button 
+                    onClick={() => setSelectedOrder(null)}
+                    className="w-full"
+                  >
+                    Fermer
+                  </Button>
+                </div>
+              </div>
+            </div>
+          )}
         </main>
       </div>
     </SidebarProvider>
