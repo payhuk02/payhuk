@@ -36,7 +36,7 @@ interface ProductFormData {
   slug: string;
   category: string;
   product_type: string;
-  pricing_model: string;
+  pricing_model: "one-time" | "subscription" | "pay-what-you-want" | "free";
   price: number;
   promotional_price: number | null;
   currency: string;
@@ -166,7 +166,7 @@ const getEmptyFormData = (): ProductFormData => ({
   slug: "",
   category: "",
   product_type: "",
-  pricing_model: "",
+  pricing_model: "one-time",
   price: 0,
   promotional_price: null,
   currency: "XOF",
@@ -387,11 +387,31 @@ export const ProductForm = ({ storeId, storeSlug, productId, initialData, onSucc
     setLoading(true);
     
     try {
+      // Filtrer les données pour ne garder que les champs valides pour la base de données
       const productData = {
-        ...formData,
-        status: status,
-        is_draft: status === 'draft',
+        name: formData.name,
+        slug: formData.slug,
+        category: formData.category,
+        product_type: formData.product_type,
+        pricing_model: formData.pricing_model,
+        price: formData.price,
+        promotional_price: formData.promotional_price,
+        currency: formData.currency,
+        description: formData.description,
+        short_description: formData.short_description,
+        image_url: formData.image_url,
+        video_url: formData.video_url,
+        meta_title: formData.meta_title,
+        meta_description: formData.meta_description,
+        meta_keywords: formData.meta_keywords,
         is_active: status === 'published',
+        is_draft: status === 'draft',
+        status: status,
+        collect_shipping_address: formData.collect_shipping_address,
+        shipping_required: formData.shipping_required,
+        shipping_cost: formData.shipping_cost,
+        free_shipping_threshold: formData.free_shipping_threshold,
+        created_at: formData.created_at,
         updated_at: new Date().toISOString(),
       };
 
