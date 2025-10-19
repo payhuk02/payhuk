@@ -4,7 +4,6 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { ProfileSettings } from "@/components/settings/ProfileSettings";
 import { StoreSettings } from "@/components/settings/StoreSettings";
-import { MultiStoreSettings } from "@/components/settings/MultiStoreSettings";
 import { SecuritySettings } from "@/components/settings/SecuritySettings";
 import { NotificationSettings } from "@/components/settings/NotificationSettings";
 import { DomainSettings } from "@/components/settings/DomainSettings";
@@ -12,13 +11,8 @@ import { ProfileDebug } from "@/components/debug/ProfileDebug";
 import { ProfileTest } from "@/components/debug/ProfileTest";
 import { DatabaseMigrationInstructions } from "@/components/debug/DatabaseMigrationInstructions";
 import { MobileResponsiveTest } from "@/components/debug/MobileResponsiveTest";
-import { useSearchParams } from "react-router-dom";
-import { StoreBreadcrumb } from "@/components/navigation/StoreBreadcrumb";
 
 const Settings = () => {
-  const [searchParams] = useSearchParams();
-  const activeTab = searchParams.get('tab') || 'profile';
-
   return (
     <SidebarProvider>
       <div className="flex min-h-screen w-full">
@@ -26,11 +20,6 @@ const Settings = () => {
         <main className="flex-1 w-full overflow-x-hidden">
           <div className="w-full h-full px-4 py-6 sm:px-6 md:px-8 lg:px-10">
             <div className="max-w-5xl mx-auto space-y-4 sm:space-y-6">
-              {/* Breadcrumb */}
-              <div className="mb-4">
-                <StoreBreadcrumb />
-              </div>
-              
               {/* Header - Responsive */}
               <div className="space-y-2">
                 <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold tracking-tight">
@@ -42,7 +31,7 @@ const Settings = () => {
               </div>
 
               {/* Tabs - Fully Responsive */}
-              <Tabs value={activeTab} className="space-y-4 sm:space-y-6">
+              <Tabs defaultValue="profile" className="space-y-4 sm:space-y-6">
                 {/* Mobile: Dropdown, Tablet+: Horizontal tabs */}
                 <div className="w-full">
                   {/* Mobile View (< 640px) */}
@@ -50,9 +39,6 @@ const Settings = () => {
                     <TabsList className="grid w-full grid-cols-2 h-auto gap-2">
                       <TabsTrigger value="profile" className="text-xs py-2">
                         Profil
-                      </TabsTrigger>
-                      <TabsTrigger value="store" className="text-xs py-2">
-                        Boutique
                       </TabsTrigger>
                       <TabsTrigger value="domain" className="text-xs py-2">
                         Domaine
@@ -75,9 +61,6 @@ const Settings = () => {
                       <TabsTrigger value="profile" className="text-sm py-2.5">
                         Profil
                       </TabsTrigger>
-                      <TabsTrigger value="store" className="text-sm py-2.5">
-                        Boutique
-                      </TabsTrigger>
                       <TabsTrigger value="domain" className="text-sm py-2.5">
                         Domaine
                       </TabsTrigger>
@@ -95,12 +78,9 @@ const Settings = () => {
 
                   {/* Desktop View (> 1024px) */}
                   <div className="hidden lg:block">
-                    <TabsList className="grid w-full grid-cols-6 h-auto">
+                    <TabsList className="grid w-full grid-cols-5 h-auto">
                       <TabsTrigger value="profile" className="py-3">
                         Profil
-                      </TabsTrigger>
-                      <TabsTrigger value="store" className="py-3">
-                        Boutique
                       </TabsTrigger>
                       <TabsTrigger value="domain" className="py-3">
                         Domaine
@@ -133,10 +113,7 @@ const Settings = () => {
                   </Card>
                 </TabsContent>
 
-                {/* Store Tab */}
-                <TabsContent value="store" className="space-y-3 sm:space-y-4 animate-fade-in">
-                  <MultiStoreSettings />
-                </TabsContent>
+                {/* Store Tab - Supprimé */}
 
                 {/* Domain Tab */}
                 <TabsContent value="domain" className="space-y-3 sm:space-y-4 animate-fade-in">

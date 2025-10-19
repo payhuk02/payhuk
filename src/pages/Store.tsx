@@ -19,12 +19,9 @@ import { useMultiStores } from "@/hooks/useMultiStores";
 import { StoresDashboard } from "@/components/stores/StoresDashboard";
 import { CreateStoreDialog } from "@/components/stores/CreateStoreDialog";
 import StoreDetails from "@/components/store/StoreDetails";
-import { useNavigate } from "react-router-dom";
-import { StoreBreadcrumb } from "@/components/navigation/StoreBreadcrumb";
 
 const Store = () => {
   const { stores, loading, canCreateStore } = useMultiStores();
-  const navigate = useNavigate();
 
   return (
     <SidebarProvider>
@@ -46,11 +43,6 @@ const Store = () => {
 
           <main className="flex-1 p-3 sm:p-4 md:p-5 lg:p-6 xl:p-8 bg-gradient-hero overflow-x-hidden">
             <div className="max-w-7xl mx-auto w-full animate-fade-in">
-              {/* Breadcrumb */}
-              <div className="mb-6">
-                <StoreBreadcrumb />
-              </div>
-              
               <Tabs defaultValue="dashboard" className="w-full">
                 <TabsList className="grid w-full grid-cols-2 lg:grid-cols-4 mb-6">
                   <TabsTrigger value="dashboard" className="gap-2">
@@ -143,11 +135,11 @@ const Store = () => {
                               Configurez les paramètres globaux de vos boutiques
                             </p>
                             <Button 
-                              onClick={() => navigate('/dashboard/settings?tab=store')}
+                              variant="outline"
                               className="w-full gap-2"
                             >
-                              <ArrowRight className="h-4 w-4" />
-                              Aller aux paramètres
+                              <Settings className="h-4 w-4" />
+                              Paramètres
                             </Button>
                           </CardContent>
                         </Card>
@@ -161,11 +153,10 @@ const Store = () => {
                             </p>
                             <Button 
                               variant="outline"
-                              onClick={() => navigate('/dashboard/products')}
                               className="w-full gap-2"
                             >
-                              <ExternalLink className="h-4 w-4" />
-                              Voir les produits
+                              <Package className="h-4 w-4" />
+                              Produits
                             </Button>
                           </CardContent>
                         </Card>
@@ -196,7 +187,6 @@ const Store = () => {
                                   <Button
                                     variant="outline"
                                     size="sm"
-                                    onClick={() => navigate(`/dashboard/settings?tab=store&store=${store.id}`)}
                                     className="gap-2"
                                   >
                                     <Settings className="h-3 w-3" />
