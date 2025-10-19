@@ -80,6 +80,10 @@ export const AdvancedStoreSettings: React.FC = () => {
 
     if (!formData.name?.trim()) {
       newErrors.name = 'Le nom de la boutique est requis';
+    } else if (formData.name.trim().length < 2) {
+      newErrors.name = 'Le nom doit contenir au moins 2 caractères';
+    } else if (formData.name.trim().length > 50) {
+      newErrors.name = 'Le nom ne peut pas dépasser 50 caractères';
     }
 
     if (formData.contact_email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.contact_email)) {
@@ -87,8 +91,25 @@ export const AdvancedStoreSettings: React.FC = () => {
     }
 
     if (formData.contact_phone && !/^[\+]?[0-9\s\-\(\)]{8,}$/.test(formData.contact_phone)) {
-      newErrors.contact_phone = 'Format de téléphone invalide';
+      newErrors.contact_phone = 'Format de téléphone invalide (minimum 8 chiffres)';
     }
+
+    if (formData.description && formData.description.length > 500) {
+      newErrors.description = 'La description ne peut pas dépasser 500 caractères';
+    }
+
+    if (formData.about && formData.about.length > 1000) {
+      newErrors.about = 'La section "À propos" ne peut pas dépasser 1000 caractères';
+    }
+
+    // Validation des URLs
+    const urlFields = ['logo_url', 'banner_url', 'facebook_url', 'instagram_url', 'twitter_url', 'linkedin_url'];
+    urlFields.forEach(field => {
+      const value = formData[field as keyof typeof formData] as string;
+      if (value && !/^https?:\/\/.+/.test(value)) {
+        newErrors[field] = 'L\'URL doit commencer par http:// ou https://';
+      }
+    });
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -96,6 +117,11 @@ export const AdvancedStoreSettings: React.FC = () => {
 
   const handleSave = async () => {
     if (!selectedStore || !validateForm()) {
+      toast({
+        title: "Erreur de validation",
+        description: "Veuillez corriger les erreurs avant de sauvegarder.",
+        variant: "destructive"
+      });
       return;
     }
 
@@ -104,6 +130,7 @@ export const AdvancedStoreSettings: React.FC = () => {
       const success = await updateStore(selectedStore.id, formData);
       if (success) {
         setIsEditing(false);
+        setSelectedStore({ ...selectedStore, ...formData });
         toast({
           title: "Paramètres sauvegardés",
           description: "Les modifications ont été appliquées avec succès."
@@ -111,6 +138,11 @@ export const AdvancedStoreSettings: React.FC = () => {
       }
     } catch (error) {
       console.error('Error saving settings:', error);
+      toast({
+        title: "Erreur",
+        description: "Impossible de sauvegarder les paramètres.",
+        variant: "destructive"
+      });
     } finally {
       setSaving(false);
     }
@@ -125,7 +157,14 @@ export const AdvancedStoreSettings: React.FC = () => {
   };
 
   const handleToggleStatus = async (store: StoreType) => {
-    await toggleStoreStatus(store.id);
+    const success = await toggleStoreStatus(store.id);
+    if (success) {
+      // Mettre à jour la boutique sélectionnée si c'est celle qui a été modifiée
+      if (selectedStore?.id === store.id) {
+        setSelectedStore({ ...store, is_active: !store.is_active });
+        setFormData(prev => ({ ...prev, is_active: !store.is_active }));
+      }
+    }
   };
 
   if (loading) {
@@ -364,7 +403,14 @@ export const AdvancedStoreSettings: React.FC = () => {
                         disabled={!isEditing}
                         rows={3}
                         placeholder="Décrivez votre boutique..."
+                        className={errors.description ? 'border-red-500' : ''}
                       />
+                      {errors.description && (
+                        <p className="text-sm text-red-500 mt-1">{errors.description}</p>
+                      )}
+                      <p className="text-xs text-muted-foreground mt-1">
+                        {formData.description?.length || 0}/500 caractères
+                      </p>
                     </div>
 
                     <div>
@@ -376,7 +422,14 @@ export const AdvancedStoreSettings: React.FC = () => {
                         disabled={!isEditing}
                         rows={4}
                         placeholder="Parlez de l'histoire de votre boutique..."
+                        className={errors.about ? 'border-red-500' : ''}
                       />
+                      {errors.about && (
+                        <p className="text-sm text-red-500 mt-1">{errors.about}</p>
+                      )}
+                      <p className="text-xs text-muted-foreground mt-1">
+                        {formData.about?.length || 0}/1000 caractères
+                      </p>
                     </div>
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -456,7 +509,23 @@ export const AdvancedStoreSettings: React.FC = () => {
                           onChange={(e) => handleInputChange('logo_url', e.target.value)}
                           disabled={!isEditing}
                           placeholder="https://exemple.com/logo.png"
+                          className={errors.logo_url ? 'border-red-500' : ''}
                         />
+                        {errors.logo_url && (
+                          <p className="text-sm text-red-500 mt-1">{errors.logo_url}</p>
+                        )}
+                        {formData.logo_url && !errors.logo_url && (
+                          <div className="mt-2">
+                            <img 
+                              src={formData.logo_url} 
+                              alt="Aperçu du logo" 
+                              className="w-16 h-16 object-cover rounded border"
+                              onError={(e) => {
+                                e.currentTarget.style.display = 'none';
+                              }}
+                            />
+                          </div>
+                        )}
                       </div>
 
                       <div>
@@ -467,7 +536,23 @@ export const AdvancedStoreSettings: React.FC = () => {
                           onChange={(e) => handleInputChange('banner_url', e.target.value)}
                           disabled={!isEditing}
                           placeholder="https://exemple.com/banner.jpg"
+                          className={errors.banner_url ? 'border-red-500' : ''}
                         />
+                        {errors.banner_url && (
+                          <p className="text-sm text-red-500 mt-1">{errors.banner_url}</p>
+                        )}
+                        {formData.banner_url && !errors.banner_url && (
+                          <div className="mt-2">
+                            <img 
+                              src={formData.banner_url} 
+                              alt="Aperçu de la bannière" 
+                              className="w-full h-20 object-cover rounded border"
+                              onError={(e) => {
+                                e.currentTarget.style.display = 'none';
+                              }}
+                            />
+                          </div>
+                        )}
                       </div>
                     </div>
                   </TabsContent>
@@ -521,7 +606,11 @@ export const AdvancedStoreSettings: React.FC = () => {
                             onChange={(e) => handleInputChange('facebook_url', e.target.value)}
                             disabled={!isEditing}
                             placeholder="https://facebook.com/votre-page"
+                            className={errors.facebook_url ? 'border-red-500' : ''}
                           />
+                          {errors.facebook_url && (
+                            <p className="text-sm text-red-500 mt-1">{errors.facebook_url}</p>
+                          )}
                         </div>
 
                         <div>
@@ -532,7 +621,11 @@ export const AdvancedStoreSettings: React.FC = () => {
                             onChange={(e) => handleInputChange('instagram_url', e.target.value)}
                             disabled={!isEditing}
                             placeholder="https://instagram.com/votre-compte"
+                            className={errors.instagram_url ? 'border-red-500' : ''}
                           />
+                          {errors.instagram_url && (
+                            <p className="text-sm text-red-500 mt-1">{errors.instagram_url}</p>
+                          )}
                         </div>
 
                         <div>
@@ -543,7 +636,11 @@ export const AdvancedStoreSettings: React.FC = () => {
                             onChange={(e) => handleInputChange('twitter_url', e.target.value)}
                             disabled={!isEditing}
                             placeholder="https://twitter.com/votre-compte"
+                            className={errors.twitter_url ? 'border-red-500' : ''}
                           />
+                          {errors.twitter_url && (
+                            <p className="text-sm text-red-500 mt-1">{errors.twitter_url}</p>
+                          )}
                         </div>
 
                         <div>
@@ -554,7 +651,11 @@ export const AdvancedStoreSettings: React.FC = () => {
                             onChange={(e) => handleInputChange('linkedin_url', e.target.value)}
                             disabled={!isEditing}
                             placeholder="https://linkedin.com/company/votre-entreprise"
+                            className={errors.linkedin_url ? 'border-red-500' : ''}
                           />
+                          {errors.linkedin_url && (
+                            <p className="text-sm text-red-500 mt-1">{errors.linkedin_url}</p>
+                          )}
                         </div>
                       </div>
                     </div>

@@ -24,6 +24,7 @@ import {
 } from 'lucide-react';
 import { useMultiStores, Store as StoreType } from '@/hooks/useMultiStores';
 import { useToast } from '@/hooks/use-toast';
+import { supabase } from '@/integrations/supabase/client';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -80,37 +81,48 @@ export const StoreProductsManager: React.FC = () => {
     
     setLoading(true);
     try {
-      // Simulation de chargement des produits
-      // Dans une vraie implémentation, vous feriez un appel API ici
-      const mockProducts: Product[] = [
-        {
-          id: '1',
-          name: 'Produit 1',
-          description: 'Description du produit 1',
-          price: 5000,
-          currency: 'XOF',
-          is_active: true,
-          category: 'Électronique',
-          product_type: 'Physique',
-          image_url: 'https://via.placeholder.com/150',
-          created_at: '2024-01-15T10:00:00Z',
-          updated_at: '2024-01-15T10:00:00Z'
-        },
-        {
-          id: '2',
-          name: 'Produit 2',
-          description: 'Description du produit 2',
-          price: 15000,
-          currency: 'XOF',
-          is_active: false,
-          category: 'Mode',
-          product_type: 'Digital',
-          created_at: '2024-01-14T10:00:00Z',
-          updated_at: '2024-01-14T10:00:00Z'
-        }
-      ];
-      
-      setProducts(mockProducts);
+      // Charger les produits depuis la base de données
+      const { data: products, error } = await supabase
+        .from('products')
+        .select('*')
+        .eq('store_id', selectedStore.id)
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+
+      // Si aucun produit n'existe, créer des exemples
+      if (!products || products.length === 0) {
+        const mockProducts: Product[] = [
+          {
+            id: '1',
+            name: 'Produit 1',
+            description: 'Description du produit 1',
+            price: 5000,
+            currency: 'XOF',
+            is_active: true,
+            category: 'Électronique',
+            product_type: 'Physique',
+            image_url: 'https://via.placeholder.com/150',
+            created_at: '2024-01-15T10:00:00Z',
+            updated_at: '2024-01-15T10:00:00Z'
+          },
+          {
+            id: '2',
+            name: 'Produit 2',
+            description: 'Description du produit 2',
+            price: 15000,
+            currency: 'XOF',
+            is_active: false,
+            category: 'Mode',
+            product_type: 'Digital',
+            created_at: '2024-01-14T10:00:00Z',
+            updated_at: '2024-01-14T10:00:00Z'
+          }
+        ];
+        setProducts(mockProducts);
+      } else {
+        setProducts(products as Product[]);
+      }
     } catch (error) {
       console.error('Error loading products:', error);
       toast({
@@ -159,24 +171,72 @@ export const StoreProductsManager: React.FC = () => {
   });
 
   const handleToggleProductStatus = async (productId: string) => {
-    setProducts(prev => prev.map(product => 
-      product.id === productId 
-        ? { ...product, is_active: !product.is_active }
-        : product
-    ));
-    
-    toast({
-      title: "Statut modifié",
-      description: "Le statut du produit a été mis à jour."
-    });
+    try {
+      const product = products.find(p => p.id === productId);
+      if (!product) return;
+
+      const newStatus = !product.is_active;
+      
+      // Mise à jour optimiste
+      setProducts(prev => prev.map(p => 
+        p.id === productId ? { ...p, is_active: newStatus } : p
+      ));
+
+      // Mise à jour en base de données
+      const { error } = await supabase
+        .from('products')
+        .update({ 
+          is_active: newStatus,
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', productId);
+
+      if (error) {
+        // Rollback en cas d'erreur
+        setProducts(prev => prev.map(p => 
+          p.id === productId ? { ...p, is_active: product.is_active } : p
+        ));
+        throw error;
+      }
+      
+      toast({
+        title: "Statut modifié",
+        description: `Le produit "${product.name}" est maintenant ${newStatus ? 'actif' : 'inactif'}.`
+      });
+    } catch (error) {
+      console.error('Error toggling product status:', error);
+      toast({
+        title: "Erreur",
+        description: "Impossible de modifier le statut du produit",
+        variant: "destructive"
+      });
+    }
   };
 
   const handleDeleteProduct = async (productId: string) => {
-    if (window.confirm('Êtes-vous sûr de vouloir supprimer ce produit ?')) {
+    if (!window.confirm('Êtes-vous sûr de vouloir supprimer ce produit ? Cette action est irréversible.')) {
+      return;
+    }
+
+    try {
+      const { error } = await supabase
+        .from('products')
+        .delete()
+        .eq('id', productId);
+
+      if (error) throw error;
+
       setProducts(prev => prev.filter(product => product.id !== productId));
       toast({
         title: "Produit supprimé",
         description: "Le produit a été supprimé avec succès."
+      });
+    } catch (error) {
+      console.error('Error deleting product:', error);
+      toast({
+        title: "Erreur",
+        description: "Impossible de supprimer le produit",
+        variant: "destructive"
       });
     }
   };
