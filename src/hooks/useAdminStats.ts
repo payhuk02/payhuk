@@ -97,31 +97,29 @@ export const useAdminStats = () => {
         created_at: profile.created_at,
       }));
 
-      // Récupérer les top stores
+      // Récupérer les top stores avec une seule requête optimisée
       const { data: topStoresData } = await supabase
         .from('stores')
-        .select('id, name')
+        .select(`
+          id, 
+          name,
+          orders!inner(
+            total_amount,
+            status
+          )
+        `)
+        .eq('orders.status', 'completed')
         .limit(5);
 
-      const topStores = await Promise.all(
-        (topStoresData || []).map(async (store) => {
-          const { data: ordersData } = await supabase
-            .from('orders')
-            .select('total_amount')
-            .eq('store_id', store.id)
-            .eq('status', 'completed');
-
-          const total_sales = ordersData?.reduce((sum, o) => sum + Number(o.total_amount), 0) || 0;
-
-          return {
-            id: store.id,
-            name: store.name,
-            total_sales,
-          };
-        })
-      );
-
-      topStores.sort((a, b) => b.total_sales - a.total_sales);
+      const topStores = (topStoresData || []).map(store => {
+        const total_sales = store.orders?.reduce((sum: number, o: any) => sum + Number(o.total_amount), 0) || 0;
+        
+        return {
+          id: store.id,
+          name: store.name,
+          total_sales,
+        };
+      }).sort((a, b) => b.total_sales - a.total_sales);
 
       setStats({
         totalUsers: usersCount || 0,

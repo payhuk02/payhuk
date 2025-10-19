@@ -123,7 +123,30 @@ export const initiateMonerooPayment = async (options: PaymentOptions) => {
     };
   } catch (error: any) {
     logger.error("Payment initiation error:", error);
-    throw error;
+    
+    // Gestion d'erreurs spécifique selon le type d'erreur
+    if (error.message?.includes('MONEROO_API_KEY')) {
+      throw new Error('Configuration de paiement manquante. Veuillez contacter le support.');
+    }
+    
+    if (error.message?.includes('CORS')) {
+      throw new Error('Erreur de connexion. Veuillez réessayer.');
+    }
+    
+    if (error.message?.includes('insufficient_funds')) {
+      throw new Error('Fonds insuffisants pour effectuer ce paiement.');
+    }
+    
+    if (error.message?.includes('invalid_currency')) {
+      throw new Error('Devise non supportée pour ce paiement.');
+    }
+    
+    if (error.message?.includes('rate_limit')) {
+      throw new Error('Trop de tentatives. Veuillez patienter avant de réessayer.');
+    }
+    
+    // Erreur générique pour les autres cas
+    throw new Error('Erreur lors de l\'initialisation du paiement. Veuillez réessayer.');
   }
 };
 

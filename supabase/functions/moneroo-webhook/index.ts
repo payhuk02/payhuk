@@ -4,11 +4,12 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2.58.0";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': process.env.NODE_ENV === 'production' 
-    ? 'https://yourdomain.com' // Remplacer par votre domaine de production
+    ? (Deno.env.get('ALLOWED_ORIGIN') || 'https://payhuk.com')
     : '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
   'Access-Control-Allow-Methods': 'POST, GET, OPTIONS',
   'Access-Control-Max-Age': '86400',
+  'Access-Control-Allow-Credentials': 'true',
 };
 
 serve(async (req) => {

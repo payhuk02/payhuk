@@ -67,11 +67,32 @@ export const AccessibilityEnhancer = () => {
   useEffect(() => {
     // Ajouter des attributs ARIA manquants
     const enhanceAccessibility = () => {
-      // Boutons sans texte
+      // Boutons sans texte - Amélioration des labels ARIA
       const buttons = document.querySelectorAll('button');
       buttons.forEach(button => {
         if (!button.getAttribute('aria-label') && !button.textContent?.trim()) {
-          button.setAttribute('aria-label', 'Bouton');
+          // Essayer de déterminer le contexte du bouton
+          const icon = button.querySelector('svg, i, [class*="icon"]');
+          const parentText = button.closest('[class*="card"], [class*="item"], [class*="product"]')?.textContent?.trim();
+          
+          let ariaLabel = 'Bouton';
+          if (icon) {
+            const iconClass = icon.className;
+            if (iconClass.includes('search') || iconClass.includes('loupe')) ariaLabel = 'Rechercher';
+            else if (iconClass.includes('heart') || iconClass.includes('favorite')) ariaLabel = 'Ajouter aux favoris';
+            else if (iconClass.includes('cart') || iconClass.includes('shopping')) ariaLabel = 'Ajouter au panier';
+            else if (iconClass.includes('edit') || iconClass.includes('modifier')) ariaLabel = 'Modifier';
+            else if (iconClass.includes('delete') || iconClass.includes('supprimer')) ariaLabel = 'Supprimer';
+            else if (iconClass.includes('close') || iconClass.includes('fermer')) ariaLabel = 'Fermer';
+            else if (iconClass.includes('menu') || iconClass.includes('hamburger')) ariaLabel = 'Ouvrir le menu';
+            else if (iconClass.includes('chevron') || iconClass.includes('arrow')) ariaLabel = 'Navigation';
+          }
+          
+          if (parentText && parentText.length < 50) {
+            ariaLabel += ` pour ${parentText}`;
+          }
+          
+          button.setAttribute('aria-label', ariaLabel);
         }
       });
 

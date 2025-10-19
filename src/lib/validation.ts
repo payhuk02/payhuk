@@ -18,14 +18,20 @@ export const isValidPhone = (phone: string): boolean => {
   return phoneRegex.test(phone.replace(/\s/g, ''));
 };
 
+import DOMPurify from 'dompurify';
+
 /**
  * Sanitise une chaîne de caractères pour éviter les injections
+ * Utilise DOMPurify pour une protection robuste contre XSS
  */
 export const sanitizeString = (str: string): string => {
-  return str
-    .replace(/[<>]/g, '') // Supprime les balises HTML
-    .replace(/['"]/g, '') // Supprime les guillemets
-    .trim();
+  if (!str || typeof str !== 'string') return '';
+  
+  return DOMPurify.sanitize(str, { 
+    ALLOWED_TAGS: [],
+    ALLOWED_ATTR: [],
+    KEEP_CONTENT: true
+  }).trim();
 };
 
 /**
@@ -70,9 +76,35 @@ export const isValidUrl = (url: string): boolean => {
 
 /**
  * Échappe les caractères spéciaux pour les requêtes SQL (protection supplémentaire)
+ * ATTENTION: Cette fonction ne remplace pas l'utilisation de requêtes paramétrées
  */
 export const escapeSqlString = (str: string): string => {
-  return str.replace(/'/g, "''");
+  if (!str || typeof str !== 'string') return '';
+  return str.replace(/'/g, "''").replace(/\\/g, '\\\\');
+};
+
+/**
+ * Valide et nettoie les données d'entrée utilisateur
+ */
+export const validateAndSanitizeInput = (input: any, type: 'string' | 'email' | 'phone' | 'url' | 'amount'): string | null => {
+  if (!input) return null;
+  
+  const sanitized = sanitizeString(String(input));
+  
+  switch (type) {
+    case 'email':
+      return isValidEmail(sanitized) ? sanitized : null;
+    case 'phone':
+      return isValidPhone(sanitized) ? sanitized : null;
+    case 'url':
+      return isValidUrl(sanitized) ? sanitized : null;
+    case 'amount':
+      const amount = parseFloat(sanitized);
+      return isValidAmount(amount) ? sanitized : null;
+    case 'string':
+    default:
+      return sanitized.length > 0 ? sanitized : null;
+  }
 };
 
 /**

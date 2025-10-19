@@ -24,7 +24,7 @@ All colors MUST be HSL.
     --secondary-foreground: 0 0% 98%;
 
     --muted: 220 20% 20%;
-    --muted-foreground: 220 10% 65%;
+    --muted-foreground: 220 10% 45%; /* Amélioration du contraste pour WCAG AA */
 
     --accent: 45 100% 60%;
     --accent-foreground: 220 30% 12%;
@@ -77,7 +77,7 @@ All colors MUST be HSL.
     --secondary-foreground: 0 0% 98%;
 
     --muted: 220 25% 16%;
-    --muted-foreground: 220 10% 70%;
+    --muted-foreground: 220 10% 50%; /* Amélioration du contraste pour WCAG AA */
 
     --accent: 45 100% 62%;
     --accent-foreground: 220 35% 8%;
@@ -173,8 +173,8 @@ All colors MUST be HSL.
     }
   }
 
-  /* Optimisations pour très petits écrans */
-  @media (max-width: 475px) {
+  /* Optimisations pour très petits écrans - Utilisation des breakpoints Tailwind standard */
+  @media (max-width: 480px) {
     .container {
       padding-left: 0.75rem;
       padding-right: 0.75rem;
@@ -191,6 +191,20 @@ All colors MUST be HSL.
     
     .gap-responsive-xs {
       gap: 0.5rem;
+    }
+    
+    .hero-title {
+      font-size: 2rem;
+      line-height: 1.2;
+    }
+    
+    .hero-subtitle {
+      font-size: 1rem;
+    }
+    
+    .btn-lg {
+      padding: 0.75rem 1.5rem;
+      font-size: 0.875rem;
     }
   }
 }
