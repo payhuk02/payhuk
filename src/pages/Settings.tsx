@@ -4,6 +4,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { ProfileSettings } from "@/components/settings/ProfileSettings";
 import { StoreSettings } from "@/components/settings/StoreSettings";
+import { MultiStoreSettings } from "@/components/settings/MultiStoreSettings";
 import { SecuritySettings } from "@/components/settings/SecuritySettings";
 import { NotificationSettings } from "@/components/settings/NotificationSettings";
 import { DomainSettings } from "@/components/settings/DomainSettings";
@@ -11,8 +12,13 @@ import { ProfileDebug } from "@/components/debug/ProfileDebug";
 import { ProfileTest } from "@/components/debug/ProfileTest";
 import { DatabaseMigrationInstructions } from "@/components/debug/DatabaseMigrationInstructions";
 import { MobileResponsiveTest } from "@/components/debug/MobileResponsiveTest";
+import { useSearchParams } from "react-router-dom";
+import { StoreBreadcrumb } from "@/components/navigation/StoreBreadcrumb";
 
 const Settings = () => {
+  const [searchParams] = useSearchParams();
+  const activeTab = searchParams.get('tab') || 'profile';
+
   return (
     <SidebarProvider>
       <div className="flex min-h-screen w-full">
@@ -20,6 +26,11 @@ const Settings = () => {
         <main className="flex-1 w-full overflow-x-hidden">
           <div className="w-full h-full px-4 py-6 sm:px-6 md:px-8 lg:px-10">
             <div className="max-w-5xl mx-auto space-y-4 sm:space-y-6">
+              {/* Breadcrumb */}
+              <div className="mb-4">
+                <StoreBreadcrumb />
+              </div>
+              
               {/* Header - Responsive */}
               <div className="space-y-2">
                 <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold tracking-tight">
@@ -31,7 +42,7 @@ const Settings = () => {
               </div>
 
               {/* Tabs - Fully Responsive */}
-              <Tabs defaultValue="profile" className="space-y-4 sm:space-y-6">
+              <Tabs value={activeTab} className="space-y-4 sm:space-y-6">
                 {/* Mobile: Dropdown, Tablet+: Horizontal tabs */}
                 <div className="w-full">
                   {/* Mobile View (< 640px) */}
@@ -124,17 +135,7 @@ const Settings = () => {
 
                 {/* Store Tab */}
                 <TabsContent value="store" className="space-y-3 sm:space-y-4 animate-fade-in">
-                  <Card className="border-none shadow-lg">
-                    <CardHeader className="space-y-1 px-4 py-4 sm:px-6 sm:py-5">
-                      <CardTitle className="text-lg sm:text-xl">Paramètres de la boutique</CardTitle>
-                      <CardDescription className="text-xs sm:text-sm">
-                        Personnalisez votre boutique en ligne
-                      </CardDescription>
-                    </CardHeader>
-                    <CardContent className="px-4 pb-4 sm:px-6 sm:pb-6">
-                      <StoreSettings />
-                    </CardContent>
-                  </Card>
+                  <MultiStoreSettings />
                 </TabsContent>
 
                 {/* Domain Tab */}

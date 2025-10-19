@@ -11,15 +11,20 @@ import {
   Package,
   ShoppingCart,
   Users,
-  TrendingUp
+  TrendingUp,
+  ArrowRight,
+  ExternalLink
 } from "lucide-react";
 import { useMultiStores } from "@/hooks/useMultiStores";
 import { StoresDashboard } from "@/components/stores/StoresDashboard";
 import { CreateStoreDialog } from "@/components/stores/CreateStoreDialog";
 import StoreDetails from "@/components/store/StoreDetails";
+import { useNavigate } from "react-router-dom";
+import { StoreBreadcrumb } from "@/components/navigation/StoreBreadcrumb";
 
 const Store = () => {
   const { stores, loading, canCreateStore } = useMultiStores();
+  const navigate = useNavigate();
 
   return (
     <SidebarProvider>
@@ -41,6 +46,11 @@ const Store = () => {
 
           <main className="flex-1 p-3 sm:p-4 md:p-5 lg:p-6 xl:p-8 bg-gradient-hero overflow-x-hidden">
             <div className="max-w-7xl mx-auto w-full animate-fade-in">
+              {/* Breadcrumb */}
+              <div className="mb-6">
+                <StoreBreadcrumb />
+              </div>
+              
               <Tabs defaultValue="dashboard" className="w-full">
                 <TabsList className="grid w-full grid-cols-2 lg:grid-cols-4 mb-6">
                   <TabsTrigger value="dashboard" className="gap-2">
@@ -116,20 +126,109 @@ const Store = () => {
                     <CardHeader>
                       <CardTitle className="flex items-center gap-2">
                         <Settings className="h-5 w-5" />
-                        Paramètres généraux
+                        Paramètres des boutiques
                       </CardTitle>
                       <CardDescription>
-                        Configurez les paramètres globaux de vos boutiques
+                        Gérez les paramètres avancés de toutes vos boutiques
                       </CardDescription>
                     </CardHeader>
-                    <CardContent>
-                      <div className="text-center py-8">
-                        <Settings className="h-12 w-12 mx-auto mb-4 text-gray-400" />
-                        <h3 className="text-lg font-semibold mb-2">Paramètres</h3>
-                        <p className="text-muted-foreground">
-                          Configurez les paramètres individuels de chaque boutique depuis le tableau de bord.
-                        </p>
+                    <CardContent className="space-y-6">
+                      {/* Actions rapides */}
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <Card className="border-dashed">
+                          <CardContent className="p-6 text-center">
+                            <Settings className="h-8 w-8 mx-auto mb-3 text-blue-500" />
+                            <h3 className="font-semibold mb-2">Paramètres généraux</h3>
+                            <p className="text-sm text-muted-foreground mb-4">
+                              Configurez les paramètres globaux de vos boutiques
+                            </p>
+                            <Button 
+                              onClick={() => navigate('/dashboard/settings?tab=store')}
+                              className="w-full gap-2"
+                            >
+                              <ArrowRight className="h-4 w-4" />
+                              Aller aux paramètres
+                            </Button>
+                          </CardContent>
+                        </Card>
+
+                        <Card className="border-dashed">
+                          <CardContent className="p-6 text-center">
+                            <Package className="h-8 w-8 mx-auto mb-3 text-green-500" />
+                            <h3 className="font-semibold mb-2">Gestion des produits</h3>
+                            <p className="text-sm text-muted-foreground mb-4">
+                              Gérez les produits de toutes vos boutiques
+                            </p>
+                            <Button 
+                              variant="outline"
+                              onClick={() => navigate('/dashboard/products')}
+                              className="w-full gap-2"
+                            >
+                              <ExternalLink className="h-4 w-4" />
+                              Voir les produits
+                            </Button>
+                          </CardContent>
+                        </Card>
                       </div>
+
+                      {/* Informations sur les boutiques */}
+                      {stores.length > 0 && (
+                        <div className="space-y-4">
+                          <h4 className="font-semibold">Vos boutiques</h4>
+                          <div className="space-y-2">
+                            {stores.map((store) => (
+                              <div key={store.id} className="flex items-center justify-between p-3 border rounded-lg">
+                                <div className="flex items-center gap-3">
+                                  <div 
+                                    className="w-8 h-8 rounded-lg flex items-center justify-center text-white font-bold text-sm"
+                                    style={{ backgroundColor: store.theme_color }}
+                                  >
+                                    {store.name.charAt(0).toUpperCase()}
+                                  </div>
+                                  <div>
+                                    <p className="font-medium">{store.name}</p>
+                                    <p className="text-sm text-muted-foreground">
+                                      {store.slug}.payhuk.com
+                                    </p>
+                                  </div>
+                                </div>
+                                <div className="flex gap-2">
+                                  <Button
+                                    variant="outline"
+                                    size="sm"
+                                    onClick={() => navigate(`/dashboard/settings?tab=store&store=${store.id}`)}
+                                    className="gap-2"
+                                  >
+                                    <Settings className="h-3 w-3" />
+                                    Paramètres
+                                  </Button>
+                                  <Button
+                                    variant="outline"
+                                    size="sm"
+                                    onClick={() => window.open(`/stores/${store.slug}`, '_blank')}
+                                    className="gap-2"
+                                  >
+                                    <ExternalLink className="h-3 w-3" />
+                                    Voir
+                                  </Button>
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Message si aucune boutique */}
+                      {stores.length === 0 && (
+                        <div className="text-center py-8">
+                          <StoreIcon className="h-12 w-12 mx-auto mb-4 text-gray-400" />
+                          <h3 className="text-lg font-semibold mb-2">Aucune boutique</h3>
+                          <p className="text-muted-foreground mb-4">
+                            Créez votre première boutique pour commencer à vendre en ligne.
+                          </p>
+                          <CreateStoreDialog />
+                        </div>
+                      )}
                     </CardContent>
                   </Card>
                 </TabsContent>
