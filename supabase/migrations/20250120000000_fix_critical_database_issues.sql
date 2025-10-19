@@ -175,25 +175,45 @@ CREATE INDEX IF NOT EXISTS idx_customers_store ON public.customers(store_id);
 -- 5. RENFORCEMENT DES CONTRAINTES DE SÉCURITÉ
 -- =====================================================
 
--- Ajouter des contraintes de validation
-ALTER TABLE public.orders 
-ADD CONSTRAINT check_order_number_format 
-CHECK (order_number ~ '^ORD-\d{8}-\d{4}$');
+-- Ajouter des contraintes de validation (si elles n'existent pas déjà)
+DO $$ 
+BEGIN
+    IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'check_order_number_format') THEN
+        ALTER TABLE public.orders 
+        ADD CONSTRAINT check_order_number_format 
+        CHECK (order_number ~ '^ORD-\d{8}-\d{4}$');
+    END IF;
+END $$;
 
--- Contrainte pour les montants positifs
-ALTER TABLE public.orders 
-ADD CONSTRAINT check_total_amount_positive 
-CHECK (total_amount > 0);
+-- Contrainte pour les montants positifs (si elle n'existe pas déjà)
+DO $$ 
+BEGIN
+    IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'check_total_amount_positive') THEN
+        ALTER TABLE public.orders 
+        ADD CONSTRAINT check_total_amount_positive 
+        CHECK (total_amount > 0);
+    END IF;
+END $$;
 
--- Contrainte pour les quantités positives
-ALTER TABLE public.order_items 
-ADD CONSTRAINT check_quantity_positive 
-CHECK (quantity > 0);
+-- Contrainte pour les quantités positives (si elle n'existe pas déjà)
+DO $$ 
+BEGIN
+    IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'check_quantity_positive') THEN
+        ALTER TABLE public.order_items 
+        ADD CONSTRAINT check_quantity_positive 
+        CHECK (quantity > 0);
+    END IF;
+END $$;
 
--- Contrainte pour les prix positifs
-ALTER TABLE public.order_items 
-ADD CONSTRAINT check_unit_price_positive 
-CHECK (unit_price > 0);
+-- Contrainte pour les prix positifs (si elle n'existe pas déjà)
+DO $$ 
+BEGIN
+    IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'check_unit_price_positive') THEN
+        ALTER TABLE public.order_items 
+        ADD CONSTRAINT check_unit_price_positive 
+        CHECK (unit_price > 0);
+    END IF;
+END $$;
 
 -- 6. MISE À JOUR DES COMMENTAIRES POUR LA DOCUMENTATION
 -- =====================================================

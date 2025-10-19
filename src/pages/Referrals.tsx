@@ -21,6 +21,7 @@ import {
   RefreshCw
 } from "lucide-react";
 import { useAdvancedReferral } from "@/hooks/useAdvancedReferral";
+import { useReferralSimple } from "@/hooks/useReferralSimple";
 import { useToast } from "@/hooks/use-toast";
 import { useNavigate } from "react-router-dom";
 import { LoadingState } from "@/components/ui/LoadingStates";
@@ -47,16 +48,19 @@ const Referrals = () => {
     shareReferralLink 
   } = useAdvancedReferral();
   
+  // Hook de fallback en cas d'erreur
+  const { data: simpleData, loading: simpleLoading } = useReferralSimple();
+  
   const { toast } = useToast();
   const navigate = useNavigate();
   const [copied, setCopied] = useState(false);
   const [activeTab, setActiveTab] = useState("overview");
 
   const copyToClipboard = async () => {
-    if (!stats?.referralLink) return;
+    if (!currentStats?.referralLink) return;
 
     try {
-      await navigator.clipboard.writeText(stats.referralLink);
+      await navigator.clipboard.writeText(currentStats.referralLink);
       setCopied(true);
       toast({
         title: "Lien copié !",
@@ -73,15 +77,35 @@ const Referrals = () => {
   };
 
   const getCurrentLevel = () => {
-    return levels.find(level => level.name === stats?.level) || levels[0];
+    return levels.find(level => level.name === currentStats?.level) || levels[0];
   };
 
   const getNextLevel = () => {
-    const currentIndex = levels.findIndex(level => level.name === stats?.level);
+    const currentIndex = levels.findIndex(level => level.name === currentStats?.level);
     return currentIndex < levels.length - 1 ? levels[currentIndex + 1] : null;
   };
 
-  if (loading) {
+  // Utiliser les données simples en cas d'erreur avec les données avancées
+  const currentStats = stats || (simpleData ? {
+    referralCode: simpleData.referralCode,
+    referralLink: simpleData.referralLink,
+    totalReferrals: simpleData.totalReferrals,
+    activeReferrals: simpleData.totalReferrals,
+    totalEarnings: simpleData.totalEarnings,
+    monthlyEarnings: 0,
+    weeklyEarnings: 0,
+    conversionRate: 0,
+    rank: 1,
+    level: 'Débutant',
+    nextLevelReferrals: 5,
+    nextLevelEarnings: 50000,
+  } : null);
+
+  const currentReferrals = referrals || [];
+  const currentHistory = history || [];
+  const currentLoading = loading || simpleLoading;
+
+  if (currentLoading) {
     return (
       <div className="container mx-auto p-6">
         <LoadingState state="loading" message="Chargement de vos données de parrainage..." />
@@ -89,18 +113,7 @@ const Referrals = () => {
     );
   }
 
-  if (error) {
-    return (
-      <div className="container mx-auto p-6">
-        <LoadingState 
-          state="error" 
-          message="Erreur lors du chargement des données de parrainage" 
-        />
-      </div>
-    );
-  }
-
-  if (!stats) {
+  if (!currentStats) {
     return (
       <div className="container mx-auto p-6">
         <LoadingState 
@@ -116,16 +129,16 @@ const Referrals = () => {
 
   return (
     <ErrorBoundary>
-      <div className="container mx-auto p-6 space-y-6">
-        {/* Header avec bouton retour */}
-        <div className="flex items-center justify-between mb-6">
-          <div className="flex items-center gap-3">
-            <UserPlus className="h-8 w-8 text-primary" />
+    <div className="container mx-auto p-6 space-y-6">
+      {/* Header avec bouton retour */}
+      <div className="flex items-center justify-between mb-6">
+        <div className="flex items-center gap-3">
+          <UserPlus className="h-8 w-8 text-primary" />
             <div>
-              <h1 className="text-3xl font-bold">Programme de parrainage</h1>
+          <h1 className="text-3xl font-bold">Programme de parrainage</h1>
               <p className="text-muted-foreground">Gagnez des commissions en parrainant vos amis</p>
             </div>
-          </div>
+        </div>
           <div className="flex gap-2">
             <Button
               variant="outline"
@@ -135,15 +148,15 @@ const Referrals = () => {
               <RefreshCw className="h-4 w-4" />
               Actualiser
             </Button>
-            <Button
-              variant="outline"
-              onClick={() => navigate('/dashboard')}
-              className="gap-2"
-            >
-              <ArrowLeft className="h-4 w-4" />
-              Retour au tableau de bord
-            </Button>
-          </div>
+        <Button
+          variant="outline"
+          onClick={() => navigate('/dashboard')}
+          className="gap-2"
+        >
+          <ArrowLeft className="h-4 w-4" />
+          Retour au tableau de bord
+        </Button>
+      </div>
         </div>
 
         {/* Statistiques principales */}
@@ -156,7 +169,7 @@ const Referrals = () => {
                 </div>
                 <div>
                   <p className="text-sm text-muted-foreground">Filleuls actifs</p>
-                  <p className="text-2xl font-bold">{stats.activeReferrals}</p>
+                  <p className="text-2xl font-bold">{currentStats.activeReferrals}</p>
                 </div>
               </div>
             </CardContent>
@@ -170,7 +183,7 @@ const Referrals = () => {
                 </div>
                 <div>
                   <p className="text-sm text-muted-foreground">Gains totaux</p>
-                  <p className="text-2xl font-bold text-green-600">{stats.totalEarnings.toLocaleString()} XOF</p>
+                  <p className="text-2xl font-bold text-green-600">{currentStats.totalEarnings.toLocaleString()} XOF</p>
                 </div>
               </div>
             </CardContent>
@@ -184,7 +197,7 @@ const Referrals = () => {
                 </div>
                 <div>
                   <p className="text-sm text-muted-foreground">Taux de conversion</p>
-                  <p className="text-2xl font-bold text-blue-600">{stats.conversionRate.toFixed(1)}%</p>
+                  <p className="text-2xl font-bold text-blue-600">{currentStats.conversionRate.toFixed(1)}%</p>
                 </div>
               </div>
             </CardContent>
@@ -198,7 +211,7 @@ const Referrals = () => {
                 </div>
                 <div>
                   <p className="text-sm text-muted-foreground">Niveau actuel</p>
-                  <p className="text-2xl font-bold text-purple-600">{stats.level}</p>
+                  <p className="text-2xl font-bold text-purple-600">{currentStats.level}</p>
                 </div>
               </div>
             </CardContent>
@@ -228,58 +241,58 @@ const Referrals = () => {
 
           {/* Vue d'ensemble */}
           <TabsContent value="overview" className="space-y-6">
-            {/* Lien de parrainage */}
-            <Card className="border-2 border-primary/20 shadow-lg">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <UserPlus className="h-5 w-5" />
-                  Votre lien de parrainage
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <p className="text-muted-foreground">
+      {/* Lien de parrainage */}
+      <Card className="border-2 border-primary/20 shadow-lg">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <UserPlus className="h-5 w-5" />
+            Votre lien de parrainage
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <p className="text-muted-foreground">
                   Partagez ce lien unique et gagnez {currentLevel.commissionRate}% de commission sur chaque vente réalisée par vos filleuls.
-                </p>
-                
+          </p>
+          
                 <div className="flex gap-2">
                   <div className="flex-1">
-                    <input
-                      type="text"
-                      value={stats.referralLink}
-                      readOnly
+              <input
+                type="text"
+                      value={currentStats.referralLink}
+                readOnly
                       className="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-50 text-sm"
-                    />
-                  </div>
+              />
+            </div>
                   <Button onClick={copyToClipboard} className="gap-2">
                     {copied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
                     {copied ? 'Copié !' : 'Copier le lien'}
-                  </Button>
+            </Button>
                   <QRCodeGenerator 
-                    referralLink={stats.referralLink}
-                    referralCode={stats.referralCode}
+                    referralLink={currentStats.referralLink}
+                    referralCode={currentStats.referralCode}
                   />
-                </div>
+          </div>
 
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4 pt-4 border-t">
                   <div className="text-center">
-                    <p className="text-2xl font-bold text-primary">{stats.totalReferrals}</p>
+                    <p className="text-2xl font-bold text-primary">{currentStats.totalReferrals}</p>
                     <p className="text-sm text-muted-foreground">Filleuls totaux</p>
                   </div>
                   <div className="text-center">
-                    <p className="text-2xl font-bold text-green-600">{stats.activeReferrals}</p>
-                    <p className="text-sm text-muted-foreground">Filleuls actifs</p>
+                    <p className="text-2xl font-bold text-green-600">{currentStats.activeReferrals}</p>
+              <p className="text-sm text-muted-foreground">Filleuls actifs</p>
                   </div>
                   <div className="text-center">
-                    <p className="text-2xl font-bold text-blue-600">{stats.monthlyEarnings.toLocaleString()}</p>
+                    <p className="text-2xl font-bold text-blue-600">{currentStats.monthlyEarnings.toLocaleString()}</p>
                     <p className="text-sm text-muted-foreground">Gains ce mois</p>
-                  </div>
+            </div>
                   <div className="text-center">
-                    <p className="text-2xl font-bold text-purple-600">#{stats.rank}</p>
+                    <p className="text-2xl font-bold text-purple-600">#{currentStats.rank}</p>
                     <p className="text-sm text-muted-foreground">Votre rang</p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
 
             {/* Niveau et progression */}
             <Card>
@@ -294,7 +307,7 @@ const Referrals = () => {
                   <div>
                     <h3 className="text-xl font-bold">{currentLevel.name}</h3>
                     <p className="text-muted-foreground">
-                      Commission: {currentLevel.commissionRate}% • Rang #{stats.rank}
+                      Commission: {currentLevel.commissionRate}% • Rang #{currentStats.rank}
                     </p>
                   </div>
                   <Badge className={`${currentLevel.color} px-3 py-1`}>
@@ -307,8 +320,8 @@ const Referrals = () => {
                     <div className="flex justify-between text-sm">
                       <span>Progression vers {nextLevel.name}</span>
                       <span>
-                        {stats.totalReferrals}/{nextLevel.minReferrals} filleuls • 
-                        {stats.totalEarnings.toLocaleString()}/{nextLevel.minEarnings.toLocaleString()} XOF
+                        {currentStats.totalReferrals}/{nextLevel.minReferrals} filleuls • 
+                        {currentStats.totalEarnings.toLocaleString()}/{nextLevel.minEarnings.toLocaleString()} XOF
                       </span>
                     </div>
                     <div className="w-full bg-gray-200 rounded-full h-2">
@@ -316,14 +329,14 @@ const Referrals = () => {
                         className="bg-primary h-2 rounded-full transition-all duration-300"
                         style={{ 
                           width: `${Math.min(
-                            (stats.totalReferrals / nextLevel.minReferrals) * 100, 
+                            (currentStats.totalReferrals / nextLevel.minReferrals) * 100, 
                             100
                           )}%` 
                         }}
                       />
                     </div>
                     <p className="text-sm text-muted-foreground">
-                      Il vous reste {stats.nextLevelReferrals} filleuls et {stats.nextLevelEarnings.toLocaleString()} XOF pour atteindre le niveau {nextLevel.name}
+                      Il vous reste {currentStats.nextLevelReferrals} filleuls et {currentStats.nextLevelEarnings.toLocaleString()} XOF pour atteindre le niveau {nextLevel.name}
                     </p>
                   </div>
                 )}
@@ -358,68 +371,68 @@ const Referrals = () => {
             </Card>
 
             {/* Comment ça marche */}
-            <Card>
-              <CardHeader>
-                <CardTitle>Comment ça marche ?</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="space-y-3">
-                  <div className="flex gap-3">
-                    <div className="flex-shrink-0 w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold">
-                      1
-                    </div>
-                    <div>
-                      <h3 className="font-semibold">Partagez votre lien</h3>
-                      <p className="text-sm text-muted-foreground">
-                        Envoyez votre lien de parrainage à vos amis, sur les réseaux sociaux ou par email.
-                      </p>
-                    </div>
-                  </div>
+      <Card>
+        <CardHeader>
+          <CardTitle>Comment ça marche ?</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="space-y-3">
+            <div className="flex gap-3">
+              <div className="flex-shrink-0 w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold">
+                1
+              </div>
+              <div>
+                <h3 className="font-semibold">Partagez votre lien</h3>
+                <p className="text-sm text-muted-foreground">
+                  Envoyez votre lien de parrainage à vos amis, sur les réseaux sociaux ou par email.
+                </p>
+              </div>
+            </div>
 
-                  <div className="flex gap-3">
-                    <div className="flex-shrink-0 w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold">
-                      2
-                    </div>
-                    <div>
-                      <h3 className="font-semibold">Vos filleuls s'inscrivent</h3>
-                      <p className="text-sm text-muted-foreground">
-                        Chaque personne qui s'inscrit via votre lien devient automatiquement votre filleul.
-                      </p>
-                    </div>
-                  </div>
+            <div className="flex gap-3">
+              <div className="flex-shrink-0 w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold">
+                2
+              </div>
+              <div>
+                <h3 className="font-semibold">Vos filleuls s'inscrivent</h3>
+                <p className="text-sm text-muted-foreground">
+                  Chaque personne qui s'inscrit via votre lien devient automatiquement votre filleul.
+                </p>
+              </div>
+            </div>
 
-                  <div className="flex gap-3">
-                    <div className="flex-shrink-0 w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold">
-                      3
-                    </div>
-                    <div>
+            <div className="flex gap-3">
+              <div className="flex-shrink-0 w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold">
+                3
+              </div>
+              <div>
                       <h3 className="font-semibold">Gagnez {currentLevel.commissionRate}% de commission</h3>
-                      <p className="text-sm text-muted-foreground">
+                <p className="text-sm text-muted-foreground">
                         À chaque vente réalisée par vos filleuls, vous recevez automatiquement {currentLevel.commissionRate}% du montant.
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
+                </p>
+              </div>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
           </TabsContent>
 
           {/* Mes filleuls */}
           <TabsContent value="referrals">
-            <ReferralDashboard referrals={referrals} loading={loading} />
+            <ReferralDashboard referrals={currentReferrals} loading={currentLoading} />
           </TabsContent>
 
           {/* Historique */}
           <TabsContent value="history">
-            <CommissionHistory history={history} loading={loading} />
+            <CommissionHistory history={currentHistory} loading={currentLoading} />
           </TabsContent>
 
           {/* Partager */}
           <TabsContent value="share">
             <div className="space-y-6">
               <SocialShare 
-                referralLink={stats.referralLink}
-                referralCode={stats.referralCode}
+                referralLink={currentStats.referralLink}
+                referralCode={currentStats.referralCode}
                 onShare={(platform) => {
                   console.log(`Shared on ${platform}`);
                 }}
@@ -437,15 +450,15 @@ const Referrals = () => {
                     Générez un QR code personnalisé pour faciliter le partage de votre lien de parrainage.
                   </p>
                   <QRCodeGenerator 
-                    referralLink={stats.referralLink}
-                    referralCode={stats.referralCode}
+                    referralLink={currentStats.referralLink}
+                    referralCode={currentStats.referralCode}
                   />
                 </CardContent>
               </Card>
             </div>
           </TabsContent>
         </Tabs>
-      </div>
+    </div>
     </ErrorBoundary>
   );
 };

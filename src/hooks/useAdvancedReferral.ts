@@ -146,23 +146,55 @@ export const useAdvancedReferral = () => {
         .eq('user_id', user.id)
         .single();
 
-      if (profileError) throw profileError;
+      if (profileError) {
+        // Si le profil n'existe pas, créer un profil par défaut
+        if (profileError.code === 'PGRST116') {
+          const { data: newProfile, error: createError } = await supabase
+            .from('profiles')
+            .insert({
+              user_id: user.id,
+              display_name: user.email?.split('@')[0] || 'Utilisateur',
+              referral_code: generateReferralCode(),
+            })
+            .select()
+            .single();
+          
+          if (createError) throw createError;
+          
+          // Utiliser le nouveau profil
+          const baseUrl = window.location.origin;
+          const referralLink = `${baseUrl}/?ref=${newProfile.referral_code}`;
+          
+          setStats({
+            referralCode: newProfile.referral_code || '',
+            referralLink,
+            totalReferrals: 0,
+            activeReferrals: 0,
+            totalEarnings: 0,
+            monthlyEarnings: 0,
+            weeklyEarnings: 0,
+            conversionRate: 0,
+            rank: 1,
+            level: 'Débutant',
+            nextLevelReferrals: 5,
+            nextLevelEarnings: 50000,
+          });
+          
+          setLoading(false);
+          return;
+        }
+        throw profileError;
+      }
 
       // Récupérer les statistiques des filleuls
       const { data: referralData, error: referralError } = await supabase
         .from('referrals')
         .select(`
           id,
-          referred_user_id,
+          referred_id,
           status,
           created_at,
-          commission_earned,
-          profiles!referrals_referred_user_id_fkey (
-            email,
-            display_name,
-            avatar_url,
-            created_at
-          )
+          commission_earned
         `)
         .eq('referrer_id', user.id);
 
@@ -250,16 +282,10 @@ export const useAdvancedReferral = () => {
         .from('referrals')
         .select(`
           id,
-          referred_user_id,
+          referred_id,
           status,
           created_at,
-          commission_earned,
-          profiles!referrals_referred_user_id_fkey (
-            email,
-            display_name,
-            avatar_url,
-            created_at
-          )
+          commission_earned
         `)
         .eq('referrer_id', user.id)
         .order('created_at', { ascending: false });
@@ -269,14 +295,20 @@ export const useAdvancedReferral = () => {
       // Récupérer les données d'activité des filleuls
       const referralUsers: ReferralUser[] = await Promise.all(
         (referralData || []).map(async (ref) => {
-          const profile = ref.profiles;
+          // Récupérer le profil du filleul
+          const { data: profile } = await supabase
+            .from('profiles')
+            .select('email, display_name, avatar_url, created_at')
+            .eq('user_id', ref.referred_id)
+            .single();
+
           if (!profile) return null;
 
           // Récupérer les commandes du filleul
           const { data: orders } = await supabase
             .from('orders')
             .select('id, total_amount, created_at')
-            .eq('customer_id', ref.referred_user_id)
+            .eq('customer_id', ref.referred_id)
             .eq('status', 'completed');
 
           const totalOrders = orders?.length || 0;
@@ -284,7 +316,7 @@ export const useAdvancedReferral = () => {
           const lastOrder = orders?.[0]?.created_at;
 
           return {
-            id: ref.referred_user_id,
+            id: ref.referred_id,
             email: profile.email,
             display_name: profile.display_name || 'Utilisateur',
             avatar_url: profile.avatar_url,
@@ -318,11 +350,7 @@ export const useAdvancedReferral = () => {
           amount,
           description,
           created_at,
-          referred_user_id,
-          profiles!referral_history_referred_user_id_fkey (
-            display_name,
-            email
-          )
+          referred_user_id
         `)
         .eq('referrer_id', user.id)
         .order('created_at', { ascending: false })
@@ -330,15 +358,26 @@ export const useAdvancedReferral = () => {
 
       if (error) throw error;
 
-      const referralHistory: ReferralHistory[] = (historyData || []).map(item => ({
-        id: item.id,
-        type: item.type as 'signup' | 'purchase' | 'commission',
-        amount: item.amount,
-        description: item.description,
-        created_at: item.created_at,
-        user_name: item.profiles?.display_name || 'Utilisateur',
-        user_email: item.profiles?.email || '',
-      }));
+      // Récupérer les profils des utilisateurs parrainés
+      const referralHistory: ReferralHistory[] = await Promise.all(
+        (historyData || []).map(async (item) => {
+          const { data: profile } = await supabase
+            .from('profiles')
+            .select('display_name, email')
+            .eq('user_id', item.referred_user_id)
+            .single();
+
+          return {
+            id: item.id,
+            type: item.type as 'signup' | 'purchase' | 'commission',
+            amount: item.amount,
+            description: item.description,
+            created_at: item.created_at,
+            user_name: profile?.display_name || 'Utilisateur',
+            user_email: profile?.email || '',
+          };
+        })
+      );
 
       setHistory(referralHistory);
 
