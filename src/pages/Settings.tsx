@@ -6,7 +6,7 @@ import { ProfileSettings } from "@/components/settings/ProfileSettings";
 import { StoreSettings } from "@/components/settings/StoreSettings";
 import { SecuritySettings } from "@/components/settings/SecuritySettings";
 import { NotificationSettings } from "@/components/settings/NotificationSettings";
-import { DomainSettings } from "@/components/settings/DomainSettings";
+import { DomainSettingsTab } from "@/components/settings/DomainSettingsTab";
 import { ProfileDebug } from "@/components/debug/ProfileDebug";
 import { ProfileTest } from "@/components/debug/ProfileTest";
 import { DatabaseMigrationInstructions } from "@/components/debug/DatabaseMigrationInstructions";
@@ -117,9 +117,7 @@ const Settings = () => {
 
                 {/* Domain Tab */}
                 <TabsContent value="domain" className="space-y-3 sm:space-y-4 animate-fade-in">
-                  <div className="space-y-3 sm:space-y-4">
-                    <DomainSettings />
-                  </div>
+                  <DomainSettingsTab />
                 </TabsContent>
 
                 {/* Notifications Tab */}
