@@ -4,6 +4,7 @@
  */
 
 interface EnvConfig {
+  VITE_SUPABASE_PROJECT_ID: string;
   VITE_SUPABASE_URL: string;
   VITE_SUPABASE_PUBLISHABLE_KEY: string;
   VITE_MONEROO_API_KEY?: string;
@@ -22,6 +23,7 @@ class EnvValidator {
     this.errors = [];
     
     // Variables requises
+    this.validateRequired('VITE_SUPABASE_PROJECT_ID', 'ID du projet Supabase');
     this.validateRequired('VITE_SUPABASE_URL', 'URL Supabase');
     this.validateRequired('VITE_SUPABASE_PUBLISHABLE_KEY', 'Clé publique Supabase');
     this.validateRequired('VITE_APP_ENV', 'Environnement de l\'application');
@@ -120,6 +122,7 @@ try {
   if (import.meta.env.PROD) {
     console.warn('⚠️ Utilisation de la configuration de fallback en production');
     envConfig = {
+      VITE_SUPABASE_PROJECT_ID: import.meta.env.VITE_SUPABASE_PROJECT_ID || 'fallback-project-id',
       VITE_SUPABASE_URL: import.meta.env.VITE_SUPABASE_URL || 'https://fallback.supabase.co',
       VITE_SUPABASE_PUBLISHABLE_KEY: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY || 'fallback-key',
       VITE_APP_ENV: (import.meta.env.VITE_APP_ENV as any) || 'production',
