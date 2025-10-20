@@ -56,7 +56,7 @@ export const useStore = () => {
       return store.custom_domain;
     }
     
-    // Utiliser le domaine actuel (Lovable ou custom)
+        // Utiliser le domaine actuel
     const currentDomain = window.location.hostname;
     return currentDomain;
   };

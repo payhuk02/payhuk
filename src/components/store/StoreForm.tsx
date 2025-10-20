@@ -199,7 +199,7 @@ const StoreForm = ({ onSuccess, initialData }: StoreFormProps) => {
             {slug && (
               <p className="text-sm text-muted-foreground">
                 Votre boutique sera accessible à : 
-                <span className="font-mono ml-1">https://{slug}.lovableproject.com</span>
+                <span className="font-mono ml-1">https://{slug}.payhuk.app</span>
               </p>
             )}
             {slugAvailable === false && (

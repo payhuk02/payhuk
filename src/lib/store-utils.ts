@@ -9,13 +9,13 @@ export const generateSlug = (text: string): string => {
 };
 
 export const getStoreDomain = (): string => {
-  // Check if we're in development or using Lovable domain
+  // Check if we're in development or production
   const hostname = window.location.hostname;
   
   // If custom domain is configured, return it
-  // For now, return the current domain (Lovable preview or custom)
-  if (hostname.includes('lovableproject.com')) {
-    return 'lovableproject.com';
+  // For development, return localhost
+  if (hostname.includes('localhost') || hostname.includes('127.0.0.1')) {
+    return 'localhost:8080';
   }
   
   // For production with custom domain

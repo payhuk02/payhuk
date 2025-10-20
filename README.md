@@ -1,73 +1,137 @@
-# Welcome to your Lovable project
+# Payhuk - Plateforme E-commerce Moderne
 
-## Project info
+**Payhuk** est une plateforme e-commerce complète et moderne, conçue pour offrir une expérience de vente en ligne professionnelle.
 
-**URL**: https://lovable.dev/projects/e8283bf9-bb7b-44cc-8c83-59fabcbc4c1e
+## 🚀 Fonctionnalités Principales
 
-## How can I edit this code?
+- **Tableau de bord avancé** avec analytics en temps réel
+- **Gestion complète des produits** avec catégories et variantes
+- **Système de commandes** avec suivi en temps réel
+- **Gestion des clients** et historique des achats
+- **Système de paiement** intégré
+- **Promotions et codes de réduction**
+- **Analytics et rapports** détaillés
+- **Interface responsive** pour tous les appareils
+- **API REST** complète pour intégrations
 
-There are several ways of editing your application.
+## 🛠️ Technologies Utilisées
 
-**Use Lovable**
+- **Frontend**: React 18 + TypeScript + Vite
+- **UI**: Tailwind CSS + Radix UI + Shadcn/ui
+- **Backend**: Supabase (PostgreSQL + Auth + Storage)
+- **Déploiement**: Vercel
+- **Graphiques**: Recharts
+- **Animations**: Framer Motion
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/e8283bf9-bb7b-44cc-8c83-59fabcbc4c1e) and start prompting.
+## 📦 Installation
 
-Changes made via Lovable will be committed automatically to this repo.
+```bash
+# Cloner le projet
+git clone https://github.com/payhuk02/payhuk.git
+cd payhuk
 
-**Use your preferred IDE**
+# Installer les dépendances
+npm install
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+# Configurer les variables d'environnement
+cp .env.example .env.local
+# Éditer .env.local avec vos clés Supabase
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
-
-Follow these steps:
-
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
-
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
-
-# Step 3: Install the necessary dependencies.
-npm i
-
-# Step 4: Start the development server with auto-reloading and an instant preview.
+# Lancer le serveur de développement
 npm run dev
 ```
 
-**Edit a file directly in GitHub**
+## 🔧 Configuration
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+### Variables d'environnement
 
-**Use GitHub Codespaces**
+Créez un fichier `.env.local` avec les variables suivantes :
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+```env
+VITE_SUPABASE_URL=your_supabase_url
+VITE_SUPABASE_ANON_KEY=your_supabase_anon_key
+VITE_SUPABASE_PROJECT_ID=your_project_id
+```
 
-## What technologies are used for this project?
+### Configuration Supabase
 
-This project is built with:
+1. Créez un projet sur [Supabase](https://supabase.com)
+2. Exécutez les migrations SQL dans le dossier `supabase/migrations/`
+3. Configurez les politiques RLS (Row Level Security)
+4. Activez l'authentification et configurez les providers
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+## 🚀 Déploiement
 
-## How can I deploy this project?
+### Vercel (Recommandé)
 
-Simply open [Lovable](https://lovable.dev/projects/e8283bf9-bb7b-44cc-8c83-59fabcbc4c1e) and click on Share -> Publish.
+```bash
+# Installer Vercel CLI
+npm i -g vercel
 
-## Can I connect a custom domain to my Lovable project?
+# Déployer
+vercel
 
-Yes, you can!
+# Configurer les variables d'environnement sur Vercel
+```
 
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
+### Configuration Vercel
 
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/features/custom-domain#custom-domain)
+Le projet inclut une configuration `vercel.json` optimisée pour :
+- Routage SPA (Single Page Application)
+- Headers de sécurité
+- Optimisation des fonctions serverless
+- Gestion des assets statiques
+
+## 📱 Fonctionnalités Mobile
+
+- **Interface responsive** adaptée à tous les écrans
+- **Menu hamburger** pour navigation mobile
+- **PWA** (Progressive Web App) avec Service Worker
+- **Optimisations de performance** pour mobile
+
+## 🔒 Sécurité
+
+- **Authentification** sécurisée avec Supabase Auth
+- **RLS** (Row Level Security) pour la protection des données
+- **Validation** des données côté client et serveur
+- **Headers de sécurité** configurés
+- **HTTPS** obligatoire en production
+
+## 📊 Analytics et Monitoring
+
+- **Métriques de performance** en temps réel
+- **Analytics des ventes** avec graphiques interactifs
+- **Suivi des conversions** et taux de rebond
+- **Rapports d'export** PDF et Excel
+
+## 🤝 Contribution
+
+1. Fork le projet
+2. Créez une branche pour votre fonctionnalité (`git checkout -b feature/AmazingFeature`)
+3. Committez vos changements (`git commit -m 'Add some AmazingFeature'`)
+4. Push vers la branche (`git push origin feature/AmazingFeature`)
+5. Ouvrez une Pull Request
+
+## 📄 Licence
+
+Ce projet est sous licence MIT. Voir le fichier `LICENSE` pour plus de détails.
+
+## 🆘 Support
+
+Pour toute question ou problème :
+- Ouvrez une issue sur GitHub
+- Consultez la documentation Supabase
+- Vérifiez les logs Vercel pour le déploiement
+
+## 🎯 Roadmap
+
+- [ ] Système de notifications push
+- [ ] Intégration avec d'autres plateformes de paiement
+- [ ] API GraphQL
+- [ ] Application mobile native
+- [ ] Système de dropshipping
+- [ ] Marketplace multi-vendeurs
+
+---
+
+**Payhuk** - Votre plateforme e-commerce moderne et professionnelle 🚀

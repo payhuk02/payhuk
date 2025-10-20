@@ -198,7 +198,7 @@ export const useDomain = (store: Store | null) => {
       },
       verificationRecord: {
         type: "TXT",
-        name: "_lovable-verification",
+        name: "_payhuk-verification",
         value: store.domain_verification_token || "",
         ttl: "3600"
       }
