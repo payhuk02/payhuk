@@ -1,7 +1,8 @@
 import { Product } from "@/hooks/useProducts";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Edit, Trash2, Copy, ExternalLink } from "lucide-react";
+import { Edit, Trash2, Copy, ExternalLink, MessageSquare } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 
 interface ProductCardDashboardProps {
@@ -19,6 +20,7 @@ const ProductCardDashboard = ({
   onDelete,
 }: ProductCardDashboardProps) => {
   const { toast } = useToast();
+  const navigate = useNavigate();
 
   const productUrl = `${window.location.origin}/stores/${storeSlug}/products/${product.slug}`;
 
@@ -126,6 +128,16 @@ const ProductCardDashboard = ({
           >
             <Edit className="h-4 w-4 mr-1" />
             Modifier
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            className="flex-1"
+            onClick={() => navigate(`/admin/products/${product.id}?tab=faq`)}
+            title="Éditer FAQ"
+          >
+            <MessageSquare className="h-4 w-4 mr-1" />
+            FAQ
           </Button>
           <Button
             variant="outline"
