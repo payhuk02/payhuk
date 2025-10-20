@@ -53,6 +53,7 @@ export const ProductFAQTab = ({ formData, updateFormData }: ProductFAQTabProps) 
   const [sortBy, setSortBy] = useState<'order' | 'question' | 'createdAt'>('order');
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
   const [replaceOnImport, setReplaceOnImport] = useState(false);
+  const [showHelp, setShowHelp] = useState(false);
   const fileInputRef = typeof window !== 'undefined' ? document.createElement('input') : null;
   if (fileInputRef) {
     fileInputRef.type = 'file';
@@ -270,6 +271,11 @@ export const ProductFAQTab = ({ formData, updateFormData }: ProductFAQTabProps) 
     updateFormData('faqs', merged);
   };
 
+  const resetOrder = () => {
+    const normalized = (formData.faqs || []).map((f: FAQItem, idx: number) => ({ ...f, order: idx }));
+    updateFormData('faqs', normalized);
+  };
+
   return (
     <div className="space-y-6">
       {/* En-tête */}
@@ -349,6 +355,8 @@ export const ProductFAQTab = ({ formData, updateFormData }: ProductFAQTabProps) 
               >
                 {replaceOnImport ? 'Remplacer: ON' : 'Remplacer: OFF'}
               </Button>
+              <Button variant="outline" size="sm" onClick={resetOrder}>Réinitialiser l'ordre</Button>
+              <Button variant="outline" size="sm" onClick={() => setShowHelp(true)}>Aide</Button>
               <Button
                 variant="outline"
                 size="sm"
@@ -372,6 +380,31 @@ export const ProductFAQTab = ({ formData, updateFormData }: ProductFAQTabProps) 
           </div>
         </CardContent>
       </Card>
+
+      {showHelp && (
+        <Card className="product-card">
+          <CardHeader>
+            <CardTitle>Formats d'import FAQ (JSON/CSV)</CardTitle>
+          </CardHeader>
+          <CardContent className="text-sm space-y-3">
+            <div>
+              <strong>JSON</strong>: tableau d'objets avec les clés: id, question, answer, category, order, isActive, isFeatured, createdAt, updatedAt.
+            </div>
+            <div>
+              <strong>CSV</strong>: première ligne d'entêtes: id,question,answer,category,order,isActive,isFeatured,createdAt,updatedAt
+            </div>
+            <div>
+              - Les dates peuvent être en ISO (ex: 2025-10-20T12:00:00Z).
+            </div>
+            <div>
+              - Les champs question et answer sont requis; les autres sont optionnels.
+            </div>
+            <div className="pt-2">
+              <Button variant="outline" onClick={() => setShowHelp(false)}>Fermer</Button>
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Liste des FAQ */}
