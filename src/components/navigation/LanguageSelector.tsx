@@ -15,8 +15,22 @@ const languages = [
 ];
 
 export const LanguageSelector = () => {
-  const { i18n, t } = useTranslation();
+  const { i18n, t, ready } = useTranslation();
   const [isOpen, setIsOpen] = useState(false);
+
+  // Attendre que i18n soit prêt
+  if (!ready) {
+    return (
+      <Button
+        variant="ghost"
+        size="sm"
+        className="h-8 w-8 p-0 hover:bg-accent/50 transition-colors"
+        disabled
+      >
+        <Globe className="h-4 w-4" />
+      </Button>
+    );
+  }
 
   const currentLanguage = languages.find(lang => lang.code === i18n.language) || languages[0];
 
@@ -60,8 +74,22 @@ export const LanguageSelector = () => {
 
 // Version compacte pour les espaces restreints
 export const LanguageSelectorCompact = () => {
-  const { i18n } = useTranslation();
+  const { i18n, ready } = useTranslation();
   const [isOpen, setIsOpen] = useState(false);
+
+  // Attendre que i18n soit prêt
+  if (!ready) {
+    return (
+      <Button
+        variant="ghost"
+        size="sm"
+        className="h-6 w-6 p-0 hover:bg-accent/50 transition-colors"
+        disabled
+      >
+        <span className="text-sm">🌐</span>
+      </Button>
+    );
+  }
 
   const currentLanguage = languages.find(lang => lang.code === i18n.language) || languages[0];
 

@@ -15,44 +15,53 @@ const resources = {
   }
 };
 
-i18n
-  .use(LanguageDetector)
-  .use(initReactI18next)
-  .init({
-    resources,
-    fallbackLng: 'fr', // Langue par défaut
-    debug: process.env.NODE_ENV === 'development',
-    
-    // Configuration de la détection automatique
-    detection: {
-      order: ['localStorage', 'navigator', 'htmlTag'],
-      caches: ['localStorage'],
-      lookupLocalStorage: 'i18nextLng',
-    },
+// Configuration d'i18n
+const initI18n = () => {
+  return i18n
+    .use(LanguageDetector)
+    .use(initReactI18next)
+    .init({
+      resources,
+      fallbackLng: 'fr', // Langue par défaut
+      debug: process.env.NODE_ENV === 'development',
+      
+      // Configuration de la détection automatique
+      detection: {
+        order: ['localStorage', 'navigator', 'htmlTag'],
+        caches: ['localStorage'],
+        lookupLocalStorage: 'i18nextLng',
+      },
 
-    interpolation: {
-      escapeValue: false, // React échappe déjà les valeurs
-    },
+      interpolation: {
+        escapeValue: false, // React échappe déjà les valeurs
+      },
 
-    // Configuration des namespaces
-    defaultNS: 'translation',
-    ns: ['translation'],
+      // Configuration des namespaces
+      defaultNS: 'translation',
+      ns: ['translation'],
 
-    // Configuration des pluriels
-    pluralSeparator: '_',
-    contextSeparator: '_',
+      // Configuration des pluriels
+      pluralSeparator: '_',
+      contextSeparator: '_',
 
-    // Configuration des clés manquantes
-    saveMissing: process.env.NODE_ENV === 'development',
-    missingKeyHandler: (lng, ns, key) => {
-      if (process.env.NODE_ENV === 'development') {
-        console.warn(`Missing translation key: ${key} for language: ${lng}`);
-      }
-    },
+      // Configuration des clés manquantes
+      saveMissing: process.env.NODE_ENV === 'development',
+      missingKeyHandler: (lng, ns, key) => {
+        if (process.env.NODE_ENV === 'development') {
+          console.warn(`Missing translation key: ${key} for language: ${lng}`);
+        }
+      },
 
-    // Configuration des formats
-    keySeparator: '.',
-    nsSeparator: ':',
-  });
+      // Configuration des formats
+      keySeparator: '.',
+      nsSeparator: ':',
+
+      // Initialisation synchrone pour éviter les erreurs de contexte
+      initImmediate: false,
+    });
+};
+
+// Initialiser i18n immédiatement
+initI18n();
 
 export default i18n;

@@ -10,6 +10,7 @@ import { LoadingBar } from "@/components/navigation/LoadingBar";
 import { useScrollRestoration } from "@/hooks/useScrollRestoration";
 import { useDarkMode } from "@/hooks/useDarkMode";
 import { PerformanceOptimizer } from "@/components/optimization/PerformanceOptimizer";
+import { I18nProvider } from "@/components/I18nProvider";
 
 // Pages principales
 import Landing from "./pages/Landing";
@@ -117,9 +118,11 @@ const App = () => (
       <Toaster />
       <Sonner />
       <BrowserRouter>
-        <AuthProvider>
-          <AppContent />
-        </AuthProvider>
+        <I18nProvider>
+          <AuthProvider>
+            <AppContent />
+          </AuthProvider>
+        </I18nProvider>
       </BrowserRouter>
     </TooltipProvider>
   </QueryClientProvider>
