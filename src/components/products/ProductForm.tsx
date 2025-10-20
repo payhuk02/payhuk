@@ -1,4 +1,6 @@
 import { useState, useEffect } from "react";
+import { z } from "zod";
+import { productCompleteSchema } from "@/lib/schemas";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
@@ -337,52 +339,43 @@ export const ProductForm = ({ storeId, storeSlug, productId, initialData, onSucc
     }
   };
 
-  // Validation des champs requis
-  const validateForm = (): boolean => {
-    const errors: Record<string, string> = {};
-    
-    if (!formData.name.trim()) {
-      errors.name = "Le nom du produit est requis";
+  // Helpers Zod -> erreurs inline
+  const zodToFieldErrors = (err: z.ZodError): Record<string, string> => {
+    const out: Record<string, string> = {};
+    for (const issue of err.issues) {
+      const path = issue.path.join(".") || "form";
+      if (!out[path]) out[path] = issue.message;
     }
-    
-    if (!formData.slug.trim()) {
-      errors.slug = "L'URL du produit est requise";
-    }
-    
-    if (!formData.category) {
-      errors.category = "La catégorie est requise";
-    }
-    
-    if (!formData.product_type) {
-      errors.product_type = "Le type de produit est requis";
-    }
-    
-    if (!formData.pricing_model) {
-      errors.pricing_model = "Le modèle de tarification est requis";
-    }
-    
-    if (formData.price === null || formData.price === undefined) {
-      errors.price = "Le prix est requis";
-    } else if (formData.price < 0) {
-      errors.price = "Le prix doit être positif";
-    }
-    
-    if (formData.promotional_price && formData.promotional_price < 0) {
-      errors.promotional_price = "Le prix promotionnel doit être positif";
-    }
-    
-    setValidationErrors(errors);
-    return Object.keys(errors).length === 0;
+    return out;
   };
 
   // Sauvegarde du produit
   const saveProduct = async (status: 'draft' | 'published' = 'draft') => {
-    if (!validateForm()) {
+    // 1) Validation Zod (draft = partielle, publish = complète)
+    const schema = status === 'published' ? productCompleteSchema : productCompleteSchema.partial();
+    const parsed = schema.safeParse(formData);
+    if (!parsed.success) {
+      setValidationErrors(zodToFieldErrors(parsed.error));
       toast({
         title: "Erreur de validation",
-        description: "Veuillez corriger les erreurs dans le formulaire",
+        description: status === 'published' ? "Complétez les champs requis pour publier" : "Corrigez les champs invalides",
         variant: "destructive",
       });
+      return;
+    }
+
+    // 2) Règles additionnelles: prix obligatoire si pas 'free'
+    if (formData.pricing_model !== 'free' && (formData.price === null || formData.price === undefined)) {
+      setValidationErrors(prev => ({ ...prev, price: "Le prix est requis (modèle non gratuit)" }));
+      toast({ title: "Prix requis", description: "Renseignez un prix valide", variant: "destructive" });
+      return;
+    }
+
+    // 3) Slug unique (contrôle final serveur)
+    const available = await checkSlugAvailability(formData.slug);
+    if (!available) {
+      setValidationErrors(prev => ({ ...prev, slug: "Ce slug est déjà utilisé dans votre boutique" }));
+      toast({ title: "URL déjà utilisée", description: "Modifiez l'URL (slug) du produit", variant: "destructive" });
       return;
     }
 
