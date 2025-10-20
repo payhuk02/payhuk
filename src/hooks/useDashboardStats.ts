@@ -1,8 +1,9 @@
-import { useState, useEffect, useMemo, useCallback } from "react";
+import { useState, useEffect, useMemo, useCallback, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useStore } from "./useStore";
 import { logger } from '@/lib/logger';
+import { useOptimizedLoading } from './useOptimizedLoading';
 
 export interface DashboardStats {
   totalProducts: number;
@@ -48,21 +49,26 @@ const defaultStats: DashboardStats = {
 
 export const useDashboardStats = () => {
   const [stats, setStats] = useState<DashboardStats>(defaultStats);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const { loading, error, startLoading, stopLoading, setError: setErrorState } = useOptimizedLoading({
+    initialLoading: true,
+    debounceMs: 150,
+    minLoadingTime: 500
+  });
   const { toast } = useToast();
   const { store } = useStore();
+  const retryCountRef = useRef(0);
+  const maxRetries = 3;
 
   const fetchStats = useCallback(async () => {
     if (!store?.id) {
       setStats(defaultStats);
-      setLoading(false);
+      stopLoading();
       return;
     }
 
     try {
-      setError(null);
-      setLoading(true);
+      startLoading();
+      retryCountRef.current = 0;
 
       // Exécuter toutes les requêtes en parallèle pour améliorer les performances
       const [
@@ -272,7 +278,18 @@ export const useDashboardStats = () => {
 
     } catch (error: any) {
       logger.error('Erreur lors du chargement des statistiques:', error);
-      setError(error.message);
+      
+      // Retry logic pour les erreurs temporaires
+      if (retryCountRef.current < maxRetries && 
+          (error.message.includes('network') || error.message.includes('timeout'))) {
+        retryCountRef.current++;
+        setTimeout(() => {
+          fetchStats();
+        }, 1000 * retryCountRef.current); // Retry avec délai croissant
+        return;
+      }
+      
+      setErrorState(error.message);
       
       // Ne pas afficher de toast pour les erreurs de données manquantes
       if (!error.message.includes('No rows found') && !error.message.includes('relation')) {
@@ -283,7 +300,7 @@ export const useDashboardStats = () => {
         });
       }
     } finally {
-      setLoading(false);
+      stopLoading();
     }
   }, [store?.id, toast]);
 
