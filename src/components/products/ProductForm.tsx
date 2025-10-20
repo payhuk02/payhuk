@@ -355,7 +355,17 @@ export const ProductForm = ({ storeId, storeSlug, productId, initialData, onSucc
   const saveProduct = async (status: 'draft' | 'published' = 'draft') => {
     // 1) Validation Zod (draft = partielle, publish = complète)
     const schema = status === 'published' ? productCompleteSchema : productCompleteSchema.partial();
-    const parsed = schema.safeParse(formData);
+    // Normaliser les FAQ (dates en ISO string pour la validation et la persistance)
+    const normalizedFormData = {
+      ...formData,
+      faqs: (formData.faqs || []).map((f: any, idx: number) => ({
+        ...f,
+        order: typeof f.order === 'number' ? f.order : idx,
+        createdAt: typeof f.createdAt === 'string' ? f.createdAt : new Date(f.createdAt).toISOString(),
+        updatedAt: typeof f.updatedAt === 'string' ? f.updatedAt : new Date(f.updatedAt).toISOString(),
+      })),
+    };
+    const parsed = schema.safeParse(normalizedFormData);
     if (!parsed.success) {
       setValidationErrors(zodToFieldErrors(parsed.error));
       toast({
@@ -401,6 +411,7 @@ export const ProductForm = ({ storeId, storeSlug, productId, initialData, onSucc
         meta_title: formData.meta_title,
         meta_description: formData.meta_description,
         meta_keywords: formData.meta_keywords,
+        faqs: normalizedFormData.faqs,
         is_active: status === 'published',
         is_draft: status === 'draft',
         status: status,

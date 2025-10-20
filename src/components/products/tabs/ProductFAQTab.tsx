@@ -6,6 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { 
   Plus, 
   Trash2, 
@@ -26,6 +27,7 @@ import {
   Clock
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { faqItemSchema } from "@/lib/schemas";
 
 interface ProductFAQTabProps {
   formData: any;
@@ -50,6 +52,12 @@ export const ProductFAQTab = ({ formData, updateFormData }: ProductFAQTabProps) 
   const [searchTerm, setSearchTerm] = useState("");
   const [sortBy, setSortBy] = useState<'order' | 'question' | 'createdAt'>('order');
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
+  const [replaceOnImport, setReplaceOnImport] = useState(false);
+  const fileInputRef = typeof window !== 'undefined' ? document.createElement('input') : null;
+  if (fileInputRef) {
+    fileInputRef.type = 'file';
+    fileInputRef.accept = '.json,.csv';
+  }
 
   const addFAQ = (faq: Omit<FAQItem, 'id' | 'createdAt' | 'updatedAt'>) => {
     const newFAQ: FAQItem = {
@@ -142,13 +150,133 @@ export const ProductFAQTab = ({ formData, updateFormData }: ProductFAQTabProps) 
 
   const categories = [...new Set((formData.faqs || []).map((faq: FAQItem) => faq.category).filter(Boolean))];
 
+  // --- Import / Export helpers ---
+  const downloadFile = (filename: string, content: string, mime: string) => {
+    const blob = new Blob([content], { type: mime });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url; a.download = filename; a.click();
+    URL.revokeObjectURL(url);
+  };
+
+  const exportJSON = () => {
+    const data = (formData.faqs || []).map((f: FAQItem) => ({
+      id: f.id,
+      question: f.question,
+      answer: f.answer,
+      category: f.category || "",
+      order: f.order,
+      isActive: f.isActive,
+      isFeatured: f.isFeatured,
+      createdAt: new Date(f.createdAt).toISOString(),
+      updatedAt: new Date(f.updatedAt).toISOString(),
+    }));
+    downloadFile('faqs.json', JSON.stringify(data, null, 2), 'application/json');
+  };
+
+  const toCsvValue = (v: unknown) => {
+    const s = String(v ?? "");
+    if (s.includes('"') || s.includes(',') || s.includes('\n')) {
+      return '"' + s.replace(/"/g, '""') + '"';
+    }
+    return s;
+  };
+
+  const exportCSV = () => {
+    const headers = ['id','question','answer','category','order','isActive','isFeatured','createdAt','updatedAt'];
+    const rows = (formData.faqs || []).map((f: FAQItem) => [
+      f.id,
+      f.question,
+      f.answer,
+      f.category || "",
+      f.order,
+      f.isActive,
+      f.isFeatured,
+      new Date(f.createdAt).toISOString(),
+      new Date(f.updatedAt).toISOString(),
+    ]);
+    const csv = [headers.join(','), ...rows.map(r => r.map(toCsvValue).join(','))].join('\n');
+    downloadFile('faqs.csv', csv, 'text/csv;charset=utf-8');
+  };
+
+  const parseCsv = (text: string): FAQItem[] => {
+    const lines = text.split(/\r?\n/).filter(l => l.trim().length > 0);
+    if (lines.length === 0) return [];
+    const headers = lines[0].split(',').map(h => h.trim());
+    const idx = (name: string) => headers.indexOf(name);
+    const out: FAQItem[] = [];
+    for (let i = 1; i < lines.length; i++) {
+      const row = lines[i];
+      const values: string[] = [];
+      let cur = ''; let inQ = false;
+      for (let c = 0; c < row.length; c++) {
+        const ch = row[c];
+        if (inQ) {
+          if (ch === '"' && row[c+1] === '"') { cur += '"'; c++; }
+          else if (ch === '"') { inQ = false; }
+          else cur += ch;
+        } else {
+          if (ch === '"') inQ = true;
+          else if (ch === ',') { values.push(cur); cur = ''; }
+          else cur += ch;
+        }
+      }
+      values.push(cur);
+      const get = (name: string) => values[idx(name)] ?? '';
+      const item: FAQItem = {
+        id: get('id') || `faq_${Date.now()}_${Math.random().toString(36).slice(2)}`,
+        question: get('question'),
+        answer: get('answer'),
+        category: get('category') || undefined,
+        order: Number(get('order') || (i-1)) || 0,
+        isActive: String(get('isActive')).toLowerCase() !== 'false',
+        isFeatured: String(get('isFeatured')).toLowerCase() === 'true',
+        createdAt: new Date(get('createdAt') || new Date().toISOString()),
+        updatedAt: new Date(get('updatedAt') || new Date().toISOString()),
+      };
+      if (item.question && item.answer) out.push(item);
+    }
+    return out;
+  };
+
+  const handleImport = async (file: File) => {
+    const ext = file.name.toLowerCase().endsWith('.csv') ? 'csv' : 'json';
+    const text = await file.text();
+    let items: FAQItem[] = [];
+    try {
+      if (ext === 'json') {
+        const raw = JSON.parse(text);
+        if (Array.isArray(raw)) {
+          items = raw.map((r: any, idx: number) => ({
+            id: r.id || `faq_${Date.now()}_${Math.random().toString(36).slice(2)}`,
+            question: r.question || '',
+            answer: r.answer || '',
+            category: r.category || undefined,
+            order: typeof r.order === 'number' ? r.order : idx,
+            isActive: r.isActive !== false,
+            isFeatured: !!r.isFeatured,
+            createdAt: new Date(r.createdAt || new Date().toISOString()),
+            updatedAt: new Date(r.updatedAt || new Date().toISOString()),
+          }));
+        }
+      } else {
+        items = parseCsv(text);
+      }
+    } catch {}
+    items = items.filter((it) => it.question && it.answer);
+    if (items.length === 0) return;
+    const base = replaceOnImport ? [] : (formData.faqs || []);
+    const merged = [...base, ...items].map((f: FAQItem, idx: number) => ({ ...f, order: idx }));
+    updateFormData('faqs', merged);
+  };
+
   return (
     <div className="space-y-6">
       {/* En-tête */}
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-2xl font-bold">FAQ du Produit</h2>
-          <p className="text-gray-600">Gérez les questions fréquemment posées sur votre produit</p>
+          <h2 className="modern-title modern-title-lg">FAQ du Produit</h2>
+          <p className="modern-description">Gérez les questions fréquemment posées sur votre produit</p>
         </div>
         <Button
           onClick={() => setShowAddForm(true)}
@@ -160,7 +288,7 @@ export const ProductFAQTab = ({ formData, updateFormData }: ProductFAQTabProps) 
       </div>
 
       {/* Barre de recherche et filtres */}
-      <Card>
+      <Card className="product-card">
         <CardContent className="p-4">
           <div className="flex flex-col sm:flex-row gap-4">
             <div className="flex-1">
@@ -170,14 +298,14 @@ export const ProductFAQTab = ({ formData, updateFormData }: ProductFAQTabProps) 
                   placeholder="Rechercher dans les FAQ..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-10"
+                  className="pl-10 modern-input"
                 />
               </div>
             </div>
             
             <div className="flex gap-2">
               <Select value={sortBy} onValueChange={(value: any) => setSortBy(value)}>
-                <SelectTrigger className="w-40">
+                <SelectTrigger className="w-40 modern-input">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -194,6 +322,52 @@ export const ProductFAQTab = ({ formData, updateFormData }: ProductFAQTabProps) 
               >
                 {sortOrder === 'asc' ? <SortAsc className="h-4 w-4" /> : <SortDesc className="h-4 w-4" />}
               </Button>
+
+              <Button variant="outline" size="sm" onClick={exportJSON}>Export JSON</Button>
+              <Button variant="outline" size="sm" onClick={exportCSV}>Export CSV</Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => {
+                  const input = document.createElement('input');
+                  input.type = 'file';
+                  input.accept = '.json,.csv';
+                  input.onchange = async (e: any) => {
+                    const file = e.target.files?.[0];
+                    if (file) await handleImport(file);
+                  };
+                  input.click();
+                }}
+              >
+                Importer
+              </Button>
+              <Button
+                variant={replaceOnImport ? 'default' : 'outline'}
+                size="sm"
+                onClick={() => setReplaceOnImport(!replaceOnImport)}
+                title="Remplacer les FAQ existantes pendant l'import"
+              >
+                {replaceOnImport ? 'Remplacer: ON' : 'Remplacer: OFF'}
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => {
+                  // Best-effort validation
+                  const allValid = (formData.faqs || []).every((f: any) =>
+                    !!f.question?.trim() && !!f.answer?.trim()
+                  );
+                  if (!allValid) return;
+                  // Normalize order indexes
+                  const normalized = (formData.faqs || []).map((f: any, idx: number) => ({
+                    ...f,
+                    order: typeof f.order === 'number' ? f.order : idx,
+                  }));
+                  updateFormData('faqs', normalized);
+                }}
+              >
+                Valider
+              </Button>
             </div>
           </div>
         </CardContent>
@@ -204,7 +378,7 @@ export const ProductFAQTab = ({ formData, updateFormData }: ProductFAQTabProps) 
         <div className="lg:col-span-2 space-y-6">
           {/* Formulaire d'ajout/modification */}
           {(showAddForm || editingFAQ) && (
-            <Card>
+            <Card className="product-card">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <HelpCircle className="h-5 w-5" />
@@ -231,7 +405,7 @@ export const ProductFAQTab = ({ formData, updateFormData }: ProductFAQTabProps) 
           )}
 
           {/* Liste des FAQ existantes */}
-          <Card>
+          <Card className="product-card">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <MessageSquare className="h-5 w-5" />
@@ -253,7 +427,13 @@ export const ProductFAQTab = ({ formData, updateFormData }: ProductFAQTabProps) 
               ) : (
                 <div className="space-y-3">
                   {filteredFAQs.map((faq: FAQItem, index: number) => (
-                    <Card key={faq.id} className={cn("border", !faq.isActive && "opacity-60")}>
+                    <Card key={faq.id} className={cn("border", !faq.isActive && "opacity-60")} draggable onDragStart={(e) => {
+                      e.dataTransfer.setData('text/plain', String(index));
+                    }} onDragOver={(e) => e.preventDefault()} onDrop={(e) => {
+                      e.preventDefault();
+                      const fromIndex = Number(e.dataTransfer.getData('text/plain'));
+                      if (!Number.isNaN(fromIndex)) moveFAQ(fromIndex, index);
+                    }}>
                       <CardContent className="p-4">
                         <div className="flex items-start gap-4">
                           <div className="flex items-center gap-2">
@@ -327,6 +507,24 @@ export const ProductFAQTab = ({ formData, updateFormData }: ProductFAQTabProps) 
                             >
                               <Eye className={cn("h-4 w-4", faq.isActive ? "text-green-500" : "text-gray-400")} />
                             </Button>
+                            <div className="flex gap-1">
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                disabled={index === 0}
+                                onClick={() => moveFAQ(index, Math.max(0, index - 1))}
+                              >
+                                ↑
+                              </Button>
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                disabled={index === filteredFAQs.length - 1}
+                                onClick={() => moveFAQ(index, Math.min(filteredFAQs.length - 1, index + 1))}
+                              >
+                                ↓
+                              </Button>
+                            </div>
                             <Button
                               variant="destructive"
                               size="sm"
@@ -348,7 +546,7 @@ export const ProductFAQTab = ({ formData, updateFormData }: ProductFAQTabProps) 
         {/* Panneau latéral */}
         <div className="space-y-6">
           {/* Statistiques */}
-          <Card>
+          <Card className="product-card">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <MessageSquare className="h-5 w-5" />
@@ -390,7 +588,7 @@ export const ProductFAQTab = ({ formData, updateFormData }: ProductFAQTabProps) 
 
           {/* Catégories */}
           {categories.length > 0 && (
-            <Card>
+            <Card className="product-card">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <Info className="h-5 w-5" />
@@ -413,7 +611,7 @@ export const ProductFAQTab = ({ formData, updateFormData }: ProductFAQTabProps) 
           )}
 
           {/* Conseils */}
-          <Card>
+          <Card className="product-card">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <AlertCircle className="h-5 w-5" />
@@ -481,6 +679,7 @@ const FAQForm = ({ faq, onSave, onCancel }: FAQFormProps) => {
           value={formData.question}
           onChange={(e) => setFormData(prev => ({ ...prev, question: e.target.value }))}
           placeholder="Quelle est votre question ?"
+          className="modern-input"
         />
       </div>
 
@@ -492,6 +691,7 @@ const FAQForm = ({ faq, onSave, onCancel }: FAQFormProps) => {
           onChange={(e) => setFormData(prev => ({ ...prev, answer: e.target.value }))}
           placeholder="Réponse détaillée..."
           rows={4}
+          className="modern-input"
         />
       </div>
 
@@ -503,6 +703,7 @@ const FAQForm = ({ faq, onSave, onCancel }: FAQFormProps) => {
             value={formData.category}
             onChange={(e) => setFormData(prev => ({ ...prev, category: e.target.value }))}
             placeholder="Général, Technique, Livraison..."
+            className="modern-input"
           />
         </div>
 
@@ -514,6 +715,7 @@ const FAQForm = ({ faq, onSave, onCancel }: FAQFormProps) => {
             value={formData.order}
             onChange={(e) => setFormData(prev => ({ ...prev, order: parseInt(e.target.value) || 0 }))}
             placeholder="0"
+            className="modern-input"
           />
         </div>
       </div>

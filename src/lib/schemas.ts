@@ -5,6 +5,19 @@ import { isValidEmail, isValidPhone, isValidAmount, isValidUrl } from '@/lib/val
  * Schémas de validation Zod pour les formulaires
  */
 
+// Schéma FAQ détaillé
+export const faqItemSchema = z.object({
+  id: z.string(),
+  question: z.string().min(3, 'La question est requise'),
+  answer: z.string().min(3, 'La réponse est requise'),
+  category: z.string().optional().or(z.literal('')),
+  order: z.number().int().min(0),
+  isActive: z.boolean(),
+  isFeatured: z.boolean(),
+  createdAt: z.string().datetime(),
+  updatedAt: z.string().datetime(),
+});
+
 // Schéma complet pour les produits
 export const productCompleteSchema = z.object({
   // Informations de base
@@ -77,7 +90,7 @@ export const productCompleteSchema = z.object({
   custom_fields: z.array(z.record(z.unknown())).optional(),
   
   // FAQ
-  faqs: z.array(z.record(z.unknown())).optional(),
+  faqs: z.array(faqItemSchema).optional(),
   
   // SEO et métadonnées
   meta_title: z.string().max(60, 'Le titre SEO ne peut pas dépasser 60 caractères').optional(),
