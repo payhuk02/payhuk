@@ -295,7 +295,9 @@ export const ProductForm = ({ storeId, storeSlug, productId, initialData, onSucc
   const navigate = useNavigate();
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
-  const [activeTab, setActiveTab] = useState("info");
+  const [activeTab, setActiveTab] = useState(() => {
+    return sessionStorage.getItem('productFormActiveTab') || 'info';
+  });
   const [validationErrors, setValidationErrors] = useState<Record<string, string>>({});
 
   // État du formulaire avec données vides par défaut
@@ -459,6 +461,25 @@ export const ProductForm = ({ storeId, storeSlug, productId, initialData, onSucc
   const handleSave = () => saveProduct('draft');
   const handlePublish = () => saveProduct('published');
 
+  // Persistance de l'onglet actif
+  useEffect(() => {
+    sessionStorage.setItem('productFormActiveTab', activeTab);
+  }, [activeTab]);
+
+  // Bouton Voir: ouvre la page produit si publié, sinon preview locale
+  const handleView = () => {
+    if (formData.slug && formData.is_active) {
+      window.open(`/stores/${storeSlug}/products/${formData.slug}`, '_blank');
+      return;
+    }
+    // preview locale simple: ouvre une fenêtre avec un rendu minimal
+    const preview = window.open('', '_blank');
+    if (preview) {
+      preview.document.write(`<title>Prévisualisation produit</title><div style="font-family:system-ui;padding:24px;color:#e5e7eb;background:#0b1220"><h1 style="margin:0 0 8px">${formData.name || 'Produit sans titre'}</h1><p style="opacity:.8;margin:0 0 12px">${formData.short_description || ''}</p>${formData.image_url ? `<img src="${formData.image_url}" style="max-width:100%;border-radius:8px"/>` : ''}<p style="margin-top:12px;font-weight:600">${formData.price ? `${formData.price} ${formData.currency}` : ''}</p></div>`);
+      preview.document.close();
+    }
+  };
+
   return (
     <div className="product-form-container">
       <Card className="product-card">
@@ -477,7 +498,7 @@ export const ProductForm = ({ storeId, storeSlug, productId, initialData, onSucc
             <div className="flex items-center gap-3">
               <Button
                 variant="outline"
-                onClick={() => navigate(-1)}
+                onClick={handleView}
                 className="theme-button-outline"
               >
                 <Eye className="h-4 w-4 mr-2" />
