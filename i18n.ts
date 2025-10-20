@@ -15,62 +15,31 @@ const resources = {
   }
 };
 
-// Configuration d'i18n avec gestion d'erreur robuste
-const initI18n = async () => {
-  try {
-    await i18n
-      .use(LanguageDetector)
-      .use(initReactI18next)
-      .init({
-        resources,
-        fallbackLng: 'fr', // Langue par défaut
-        debug: false, // Désactiver le debug en production
-        
-        // Configuration de la détection automatique
-        detection: {
-          order: ['localStorage', 'navigator', 'htmlTag'],
-          caches: ['localStorage'],
-          lookupLocalStorage: 'i18nextLng',
-        },
-
-        interpolation: {
-          escapeValue: false, // React échappe déjà les valeurs
-        },
-
-        // Configuration des namespaces
-        defaultNS: 'translation',
-        ns: ['translation'],
-
-        // Configuration des pluriels
-        pluralSeparator: '_',
-        contextSeparator: '_',
-
-        // Configuration des clés manquantes
-        saveMissing: false, // Désactiver en production
-        missingKeyHandler: (lng, ns, key) => {
-          console.warn(`Missing translation key: ${key} for language: ${lng}`);
-        },
-
-        // Configuration des formats
-        keySeparator: '.',
-        nsSeparator: ':',
-
-        // Initialisation asynchrone pour éviter les erreurs de contexte
-        initImmediate: false,
-        
-        // Configuration de compatibilité
-        compatibilityJSON: 'v3',
-      });
+// Configuration d'i18n simplifiée
+i18n
+  .use(LanguageDetector)
+  .use(initReactI18next)
+  .init({
+    resources,
+    fallbackLng: 'fr',
+    debug: false,
     
-    console.log('✅ i18n initialisé avec succès');
-    return true;
-  } catch (error) {
-    console.error('❌ Erreur lors de l\'initialisation d\'i18n:', error);
-    return false;
-  }
-};
+    detection: {
+      order: ['localStorage', 'navigator', 'htmlTag'],
+      caches: ['localStorage'],
+      lookupLocalStorage: 'i18nextLng',
+    },
 
-// Initialiser i18n de manière asynchrone
-initI18n();
+    interpolation: {
+      escapeValue: false,
+    },
+
+    defaultNS: 'translation',
+    ns: ['translation'],
+    keySeparator: '.',
+    nsSeparator: ':',
+    
+    initImmediate: true,
+  });
 
 export default i18n;

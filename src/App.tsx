@@ -114,30 +114,22 @@ const AppContent = () => {
 
 const queryClient = new QueryClient();
 
-const App = () => {
-  // Vérifier si i18n est initialisé avant de rendre l'application
-  try {
-    return (
-      <QueryClientProvider client={queryClient}>
-        <TooltipProvider>
-          <Toaster />
-          <Sonner />
-          <BrowserRouter>
-            <I18nProvider>
-              <ConfigChecker>
-                <AuthProvider>
-                  <AppContent />
-                </AuthProvider>
-              </ConfigChecker>
-            </I18nProvider>
-          </BrowserRouter>
-        </TooltipProvider>
-      </QueryClientProvider>
-    );
-  } catch (error) {
-    console.error('❌ Erreur dans App:', error);
-    return <AppFallback />;
-  }
-};
+const App = () => (
+  <QueryClientProvider client={queryClient}>
+    <TooltipProvider>
+      <Toaster />
+      <Sonner />
+      <BrowserRouter>
+        <I18nProvider>
+          <ConfigChecker>
+            <AuthProvider>
+              <AppContent />
+            </AuthProvider>
+          </ConfigChecker>
+        </I18nProvider>
+      </BrowserRouter>
+    </TooltipProvider>
+  </QueryClientProvider>
+);
 
 export default App;
