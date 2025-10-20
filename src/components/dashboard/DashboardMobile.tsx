@@ -28,6 +28,7 @@ import { TopProductsCard } from "@/components/dashboard/TopProductsCard";
 import { QuickActions } from "@/components/dashboard/QuickActions";
 import { ActivityFeed } from "@/components/dashboard/ActivityFeed";
 import { PerformanceMetrics } from "@/components/dashboard/PerformanceMetrics";
+import { MobileMenu } from "@/components/navigation/MobileMenu";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 
@@ -100,13 +101,13 @@ const DashboardMobile = () => {
   }
 
   return (
-    <div className="p-4 space-y-4">
-      {/* Header Mobile */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-xl font-bold">Tableau de bord</h1>
-          <p className="text-sm text-muted-foreground">{store.name}</p>
-        </div>
+    <div className="min-h-screen bg-background">
+      {/* Header avec menu hamburger */}
+      <div className="flex items-center justify-between p-4 border-b bg-background">
+        <MobileMenu>
+          <div />
+        </MobileMenu>
+        <h1 className="text-xl font-bold">Tableau de bord</h1>
         <Button
           variant="outline"
           size="sm"
@@ -116,6 +117,9 @@ const DashboardMobile = () => {
           <RefreshCw className={`h-4 w-4 ${isRefreshing ? 'animate-spin' : ''}`} />
         </Button>
       </div>
+      
+      {/* Contenu principal */}
+      <div className="p-4 space-y-4">
 
       {/* Stats Cards Mobile */}
       <div className="grid grid-cols-2 gap-3">
@@ -246,6 +250,7 @@ const DashboardMobile = () => {
           <ActivityFeed />
         </TabsContent>
       </Tabs>
+      </div>
     </div>
   );
 };

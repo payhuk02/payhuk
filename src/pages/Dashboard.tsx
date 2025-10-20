@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { SidebarProvider } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/AppSidebar";
+import { MobileMenu } from "@/components/navigation/MobileMenu";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -155,8 +156,25 @@ const Dashboard = () => {
 
   return (
     <SidebarProvider>
-        <AppSidebar />
-      <div className="flex-1 p-6 space-y-6">
+      <div className="flex min-h-screen w-full">
+        {/* Sidebar Desktop */}
+        <div className="hidden md:block">
+          <AppSidebar />
+        </div>
+        
+        {/* Contenu principal */}
+        <div className="flex-1 flex flex-col">
+          {/* Header avec menu mobile */}
+          <div className="flex items-center justify-between p-4 border-b bg-background md:hidden">
+            <MobileMenu>
+              <div />
+            </MobileMenu>
+            <h1 className="text-xl font-bold">Tableau de bord</h1>
+            <div className="w-10" /> {/* Spacer pour centrer le titre */}
+          </div>
+          
+          {/* Contenu du dashboard */}
+          <div className="flex-1 p-6 space-y-6">
         {/* Header */}
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
           <div>
@@ -394,7 +412,9 @@ const Dashboard = () => {
           </TabsContent>
         </Tabs>
       </div>
-    </SidebarProvider>
+    </div>
+  </div>
+</SidebarProvider>
   );
 };
 

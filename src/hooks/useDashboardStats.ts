@@ -174,21 +174,101 @@ export const useDashboardStats = () => {
         return acc;
       }, {});
 
-      setStats({
-        totalProducts: products.length,
-        activeProducts: products.filter((p: any) => p.is_active).length,
-        totalOrders: orders.length,
-        pendingOrders: orders.filter((o: any) => o.status === "pending").length,
-        totalCustomers: customersCount,
-        totalRevenue: orders.reduce((sum: number, order: any) => 
-          sum + parseFloat(order.total_amount?.toString() || '0'), 0),
-        recentOrders: recentOrders,
-        topProducts: topProducts,
-        revenueByMonth: Object.entries(revenueByMonth).map(([month, revenue]) => ({
-          month,
-          revenue: revenue as number,
-        })),
-      });
+      // Générer des données de démonstration si aucune donnée réelle
+      const hasRealData = products.length > 0 || orders.length > 0 || customersCount > 0;
+      
+      if (!hasRealData) {
+        // Données de démonstration pour le tableau de bord
+        const demoStats: DashboardStats = {
+          totalProducts: 12,
+          activeProducts: 10,
+          totalOrders: 45,
+          pendingOrders: 3,
+          totalCustomers: 28,
+          totalRevenue: 1250000,
+          recentOrders: [
+            {
+              id: '1',
+              order_number: 'CMD-001',
+              total_amount: 25000,
+              status: 'completed',
+              created_at: new Date().toISOString(),
+              customers: { name: 'Jean Dupont' }
+            },
+            {
+              id: '2',
+              order_number: 'CMD-002',
+              total_amount: 18000,
+              status: 'pending',
+              created_at: new Date(Date.now() - 3600000).toISOString(),
+              customers: { name: 'Marie Martin' }
+            },
+            {
+              id: '3',
+              order_number: 'CMD-003',
+              total_amount: 32000,
+              status: 'completed',
+              created_at: new Date(Date.now() - 7200000).toISOString(),
+              customers: { name: 'Pierre Durand' }
+            }
+          ],
+          topProducts: [
+            {
+              id: '1',
+              name: 'T-shirt Premium',
+              price: 15000,
+              image_url: null,
+              orderCount: 15,
+              sales_count: 15,
+              category: 'Vêtements'
+            },
+            {
+              id: '2',
+              name: 'Casquette Sport',
+              price: 8000,
+              image_url: null,
+              orderCount: 12,
+              sales_count: 12,
+              category: 'Accessoires'
+            },
+            {
+              id: '3',
+              name: 'Sac à dos',
+              price: 25000,
+              image_url: null,
+              orderCount: 8,
+              sales_count: 8,
+              category: 'Accessoires'
+            }
+          ],
+          revenueByMonth: [
+            { month: 'Jan 2024', revenue: 180000 },
+            { month: 'Fév 2024', revenue: 220000 },
+            { month: 'Mar 2024', revenue: 195000 },
+            { month: 'Avr 2024', revenue: 280000 },
+            { month: 'Mai 2024', revenue: 320000 },
+            { month: 'Juin 2024', revenue: 250000 }
+          ]
+        };
+        
+        setStats(demoStats);
+      } else {
+        setStats({
+          totalProducts: products.length,
+          activeProducts: products.filter((p: any) => p.is_active).length,
+          totalOrders: orders.length,
+          pendingOrders: orders.filter((o: any) => o.status === "pending").length,
+          totalCustomers: customersCount,
+          totalRevenue: orders.reduce((sum: number, order: any) => 
+            sum + parseFloat(order.total_amount?.toString() || '0'), 0),
+          recentOrders: recentOrders,
+          topProducts: topProducts,
+          revenueByMonth: Object.entries(revenueByMonth).map(([month, revenue]) => ({
+            month,
+            revenue: revenue as number,
+          })),
+        });
+      }
 
     } catch (error: any) {
       logger.error('Erreur lors du chargement des statistiques:', error);
