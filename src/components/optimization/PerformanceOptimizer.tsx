@@ -25,19 +25,27 @@ export const MobilePerformanceOptimizer = () => {
           }
         });
         
-        // Précharger les ressources critiques
-        const preloadLink = document.createElement('link');
-        preloadLink.rel = 'preload';
-        preloadLink.href = '/assets/critical.css';
-        preloadLink.as = 'style';
-        document.head.appendChild(preloadLink);
+      // Charger les ressources critiques correctement (as="style" + stylesheet)
+      const preloadLink = document.createElement('link');
+      preloadLink.rel = 'preload';
+      preloadLink.href = '/assets/critical.css';
+      preloadLink.as = 'style';
+      document.head.appendChild(preloadLink);
+      const cssLink = document.createElement('link');
+      cssLink.rel = 'stylesheet';
+      cssLink.href = '/assets/critical.css';
+      document.head.appendChild(cssLink);
         
         // Optimiser les polices pour mobile
-        const fontLink = document.createElement('link');
-        fontLink.rel = 'preload';
-        fontLink.href = 'https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap';
-        fontLink.as = 'style';
-        document.head.appendChild(fontLink);
+      const fontPreload = document.createElement('link');
+      fontPreload.rel = 'preload';
+      fontPreload.href = '/assets/fonts.css';
+      fontPreload.as = 'style';
+      document.head.appendChild(fontPreload);
+      const fontStyles = document.createElement('link');
+      fontStyles.rel = 'stylesheet';
+      fontStyles.href = '/assets/fonts.css';
+      document.head.appendChild(fontStyles);
       }
     };
 
@@ -227,17 +235,14 @@ export const PerformanceOptimizer = () => {
       images.forEach(img => imageObserver.observe(img));
 
       // Précharger les ressources critiques
-      const criticalResources = [
-        '/assets/critical.css',
-        '/assets/fonts.css'
-      ];
-
-      criticalResources.forEach(resource => {
-        const link = document.createElement('link');
-        link.rel = 'preload';
-        link.href = resource;
-        link.as = 'style';
-        document.head.appendChild(link);
+      // Charger proprement les styles si non présents
+      ['/assets/critical.css','/assets/fonts.css'].forEach(href => {
+        if (!document.querySelector(`link[href="${href}"][rel="stylesheet"]`)) {
+          const link = document.createElement('link');
+          link.rel = 'stylesheet';
+          link.href = href;
+          document.head.appendChild(link);
+        }
       });
     };
 

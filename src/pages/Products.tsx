@@ -53,7 +53,7 @@ const Products = () => {
   // Compteurs par statut
   const publishedCount = useMemo(() => products.filter(p => p.is_active).length, [products]);
   const inactiveCount = useMemo(() => products.filter(p => !p.is_active).length, [products]);
-  const draftCount = 0; // si la colonne existe côté BDD on l'ajoutera dans la sélection
+  // const draftCount = 0; // optionnel: ajouter quand la colonne existera
 
   // Filter and sort products
   const filteredProducts = useMemo(() => {
@@ -100,7 +100,7 @@ const Products = () => {
         case "price-desc":
           return b.price - a.price;
         case "popular":
-          return (b.reviews_count || 0) - (a.reviews_count || 0);
+          return 0; // placeholder tant que la métrique d'avis n'existe pas
         default:
           return 0;
       }
@@ -166,9 +166,9 @@ const Products = () => {
               <div className="flex-1">
                 <h1 className="text-xl sm:text-2xl font-bold">Produits</h1>
                   <div className="mt-1 flex gap-2 text-xs">
-                    <Badge variant="secondary">Publiés: {publishedCount}</Badge>
-                    <Badge variant="outline">Inactifs: {inactiveCount}</Badge>
-                    <Badge>Drafts: {draftCount}</Badge>
+                    <Badge variant={status==='all'?'default':'outline'} onClick={()=>setStatus('all')} className="cursor-pointer">Tous</Badge>
+                    <Badge variant={status==='active'?'default':'outline'} onClick={()=>setStatus('active')} className="cursor-pointer">Publiés: {publishedCount}</Badge>
+                    <Badge variant={status==='inactive'?'default':'outline'} onClick={()=>setStatus('inactive')} className="cursor-pointer">Inactifs: {inactiveCount}</Badge>
                   </div>
               </div>
               <Button onClick={() => navigate("/dashboard/products/new")}>
