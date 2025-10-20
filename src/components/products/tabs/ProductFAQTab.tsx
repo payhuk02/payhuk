@@ -200,6 +200,29 @@ export const ProductFAQTab = ({ formData, updateFormData }: ProductFAQTabProps) 
     downloadFile('faqs.csv', csv, 'text/csv;charset=utf-8');
   };
 
+  const downloadTemplates = () => {
+    // JSON template
+    const jsonTemplate = [
+      {
+        id: "faq_example_1",
+        question: "Comment puis-je télécharger mon produit ?",
+        answer: "Après l'achat, un lien de téléchargement est envoyé par email et disponible dans votre compte.",
+        category: "Général",
+        order: 0,
+        isActive: true,
+        isFeatured: true,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString()
+      }
+    ];
+    downloadFile('faqs-template.json', JSON.stringify(jsonTemplate, null, 2), 'application/json');
+
+    // CSV template
+    const headers = 'id,question,answer,category,order,isActive,isFeatured,createdAt,updatedAt\n';
+    const sample = 'faq_example_1,Comment puis-je télécharger mon produit ?,Après l\'achat, un lien de téléchargement est envoyé par email et disponible dans votre compte.,Général,0,true,true,' + new Date().toISOString() + ',' + new Date().toISOString() + '\n';
+    downloadFile('faqs-template.csv', headers + sample, 'text/csv;charset=utf-8');
+  };
+
   const parseCsv = (text: string): FAQItem[] => {
     const lines = text.split(/\r?\n/).filter(l => l.trim().length > 0);
     if (lines.length === 0) return [];
@@ -331,6 +354,7 @@ export const ProductFAQTab = ({ formData, updateFormData }: ProductFAQTabProps) 
 
               <Button variant="outline" size="sm" onClick={exportJSON}>Export JSON</Button>
               <Button variant="outline" size="sm" onClick={exportCSV}>Export CSV</Button>
+              <Button variant="outline" size="sm" onClick={downloadTemplates}>Modèles</Button>
               <Button
                 variant="outline"
                 size="sm"
