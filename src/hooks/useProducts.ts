@@ -28,15 +28,19 @@ export const useProducts = (storeId?: string) => {
 
   const fetchProducts = async () => {
     try {
-      let query = supabase
-        .from('products')
-        .select('*')
-        .eq('is_active', true)
-        .order('created_at', { ascending: false });
-
-      if (storeId) {
-        query = query.eq('store_id', storeId);
+      // Si aucun storeId, ne pas interroger encore (évite écran vide)
+      if (!storeId) {
+        setProducts([]);
+        setLoading(false);
+        return;
       }
+
+      const query = supabase
+        .from('products')
+        .select('id, store_id, name, slug, description, price, currency, image_url, category, product_type, rating, reviews_count, is_active, created_at, updated_at')
+        // Dashboard: afficher tous les produits (y compris drafts/inactifs)
+        .eq('store_id', storeId)
+        .order('created_at', { ascending: false });
 
       const { data, error } = await query;
 
