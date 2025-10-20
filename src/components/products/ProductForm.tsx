@@ -301,7 +301,7 @@ export const ProductForm = ({ storeId, storeSlug, productId, initialData, onSucc
     const fromUrl = urlParams.get('tab');
     const allowed = new Set(['info','description','visual','files','custom','faq','seo','analytics','pixels','variants','promotions','payment']);
     if (fromUrl && allowed.has(fromUrl)) return fromUrl;
-    return sessionStorage.getItem('productFormActiveTab') || 'info';
+    return localStorage.getItem('productFormActiveTab') || sessionStorage.getItem('productFormActiveTab') || 'info';
   });
   const [validationErrors, setValidationErrors] = useState<Record<string, string>>({});
 
@@ -480,6 +480,7 @@ export const ProductForm = ({ storeId, storeSlug, productId, initialData, onSucc
   // Persistance de l'onglet actif
   useEffect(() => {
     sessionStorage.setItem('productFormActiveTab', activeTab);
+    localStorage.setItem('productFormActiveTab', activeTab);
     // Sync URL query param ?tab=activeTab (preserve other params)
     const search = new URLSearchParams(location.search);
     if (search.get('tab') !== activeTab) {
