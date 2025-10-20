@@ -12,7 +12,7 @@ if ('serviceWorker' in navigator) {
   });
 }
 
-// Rendu simple sans i18n au niveau racine
+// Rendu simple sans i18n
 const root = document.getElementById("root");
 
 if (root) {

@@ -2,68 +2,64 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Plus, Package, ShoppingCart, Users, Tag } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import { useTranslation } from "react-i18next";
 
 export const QuickActions = () => {
   const navigate = useNavigate();
-  const { t } = useTranslation();
 
   const actions = [
     {
-      title: t("dashboard.actions.addProduct"),
-      description: t("dashboard.actions.addProductDesc"),
+      title: "Ajouter un produit",
+      description: "Créer un nouveau produit",
       icon: Package,
       onClick: () => navigate("/dashboard/products"),
-      variant: "default" as const,
     },
     {
-      title: t("dashboard.actions.newOrder"),
-      description: t("dashboard.actions.newOrderDesc"),
+      title: "Nouvelle commande",
+      description: "Enregistrer une commande",
       icon: ShoppingCart,
       onClick: () => navigate("/dashboard/orders"),
-      variant: "secondary" as const,
     },
     {
-      title: t("dashboard.actions.addCustomer"),
-      description: t("dashboard.actions.addCustomerDesc"),
+      title: "Ajouter un client",
+      description: "Enregistrer un nouveau client",
       icon: Users,
       onClick: () => navigate("/dashboard/customers"),
-      variant: "outline" as const,
     },
     {
-      title: t("dashboard.actions.createPromotion"),
-      description: t("dashboard.actions.createPromotionDesc"),
+      title: "Créer une promotion",
+      description: "Nouvelle offre promotionnelle",
       icon: Tag,
       onClick: () => navigate("/dashboard/promotions"),
-      variant: "outline" as const,
     },
   ];
 
   return (
-    <Card className="shadow-soft">
+    <Card>
       <CardHeader>
-        <CardTitle>{t("dashboard.quickActions")}</CardTitle>
-        <CardDescription>Accédez rapidement aux fonctions principales</CardDescription>
+        <CardTitle>Actions rapides</CardTitle>
+        <CardDescription>
+          Accédez rapidement aux fonctions principales
+        </CardDescription>
       </CardHeader>
-      <CardContent>
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-          {actions.map((action) => (
-            <Button
-              key={action.title}
-              variant={action.variant}
-              className="h-auto flex-col items-start p-4 gap-2 hover-scale"
-              onClick={action.onClick}
-            >
-              <div className="flex items-center gap-2 w-full">
-                <action.icon className="h-5 w-5" />
-                <span className="font-semibold">{action.title}</span>
+      <CardContent className="space-y-4">
+        {actions.map((action, index) => (
+          <Button
+            key={index}
+            variant="outline"
+            className="w-full justify-start h-auto p-4"
+            onClick={action.onClick}
+          >
+            <div className="flex items-center space-x-3">
+              <action.icon className="h-5 w-5" />
+              <div className="text-left">
+                <div className="font-medium">{action.title}</div>
+                <div className="text-sm text-muted-foreground">
+                  {action.description}
+                </div>
               </div>
-              <span className="text-xs text-muted-foreground font-normal">
-                {action.description}
-              </span>
-            </Button>
-          ))}
-        </div>
+            </div>
+          </Button>
+        ))}
       </CardContent>
     </Card>
   );

@@ -36,39 +36,40 @@ import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useAdmin } from "@/hooks/useAdmin";
-import { useTranslation } from "react-i18next";
-import { LanguageSelectorCompact } from "@/components/navigation/LanguageSelector";
 
-  const { t } = useTranslation();
+export const AppSidebar = () => {
+  const { toast } = useToast();
+  const navigate = useNavigate();
+  const { isAdmin } = useAdmin();
 
   const menuItems = [
     {
-      title: t("navigation.dashboard"),
+      title: "Tableau de bord",
       url: "/dashboard",
       icon: LayoutDashboard,
     },
     {
-      title: t("navigation.shop"),
+      title: "Boutique",
       url: "/dashboard/store",
       icon: Store,
     },
     {
-      title: t("navigation.marketplace"),
+      title: "Marketplace",
       url: "/marketplace",
       icon: ShoppingCart,
     },
     {
-      title: t("navigation.products"),
+      title: "Produits",
       url: "/dashboard/products",
       icon: Package,
     },
     {
-      title: t("navigation.orders"),
+      title: "Commandes",
       url: "/dashboard/orders",
       icon: ShoppingCart,
     },
     {
-      title: t("navigation.customers"),
+      title: "Clients",
       url: "/dashboard/customers",
       icon: Users,
     },
@@ -78,7 +79,7 @@ import { LanguageSelectorCompact } from "@/components/navigation/LanguageSelecto
       icon: Tag,
     },
     {
-      title: t("navigation.analytics"),
+      title: "Statistiques",
       url: "/dashboard/analytics",
       icon: BarChart3,
     },
@@ -108,137 +109,114 @@ import { LanguageSelectorCompact } from "@/components/navigation/LanguageSelecto
       icon: Search,
     },
     {
-      title: t("navigation.settings"),
+      title: "Paramètres",
       url: "/dashboard/settings",
       icon: Settings,
     },
   ];
 
-const adminMenuItems = [
-  {
-    title: "Vue d'ensemble",
-    url: "/admin",
-    icon: LayoutDashboard,
-  },
-  {
-    title: "Utilisateurs",
-    url: "/admin/users",
-    icon: Users,
-  },
-  {
-    title: "Boutiques",
-    url: "/admin/stores",
-    icon: Store,
-  },
-  {
-    title: "Produits",
-    url: "/admin/products",
-    icon: Package,
-  },
-  {
-    title: "Ventes",
-    url: "/admin/sales",
-    icon: ShoppingCart,
-  },
-  {
-    title: "Parrainages",
-    url: "/admin/referrals",
-    icon: UserPlus,
-  },
-  {
-    title: "Activité",
-    url: "/admin/activity",
-    icon: History,
-  },
-  {
-    title: "Revenus Plateforme",
-    url: "/admin/revenue",
-    icon: DollarSign,
-  },
-  {
-    title: "Admin KYC",
-    url: "/admin/kyc",
-    icon: ShieldCheck,
-  },
-  {
-    title: "Paramètres",
-    url: "/admin/settings",
-    icon: Settings,
-  },
-  {
-    title: "Notifications",
-    url: "/admin/notifications",
-    icon: Bell,
-  },
-];
-
-export function AppSidebar() {
-  const { state } = useSidebar();
-  const navigate = useNavigate();
-  const { toast } = useToast();
-  const { isAdmin } = useAdmin();
-  const isCollapsed = state === "collapsed";
+  const adminMenuItems = [
+    {
+      title: "Admin Dashboard",
+      url: "/admin",
+      icon: LayoutDashboard,
+    },
+    {
+      title: "Utilisateurs Admin",
+      url: "/admin/users",
+      icon: Users,
+    },
+    {
+      title: "Boutiques Admin",
+      url: "/admin/stores",
+      icon: Store,
+    },
+    {
+      title: "Produits Admin",
+      url: "/admin/products",
+      icon: Package,
+    },
+    {
+      title: "Ventes Admin",
+      url: "/admin/sales",
+      icon: DollarSign,
+    },
+    {
+      title: "Parrainages Admin",
+      url: "/admin/referrals",
+      icon: UserPlus,
+    },
+    {
+      title: "Activité Admin",
+      url: "/admin/activity",
+      icon: History,
+    },
+    {
+      title: "Paramètres Admin",
+      url: "/admin/settings",
+      icon: Settings,
+    },
+    {
+      title: "Notifications Admin",
+      url: "/admin/notifications",
+      icon: Bell,
+    },
+    {
+      title: "Revenus Plateforme",
+      url: "/admin/revenue",
+      icon: DollarSign,
+    },
+    {
+      title: "KYC Admin",
+      url: "/admin/kyc",
+      icon: ShieldCheck,
+    },
+  ];
 
   const handleLogout = async () => {
     try {
-      const { error } = await supabase.auth.signOut();
-      if (error) throw error;
-      
+      await supabase.auth.signOut();
       toast({
         title: "Déconnexion réussie",
-        description: "À bientôt !",
+        description: "Vous avez été déconnecté avec succès.",
       });
       navigate("/");
     } catch (error) {
-      console.error('Logout error:', error);
       toast({
-        title: "Erreur",
-        description: "Impossible de se déconnecter",
-        variant: "destructive"
+        title: "Erreur de déconnexion",
+        description: "Une erreur s'est produite lors de la déconnexion.",
+        variant: "destructive",
       });
     }
   };
 
   return (
-    <Sidebar collapsible="icon" className="border-r w-full sm:w-auto">
-      <SidebarContent className="overflow-y-auto">
-        {/* Logo */}
-        <div className="p-2 sm:p-3 md:p-4 border-b">
-          <div className="flex items-center gap-2">
-            <img 
-              src={payhukLogo} 
-              alt="Payhuk" 
-              className="h-6 w-6 sm:h-8 sm:w-8 md:h-10 md:w-10 flex-shrink-0 object-contain" 
-            />
-            {!isCollapsed && (
-              <span className="text-sm sm:text-base md:text-lg font-bold text-black dark:text-white truncate">
-                Payhuk
-              </span>
-            )}
-          </div>
+    <Sidebar>
+      <SidebarContent>
+        <div className="flex items-center gap-2 px-4 py-2">
+          <img src={payhukLogo} alt="Payhuk" className="h-8 w-8" />
+          <span className="font-bold text-lg">Payhuk</span>
         </div>
 
-        {/* Menu Items */}
         <SidebarGroup>
-          <SidebarGroupLabel className="!text-black text-xs sm:text-sm px-2 sm:px-3">Menu principal</SidebarGroupLabel>
+          <SidebarGroupLabel>Menu principal</SidebarGroupLabel>
           <SidebarGroupContent>
-            <SidebarMenu className="space-y-1">
+            <SidebarMenu>
               {menuItems.map((item) => (
                 <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton asChild className="h-8 sm:h-10 px-2 sm:px-3">
+                  <SidebarMenuButton asChild>
                     <NavLink
                       to={item.url}
-                      end={item.url === "/dashboard"}
                       className={({ isActive }) =>
-                        `transition-all duration-300 text-xs sm:text-sm ${
+                        `flex items-center gap-2 px-3 py-2 rounded-md transition-colors ${
                           isActive
-                            ? "bg-primary/20 text-primary font-semibold border-l-2 border-primary"
-                            : "!text-black hover:bg-muted hover:translate-x-1"
+                            ? "bg-primary text-primary-foreground"
+                            : "hover:bg-accent"
                         }`
                       }
                     >
-                      <item.icon className="h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0" />
-                      {!isCollapsed && <span className="truncate">{item.title}</span>}
+                      <item.icon className="h-4 w-4" />
+                      <span>{item.title}</span>
                     </NavLink>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
@@ -247,27 +225,26 @@ export function AppSidebar() {
           </SidebarGroupContent>
         </SidebarGroup>
 
-        {/* Admin Menu Items */}
         {isAdmin && (
           <SidebarGroup>
-            <SidebarGroupLabel className="!text-black text-xs sm:text-sm px-2 sm:px-3">Administration</SidebarGroupLabel>
+            <SidebarGroupLabel>Administration</SidebarGroupLabel>
             <SidebarGroupContent>
-              <SidebarMenu className="space-y-1">
+              <SidebarMenu>
                 {adminMenuItems.map((item) => (
                   <SidebarMenuItem key={item.title}>
-                    <SidebarMenuButton asChild className="h-8 sm:h-10 px-2 sm:px-3">
+                    <SidebarMenuButton asChild>
                       <NavLink
                         to={item.url}
                         className={({ isActive }) =>
-                          `transition-all duration-300 text-xs sm:text-sm ${
+                          `flex items-center gap-2 px-3 py-2 rounded-md transition-colors ${
                             isActive
-                              ? "bg-primary/20 text-primary font-semibold border-l-2 border-primary"
-                              : "!text-black hover:bg-muted hover:translate-x-1"
+                              ? "bg-primary text-primary-foreground"
+                              : "hover:bg-accent"
                           }`
                         }
                       >
-                        <item.icon className="h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0" />
-                        {!isCollapsed && <span className="truncate">{item.title}</span>}
+                        <item.icon className="h-4 w-4" />
+                        <span>{item.title}</span>
                       </NavLink>
                     </SidebarMenuButton>
                   </SidebarMenuItem>
@@ -278,22 +255,16 @@ export function AppSidebar() {
         )}
       </SidebarContent>
 
-      {/* Footer */}
-      <SidebarFooter className="border-t p-2 sm:p-3 md:p-4 space-y-2">
-        {/* Sélecteur de langue */}
-        <div className="flex items-center justify-center">
-          <LanguageSelectorCompact />
-        </div>
-        
+      <SidebarFooter>
         <Button
           variant="ghost"
-          className="w-full justify-start !text-black text-xs sm:text-sm h-8 sm:h-10"
+          className="w-full justify-start"
           onClick={handleLogout}
         >
-          <LogOut className="h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0" />
-          {!isCollapsed && <span className="truncate">{t("navigation.logout")}</span>}
+          <LogOut className="h-4 w-4 mr-2" />
+          Déconnexion
         </Button>
       </SidebarFooter>
     </Sidebar>
   );
-}
+};
