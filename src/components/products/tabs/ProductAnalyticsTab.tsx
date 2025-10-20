@@ -47,7 +47,7 @@ export const ProductAnalyticsTab = ({ formData, updateFormData }: ProductAnalyti
   const { toast } = useToast();
   const [activeTab, setActiveTab] = useState("overview");
   
-  // Hooks
+  // Hooks - Only initialize if we have a product ID
   const { 
     analyticsData, 
     goals, 
@@ -55,7 +55,7 @@ export const ProductAnalyticsTab = ({ formData, updateFormData }: ProductAnalyti
     realTimeEvents, 
     trackEvent, 
     saveGoals 
-  } = useProductAnalytics(formData.id);
+  } = useProductAnalytics(formData.id || 'temp');
   
   const { 
     config: trackingConfig, 
@@ -65,7 +65,7 @@ export const ProductAnalyticsTab = ({ formData, updateFormData }: ProductAnalyti
     addCustomEvent, 
     removeCustomEvent, 
     toggleTracking 
-  } = useProductTrackingConfig(formData.id);
+  } = useProductTrackingConfig(formData.id || 'temp');
   
   const { 
     goals: goalsData, 
@@ -76,14 +76,14 @@ export const ProductAnalyticsTab = ({ formData, updateFormData }: ProductAnalyti
     markAllAlertsAsRead, 
     deleteAlert, 
     unreadAlertsCount 
-  } = useProductGoalsAlerts(formData.id);
+  } = useProductGoalsAlerts(formData.id || 'temp');
   
   const { 
     generating, 
     generateAndDownloadDailyReport, 
     generateAndDownloadMonthlyReport, 
     exportAndDownloadCSV 
-  } = useProductReports(formData.id);
+  } = useProductReports(formData.id || 'temp');
 
   // External analytics
   const externalConfig = {
@@ -98,7 +98,7 @@ export const ProductAnalyticsTab = ({ formData, updateFormData }: ProductAnalyti
 
   // Track page view on mount
   useEffect(() => {
-    if (formData.id && trackingConfig?.analytics_enabled) {
+    if (formData.id && formData.id !== 'temp' && trackingConfig?.analytics_enabled) {
       trackEvent('view', {
         page: 'product_analytics',
         product_name: formData.name,
@@ -129,6 +129,374 @@ export const ProductAnalyticsTab = ({ formData, updateFormData }: ProductAnalyti
   const revenueProgress = getGoalProgress('revenue');
   const conversionsProgress = getGoalProgress('conversions');
   const conversionRateProgress = getGoalProgress('conversion_rate');
+
+  // Show demo mode for new products without ID
+  if (!formData.id || formData.id === 'temp') {
+    return (
+      <div className="saas-space-y-6">
+        {/* En-tête */}
+        <div className="flex items-center justify-between">
+          <div>
+            <h2 className="text-2xl font-bold saas-text-primary">Analytics & Tracking</h2>
+            <p className="saas-text-secondary">Surveillez les performances de votre produit</p>
+          </div>
+          <Badge variant="secondary" className="flex items-center gap-1">
+            <AlertCircle className="h-3 w-3" />
+            Mode démo
+          </Badge>
+        </div>
+
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+          <TabsList className="grid w-full grid-cols-5">
+            <TabsTrigger value="overview">Vue d'ensemble</TabsTrigger>
+            <TabsTrigger value="tracking">Configuration</TabsTrigger>
+            <TabsTrigger value="goals">Objectifs</TabsTrigger>
+            <TabsTrigger value="reports">Rapports</TabsTrigger>
+            <TabsTrigger value="realtime">Temps réel</TabsTrigger>
+          </TabsList>
+
+          {/* Vue d'ensemble */}
+          <TabsContent value="overview" className="saas-space-y-6">
+            {/* Métriques principales */}
+            <div className="saas-grid saas-grid-cols-4">
+              <div className="saas-stats-card">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="saas-stats-label">Vues</p>
+                    <p className="saas-stats-value">0</p>
+                  </div>
+                  <Eye className="h-8 w-8 text-blue-600" />
+                </div>
+                <div className="flex items-center mt-2">
+                  <TrendingUp className="h-4 w-4 text-gray-400 mr-1" />
+                  <span className="saas-stats-change text-gray-400">Aucune donnée</span>
+                </div>
+              </div>
+
+              <div className="saas-stats-card">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="saas-stats-label">Clics</p>
+                    <p className="saas-stats-value">0</p>
+                  </div>
+                  <MousePointer className="h-8 w-8 text-green-600" />
+                </div>
+                <div className="flex items-center mt-2">
+                  <TrendingUp className="h-4 w-4 text-gray-400 mr-1" />
+                  <span className="saas-stats-change text-gray-400">Aucune donnée</span>
+                </div>
+              </div>
+
+              <div className="saas-stats-card">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="saas-stats-label">Conversions</p>
+                    <p className="saas-stats-value">0</p>
+                  </div>
+                  <Target className="h-8 w-8 text-purple-600" />
+                </div>
+                <div className="flex items-center mt-2">
+                  <TrendingUp className="h-4 w-4 text-gray-400 mr-1" />
+                  <span className="saas-stats-change text-gray-400">Aucune donnée</span>
+                </div>
+              </div>
+
+              <div className="saas-stats-card">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="saas-stats-label">Taux de conversion</p>
+                    <p className="saas-stats-value">0%</p>
+                  </div>
+                  <BarChart3 className="h-8 w-8 text-orange-600" />
+                </div>
+                <div className="flex items-center mt-2">
+                  <TrendingUp className="h-4 w-4 text-gray-400 mr-1" />
+                  <span className="saas-stats-change text-gray-400">Aucune donnée</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Message d'information */}
+            <Alert>
+              <AlertCircle className="h-4 w-4" />
+              <AlertDescription>
+                Les analytics seront disponibles une fois le produit sauvegardé et publié. 
+                Vous pouvez configurer le tracking ci-dessous.
+              </AlertDescription>
+            </Alert>
+          </TabsContent>
+
+          {/* Configuration du tracking */}
+          <TabsContent value="tracking" className="saas-space-y-6">
+            <div className="saas-section-card">
+              <div className="flex items-center gap-2 mb-3">
+                <Settings className="h-5 w-5 text-gray-600" />
+                <h3 className="saas-section-title">Configuration du tracking</h3>
+              </div>
+              <p className="saas-section-description">
+                Surveillez les interactions des utilisateurs avec votre produit.
+              </p>
+              
+              <div className="saas-grid saas-grid-cols-2">
+                <div className="flex items-center justify-between space-x-2">
+                  <div className="flex flex-col">
+                    <label className="saas-label">Tracking des événements</label>
+                    <span className="saas-label-description">Enregistrer les événements personnalisés</span>
+                  </div>
+                  <Switch
+                    checked={formData.analytics_enabled || false}
+                    onCheckedChange={(checked) => updateFormData("analytics_enabled", checked)}
+                    className="saas-switch"
+                  />
+                </div>
+                <div className="flex items-center justify-between space-x-2">
+                  <div className="flex flex-col">
+                    <label className="saas-label">Tracking des vues</label>
+                    <span className="saas-label-description">Enregistrer chaque vue de produit</span>
+                  </div>
+                  <Switch
+                    checked={formData.track_views || true}
+                    onCheckedChange={(checked) => updateFormData("track_views", checked)}
+                    className="saas-switch"
+                  />
+                </div>
+                <div className="flex items-center justify-between space-x-2">
+                  <div className="flex flex-col">
+                    <label className="saas-label">Tracking des clics</label>
+                    <span className="saas-label-description">Enregistrer les clics sur les boutons et liens</span>
+                  </div>
+                  <Switch
+                    checked={formData.track_clicks || true}
+                    onCheckedChange={(checked) => updateFormData("track_clicks", checked)}
+                    className="saas-switch"
+                  />
+                </div>
+                <div className="flex items-center justify-between space-x-2">
+                  <div className="flex flex-col">
+                    <label className="saas-label">Tracking des achats</label>
+                    <span className="saas-label-description">Enregistrer les conversions et revenus</span>
+                  </div>
+                  <Switch
+                    checked={formData.track_purchases || true}
+                    onCheckedChange={(checked) => updateFormData("track_purchases", checked)}
+                    className="saas-switch"
+                  />
+                </div>
+                <div className="flex items-center justify-between space-x-2">
+                  <div className="flex flex-col">
+                    <label className="saas-label">Tracking du temps passé</label>
+                    <span className="saas-label-description">Mesurer l'engagement des utilisateurs</span>
+                  </div>
+                  <Switch
+                    checked={formData.track_time_spent || false}
+                    onCheckedChange={(checked) => updateFormData("track_time_spent", checked)}
+                    className="saas-switch"
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* Analytics externes */}
+            <div className="saas-section-card">
+              <div className="flex items-center gap-2 mb-3">
+                <Activity className="h-5 w-5 text-gray-600" />
+                <h3 className="saas-section-title">Analytics externes</h3>
+              </div>
+              <p className="saas-section-description">
+                Intégrez votre produit avec des outils d'analyse tiers.
+              </p>
+              
+              <div className="saas-grid saas-grid-cols-2">
+                <div>
+                  <label className="saas-label">Google Analytics ID</label>
+                  <Input
+                    value={formData.google_analytics_id || ''}
+                    onChange={(e) => updateFormData("google_analytics_id", e.target.value)}
+                    placeholder="UA-XXXXXXXXX-X ou G-XXXXXXXXXX"
+                    className="saas-input"
+                  />
+                </div>
+                <div>
+                  <label className="saas-label">Facebook Pixel ID</label>
+                  <Input
+                    value={formData.facebook_pixel_id || ''}
+                    onChange={(e) => updateFormData("facebook_pixel_id", e.target.value)}
+                    placeholder="123456789012345"
+                    className="saas-input"
+                  />
+                </div>
+                <div>
+                  <label className="saas-label">Google Tag Manager ID</label>
+                  <Input
+                    value={formData.google_tag_manager_id || ''}
+                    onChange={(e) => updateFormData("google_tag_manager_id", e.target.value)}
+                    placeholder="GTM-XXXXXXX"
+                    className="saas-input"
+                  />
+                </div>
+                <div>
+                  <label className="saas-label">TikTok Pixel ID</label>
+                  <Input
+                    value={formData.tiktok_pixel_id || ''}
+                    onChange={(e) => updateFormData("tiktok_pixel_id", e.target.value)}
+                    placeholder="CXXXXXXXXXXXXXXX"
+                    className="saas-input"
+                  />
+                </div>
+                <div>
+                  <label className="saas-label">Pinterest Pixel ID</label>
+                  <Input
+                    value={formData.pinterest_pixel_id || ''}
+                    onChange={(e) => updateFormData("pinterest_pixel_id", e.target.value)}
+                    placeholder="123456789012345"
+                    className="saas-input"
+                  />
+                </div>
+              </div>
+              
+              <div className="saas-separator" />
+              
+              <div className="flex items-center justify-between space-x-2">
+                <div className="flex flex-col">
+                  <label className="saas-label">Tracking avancé</label>
+                  <span className="saas-label-description">Événements personnalisés et configurations spécifiques</span>
+                </div>
+                <Switch
+                  checked={formData.advanced_tracking || false}
+                  onCheckedChange={(checked) => updateFormData("advanced_tracking", checked)}
+                  className="saas-switch"
+                />
+              </div>
+              
+              {formData.advanced_tracking && (
+                <div>
+                  <label className="saas-label">Événements personnalisés</label>
+                  <Input
+                    value={formData.custom_events?.join(',') || ''}
+                    onChange={(e) => updateFormData("custom_events", e.target.value.split(',').map(s => s.trim()))}
+                    placeholder="event1,event2,event3"
+                    className="saas-input"
+                  />
+                  <p className="saas-label-description">Séparez les événements personnalisés par des virgules.</p>
+                </div>
+              )}
+            </div>
+          </TabsContent>
+
+          {/* Objectifs */}
+          <TabsContent value="goals" className="saas-space-y-6">
+            <div className="saas-section-card">
+              <div className="flex items-center gap-2 mb-3">
+                <Target className="h-5 w-5 text-gray-600" />
+                <h3 className="saas-section-title">Objectifs et alertes</h3>
+              </div>
+              <p className="saas-section-description">
+                Définissez des objectifs de performance pour ce produit et recevez des alertes.
+              </p>
+              
+              <div className="saas-grid saas-grid-cols-4">
+                <div>
+                  <label className="saas-label">Objectif vues (mensuel)</label>
+                  <Input
+                    type="number"
+                    value={formData.goal_views || ''}
+                    onChange={(e) => updateFormData("goal_views", parseInt(e.target.value) || null)}
+                    placeholder="1000"
+                    className="saas-input"
+                  />
+                </div>
+                <div>
+                  <label className="saas-label">Objectif revenus (mensuel)</label>
+                  <Input
+                    type="number"
+                    value={formData.goal_revenue || ''}
+                    onChange={(e) => updateFormData("goal_revenue", parseFloat(e.target.value) || null)}
+                    placeholder="5000"
+                    className="saas-input"
+                  />
+                </div>
+                <div>
+                  <label className="saas-label">Objectif conversions (mensuel)</label>
+                  <Input
+                    type="number"
+                    value={formData.goal_conversions || ''}
+                    onChange={(e) => updateFormData("goal_conversions", parseInt(e.target.value) || null)}
+                    placeholder="50"
+                    className="saas-input"
+                  />
+                </div>
+                <div>
+                  <label className="saas-label">Objectif taux de conversion (%)</label>
+                  <Input
+                    type="number"
+                    step="0.1"
+                    value={formData.goal_conversion_rate || ''}
+                    onChange={(e) => updateFormData("goal_conversion_rate", parseFloat(e.target.value) || null)}
+                    placeholder="5.0"
+                    className="saas-input"
+                  />
+                </div>
+              </div>
+              
+              <div className="saas-separator" />
+              
+              <div className="flex items-center justify-between space-x-2">
+                <div className="flex flex-col">
+                  <label className="saas-label">Alertes par email</label>
+                  <span className="saas-label-description">Recevez des notifications automatiques en cas de dépassement ou de non-atteinte des objectifs.</span>
+                </div>
+                <Switch
+                  checked={formData.email_alerts || false}
+                  onCheckedChange={(checked) => updateFormData("email_alerts", checked)}
+                  className="saas-switch"
+                />
+              </div>
+            </div>
+          </TabsContent>
+
+          {/* Rapports */}
+          <TabsContent value="reports" className="saas-space-y-6">
+            <div className="saas-section-card">
+              <div className="flex items-center gap-2 mb-3">
+                <PieChart className="h-5 w-5 text-gray-600" />
+                <h3 className="saas-section-title">Rapports et export</h3>
+              </div>
+              <p className="saas-section-description">
+                Générez des rapports détaillés et exportez vos données d'analytics.
+              </p>
+              
+              <Alert>
+                <AlertCircle className="h-4 w-4" />
+                <AlertDescription>
+                  Les rapports seront disponibles une fois le produit publié et que des données d'analytics auront été collectées.
+                </AlertDescription>
+              </Alert>
+            </div>
+          </TabsContent>
+
+          {/* Temps réel */}
+          <TabsContent value="realtime" className="saas-space-y-6">
+            <div className="saas-section-card">
+              <div className="flex items-center gap-2 mb-3">
+                <Zap className="h-5 w-5 text-gray-600" />
+                <h3 className="saas-section-title">Données en temps réel</h3>
+              </div>
+              <p className="saas-section-description">
+                Activité actuelle sur ce produit.
+              </p>
+              
+              <Alert>
+                <AlertCircle className="h-4 w-4" />
+                <AlertDescription>
+                  Les données en temps réel seront disponibles une fois le produit publié et que des utilisateurs commenceront à interagir avec celui-ci.
+                </AlertDescription>
+              </Alert>
+            </div>
+          </TabsContent>
+        </Tabs>
+      </div>
+    );
+  }
 
   if (analyticsLoading || configLoading || goalsLoading) {
     return (
