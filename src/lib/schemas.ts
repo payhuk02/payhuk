@@ -107,7 +107,15 @@ export const productCompleteSchema = z.object({
   retargeting_pixels: z.array(z.record(z.unknown())).optional(),
   
   // Variantes et attributs
-  variants: z.array(z.record(z.unknown())).optional(),
+  variants: z.array(z.object({
+    id: z.string(),
+    name: z.string().min(1, 'Nom de variante requis'),
+    sku: z.string().optional(),
+    values: z.array(z.string()).optional().default([]),
+    priceOverride: z.number().optional(),
+    stock: z.number().optional(),
+    isDefault: z.boolean().optional()
+  })).optional(),
   color_variants: z.boolean().optional(),
   size_variants: z.boolean().optional(),
   pattern_variants: z.boolean().optional(),

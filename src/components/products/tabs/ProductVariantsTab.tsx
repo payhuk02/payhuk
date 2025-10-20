@@ -34,11 +34,11 @@ export const ProductVariantsTab = ({ formData, updateFormData }: ProductVariants
       id: Date.now().toString(),
       name: "",
       sku: "",
-      price: formData.price || 0,
-      stock: 0,
-      attributes: {},
+      priceOverride: formData.different_prices_per_variant ? (formData.price || 0) : undefined,
+      stock: formData.centralized_stock ? undefined : 0,
       image: "",
-      is_active: true
+      is_active: true,
+      values: [] as string[],
     };
     
     const updatedVariants = [...variants, newVariant];
@@ -159,12 +159,13 @@ export const ProductVariantsTab = ({ formData, updateFormData }: ProductVariants
 
                     <div className="saas-grid saas-grid-cols-2">
                       <div>
-                        <label className="saas-label">Prix</label>
+                        <label className="saas-label">Prix de la variante</label>
                         <Input
                           type="number"
-                          value={variant.price}
-                          onChange={(e) => updateVariant(index, "price", parseFloat(e.target.value) || 0)}
-                          placeholder="0"
+                          disabled={!formData.different_prices_per_variant}
+                          value={variant.priceOverride ?? ''}
+                          onChange={(e) => updateVariant(index, "priceOverride", e.target.value ? parseFloat(e.target.value) : undefined)}
+                          placeholder={formData.price || 0}
                           className="saas-input"
                         />
                       </div>
@@ -172,8 +173,9 @@ export const ProductVariantsTab = ({ formData, updateFormData }: ProductVariants
                         <label className="saas-label">Stock</label>
                         <Input
                           type="number"
-                          value={variant.stock}
-                          onChange={(e) => updateVariant(index, "stock", parseInt(e.target.value) || 0)}
+                          disabled={formData.centralized_stock}
+                          value={variant.stock ?? ''}
+                          onChange={(e) => updateVariant(index, "stock", e.target.value ? parseInt(e.target.value) : undefined)}
                           placeholder="0"
                           className="saas-input"
                         />

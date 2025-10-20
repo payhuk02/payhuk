@@ -40,7 +40,7 @@ interface ProductFilesTabProps {
 interface FileItem {
   id: string;
   name: string;
-  url: string;
+  path: string; // chemin dans le bucket (privé)
   size: number;
   type: string;
   uploadedAt: Date;
@@ -70,11 +70,7 @@ export const ProductFilesTab = ({ formData, updateFormData, storeId }: ProductFi
 
     if (error) throw error;
 
-    const { data: { publicUrl } } = supabase.storage
-      .from('product-files')
-      .getPublicUrl(filePath);
-
-    return publicUrl;
+    return filePath; // on stocke désormais le path privé
   };
 
   const handleFileSelect = async (files: FileList | null) => {
@@ -89,14 +85,14 @@ export const ProductFilesTab = ({ formData, updateFormData, storeId }: ProductFi
       
       for (let i = 0; i < fileArray.length; i++) {
         const file = fileArray[i];
-        const url = await uploadFile(file);
+        const path = await uploadFile(file);
         
         setUploadProgress(((i + 1) / fileArray.length) * 100);
         
         const fileItem: FileItem = {
           id: `${Date.now()}-${i}`,
           name: file.name,
-          url,
+          path,
           size: file.size,
           type: file.type,
           uploadedAt: new Date(),
@@ -321,14 +317,46 @@ export const ProductFilesTab = ({ formData, updateFormData, storeId }: ProductFi
                             <Button
                               variant="outline"
                               size="sm"
-                              onClick={() => window.open(file.url, '_blank')}
+                              onClick={async () => {
+                                try {
+                                  const res = await fetch('/functions/v1/get-download-url', {
+                                    method: 'POST',
+                                    headers: {
+                                      'Content-Type': 'application/json',
+                                      'Authorization': (await supabase.auth.getSession()).data.session?.access_token ? `Bearer ${(await supabase.auth.getSession()).data.session?.access_token}` : ''
+                                    },
+                                    body: JSON.stringify({ filePath: file.path, productId: (formData as any).id }),
+                                  });
+                                  const json = await res.json();
+                                  if (!res.ok) throw new Error(json.error || 'Impossible d\'obtenir le lien');
+                                  window.open(json.url, '_blank');
+                                } catch (err: any) {
+                                  toast({ title: 'Erreur', description: err.message || 'Téléchargement impossible', variant: 'destructive' });
+                                }
+                              }}
                             >
                               <Eye className="h-4 w-4" />
                             </Button>
                             <Button
                               variant="outline"
                               size="sm"
-                              onClick={() => window.open(file.url, '_blank')}
+                              onClick={async () => {
+                                try {
+                                  const res = await fetch('/functions/v1/get-download-url', {
+                                    method: 'POST',
+                                    headers: {
+                                      'Content-Type': 'application/json',
+                                      'Authorization': (await supabase.auth.getSession()).data.session?.access_token ? `Bearer ${(await supabase.auth.getSession()).data.session?.access_token}` : ''
+                                    },
+                                    body: JSON.stringify({ filePath: file.path, productId: (formData as any).id }),
+                                  });
+                                  const json = await res.json();
+                                  if (!res.ok) throw new Error(json.error || 'Impossible d\'obtenir le lien');
+                                  window.location.href = json.url;
+                                } catch (err: any) {
+                                  toast({ title: 'Erreur', description: err.message || 'Téléchargement impossible', variant: 'destructive' });
+                                }
+                              }}
                             >
                               <Download className="h-4 w-4" />
                             </Button>
