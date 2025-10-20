@@ -25,7 +25,7 @@ interface ProductFormProps {
   storeId: string;
   storeSlug: string;
   productId?: string;
-  initialData?: any;
+  initialData?: Record<string, unknown>;
   onSuccess?: () => void;
 }
 
@@ -45,7 +45,7 @@ interface ProductFormData {
   description: string;
   short_description: string;
   features: string[];
-  specifications: any[];
+  specifications: Record<string, unknown>[];
   
   // Images et médias
   image_url: string;
@@ -54,16 +54,16 @@ interface ProductFormData {
   gallery_images: string[];
   
   // Fichiers et téléchargements
-  downloadable_files: any[];
+  downloadable_files: Record<string, unknown>[];
   file_access_type: string;
   download_limit: number | null;
   download_expiry_days: number | null;
   
   // Champs personnalisés
-  custom_fields: any[];
+  custom_fields: Record<string, unknown>[];
   
   // FAQ
-  faqs: any[];
+  faqs: Record<string, unknown>[];
   
   // SEO et métadonnées
   meta_title: string;
@@ -89,11 +89,11 @@ interface ProductFormData {
   
   // Pixels et tracking
   pixels_enabled: boolean;
-  conversion_pixels: any[];
-  retargeting_pixels: any[];
+  conversion_pixels: Record<string, unknown>[];
+  retargeting_pixels: Record<string, unknown>[];
   
   // Variantes et attributs
-  variants: any[];
+  variants: Record<string, unknown>[];
   color_variants: boolean;
   size_variants: boolean;
   pattern_variants: boolean;
@@ -304,7 +304,7 @@ export const ProductForm = ({ storeId, storeSlug, productId, initialData, onSucc
     return getEmptyFormData();
   });
 
-  const updateFormData = (field: string, value: any) => {
+  const updateFormData = (field: string, value: string | number | boolean | string[] | Record<string, unknown>[]) => {
     setFormData(prev => ({ ...prev, [field]: value }));
     
     // Auto-generate slug from name

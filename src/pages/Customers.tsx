@@ -43,7 +43,7 @@ const Customers = () => {
         (payload) => {
           console.log("🧩 Realtime customers payload:", payload);
 
-          setCustomers((prev: any[]) => {
+          setCustomers((prev: Record<string, unknown>[]) => {
             if (payload.eventType === "INSERT") {
               return [payload.new, ...prev];
             }

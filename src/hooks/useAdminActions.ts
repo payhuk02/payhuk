@@ -8,7 +8,7 @@ export const useAdminActions = () => {
     actionType: string,
     targetType: string,
     targetId: string,
-    details?: any
+    details?: Record<string, unknown>
   ) => {
     try {
       const { data: { user } } = await supabase.auth.getUser();
@@ -51,10 +51,10 @@ export const useAdminActions = () => {
       });
 
       return true;
-    } catch (error: any) {
+    } catch (error: unknown) {
       toast({
         title: "Erreur",
-        description: error.message,
+        description: error instanceof Error ? error.message : "Une erreur est survenue.",
         variant: "destructive",
       });
       return false;
@@ -83,10 +83,10 @@ export const useAdminActions = () => {
       });
 
       return true;
-    } catch (error: any) {
+    } catch (error: unknown) {
       toast({
         title: "Erreur",
-        description: error.message,
+        description: error instanceof Error ? error.message : "Une erreur est survenue.",
         variant: "destructive",
       });
       return false;
@@ -110,10 +110,10 @@ export const useAdminActions = () => {
       });
 
       return true;
-    } catch (error: any) {
+    } catch (error: unknown) {
       toast({
         title: "Erreur",
-        description: error.message,
+        description: error instanceof Error ? error.message : "Une erreur est survenue.",
         variant: "destructive",
       });
       return false;
@@ -137,10 +137,10 @@ export const useAdminActions = () => {
       });
 
       return true;
-    } catch (error: any) {
+    } catch (error: unknown) {
       toast({
         title: "Erreur",
-        description: error.message,
+        description: error instanceof Error ? error.message : "Une erreur est survenue.",
         variant: "destructive",
       });
       return false;
@@ -164,10 +164,10 @@ export const useAdminActions = () => {
       });
 
       return true;
-    } catch (error: any) {
+    } catch (error: unknown) {
       toast({
         title: "Erreur",
-        description: error.message,
+        description: error instanceof Error ? error.message : "Une erreur est survenue.",
         variant: "destructive",
       });
       return false;
@@ -195,10 +195,10 @@ export const useAdminActions = () => {
       });
 
       return true;
-    } catch (error: any) {
+    } catch (error: unknown) {
       toast({
         title: "Erreur",
-        description: error.message,
+        description: error instanceof Error ? error.message : "Une erreur est survenue.",
         variant: "destructive",
       });
       return false;
@@ -222,10 +222,10 @@ export const useAdminActions = () => {
       });
 
       return true;
-    } catch (error: any) {
+    } catch (error: unknown) {
       toast({
         title: "Erreur",
-        description: error.message,
+        description: error instanceof Error ? error.message : "Une erreur est survenue.",
         variant: "destructive",
       });
       return false;

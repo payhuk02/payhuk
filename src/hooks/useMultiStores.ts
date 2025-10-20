@@ -99,9 +99,9 @@ export const useMultiStores = () => {
       if (fetchError) throw fetchError;
 
       setStores(data || []);
-    } catch (err: any) {
+    } catch (err: unknown) {
       logger.error('Error fetching stores:', err);
-      setError(err.message);
+      setError(err instanceof Error ? err.message : "Une erreur est survenue");
       toast({
         title: "Erreur",
         description: "Impossible de charger vos boutiques",
@@ -163,11 +163,11 @@ export const useMultiStores = () => {
       });
 
       return data;
-    } catch (err: any) {
+    } catch (err: unknown) {
       logger.error('Error creating store:', err);
       toast({
         title: "Erreur",
-        description: err.message || "Impossible de créer la boutique",
+        description: err instanceof Error ? err.message : "Impossible de créer la boutique",
         variant: "destructive"
       });
       return null;
@@ -199,7 +199,7 @@ export const useMultiStores = () => {
       });
 
       return data;
-    } catch (err: any) {
+    } catch (err: unknown) {
       logger.error('Error updating store:', err);
       toast({
         title: "Erreur",
@@ -228,7 +228,7 @@ export const useMultiStores = () => {
       });
 
       return true;
-    } catch (err: any) {
+    } catch (err: unknown) {
       logger.error('Error deleting store:', err);
       toast({
         title: "Erreur",
@@ -288,11 +288,11 @@ export const useMultiStores = () => {
       });
 
       return true;
-    } catch (err: any) {
+    } catch (err: unknown) {
       logger.error('Error toggling store status:', err);
       toast({
         title: "Erreur",
-        description: err.message || "Impossible de modifier l'état de la boutique",
+        description: err instanceof Error ? err.message : "Impossible de modifier l'état de la boutique",
         variant: "destructive"
       });
       return false;
@@ -301,7 +301,7 @@ export const useMultiStores = () => {
 
   // Générer un slug unique
   const generateUniqueSlug = async (name: string): Promise<string> => {
-    let baseSlug = name
+    const baseSlug = name
       .toLowerCase()
       .trim()
       .replace(/[^a-z0-9\s-]/g, '')
@@ -390,7 +390,7 @@ export const useMultiStores = () => {
         monthlyViews,
         topProducts
       };
-    } catch (err: any) {
+    } catch (err: unknown) {
       logger.error('Error fetching store stats:', err);
       return null;
     }
@@ -432,7 +432,7 @@ export const useMultiStores = () => {
           created_at: order.created_at
         })) || []
       };
-    } catch (err: any) {
+    } catch (err: unknown) {
       logger.error('Error fetching store analytics:', err);
       return null;
     }

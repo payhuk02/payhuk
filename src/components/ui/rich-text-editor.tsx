@@ -90,11 +90,12 @@ export const RichTextEditor = ({
           e.preventDefault();
           execCommand('underline');
           break;
-        case 'k':
+        case 'k': {
           e.preventDefault();
           const url = prompt('Entrez l\'URL:');
           if (url) execCommand('createLink', url);
           break;
+        }
         case 'z':
           if (e.shiftKey) {
             e.preventDefault();
@@ -156,7 +157,7 @@ export const RichTextEditor = ({
     disabled: btnDisabled = false 
   }: {
     onClick: () => void;
-    icon: any;
+    icon: React.ComponentType<{ className?: string }>;
     title: string;
     isActive?: boolean;
     disabled?: boolean;

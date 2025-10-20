@@ -76,7 +76,7 @@ export const CreateStoreDialog: React.FC<CreateStoreDialogProps> = ({
       newErrors.contact_email = 'Format d\'email invalide';
     }
 
-    if (formData.contact_phone && !/^[\+]?[0-9\s\-\(\)]{8,}$/.test(formData.contact_phone)) {
+    if (formData.contact_phone && !/^[+]?[0-9\s\-()]{8,}$/.test(formData.contact_phone)) {
       newErrors.contact_phone = 'Format de téléphone invalide';
     }
 

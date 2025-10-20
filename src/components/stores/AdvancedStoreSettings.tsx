@@ -66,7 +66,7 @@ export const AdvancedStoreSettings: React.FC = () => {
     }
   }, [selectedStore]);
 
-  const handleInputChange = (field: string, value: any) => {
+  const handleInputChange = (field: string, value: string | boolean | number) => {
     setFormData(prev => ({ ...prev, [field]: value }));
     
     // Effacer l'erreur du champ modifié
@@ -90,7 +90,7 @@ export const AdvancedStoreSettings: React.FC = () => {
       newErrors.contact_email = 'Format d\'email invalide';
     }
 
-    if (formData.contact_phone && !/^[\+]?[0-9\s\-\(\)]{8,}$/.test(formData.contact_phone)) {
+    if (formData.contact_phone && !/^[+]?[0-9\s\-()]{8,}$/.test(formData.contact_phone)) {
       newErrors.contact_phone = 'Format de téléphone invalide (minimum 8 chiffres)';
     }
 

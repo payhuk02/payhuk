@@ -12,8 +12,8 @@ import DOMPurify from "dompurify";
 
 const ProductDetails = () => {
   const { slug, productSlug } = useParams<{ slug: string; productSlug: string }>();
-  const [product, setProduct] = useState<any>(null);
-  const [store, setStore] = useState<any>(null);
+  const [product, setProduct] = useState<Record<string, unknown> | null>(null);
+  const [store, setStore] = useState<Record<string, unknown> | null>(null);
   const [loading, setLoading] = useState(true);
 
   const { products: similarProducts } = useProducts(store?.id);

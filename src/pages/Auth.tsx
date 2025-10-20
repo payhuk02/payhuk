@@ -72,9 +72,9 @@ const Auth = () => {
         });
         navigate("/dashboard");
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Signup error:', error);
-      setError(error.message || "Erreur lors de la création du compte");
+      setError(error instanceof Error ? error.message : "Erreur lors de la création du compte");
     } finally {
       setIsLoading(false);
     }
@@ -110,12 +110,12 @@ const Auth = () => {
         });
         navigate("/dashboard");
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Login error:', error);
-      if (error.message.includes('Invalid login credentials')) {
+      if (error instanceof Error && error.message.includes('Invalid login credentials')) {
         setError("Email ou mot de passe incorrect");
       } else {
-        setError(error.message || "Erreur lors de la connexion");
+        setError(error instanceof Error ? error.message : "Erreur lors de la connexion");
       }
     } finally {
       setIsLoading(false);

@@ -167,11 +167,11 @@ export const ImageUpload = ({
         description: `${fileArray.length} fichier(s) téléchargé(s) avec succès.`,
       });
 
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Upload error:', error);
       toast({
         title: "Erreur de téléchargement",
-        description: error.message || "Une erreur est survenue lors du téléchargement.",
+        description: error instanceof Error ? error.message : "Une erreur est survenue lors du téléchargement.",
         variant: "destructive",
       });
     } finally {

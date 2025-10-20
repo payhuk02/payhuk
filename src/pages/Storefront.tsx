@@ -16,7 +16,7 @@ import { ShoppingCart } from "lucide-react";
 
 const Storefront = () => {
   const { slug } = useParams<{ slug: string }>();
-  const [store, setStore] = useState<any>(null);
+  const [store, setStore] = useState<Record<string, unknown> | null>(null);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
   const [category, setCategory] = useState("all");

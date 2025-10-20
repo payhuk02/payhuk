@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
@@ -25,8 +25,8 @@ import { cn } from "@/lib/utils";
 import React from "react";
 
 interface ProductDescriptionTabProps {
-  formData: any;
-  updateFormData: (field: string, value: any) => void;
+  formData: Record<string, unknown>;
+  updateFormData: (field: string, value: string | number | boolean | string[] | Record<string, unknown>[]) => void;
 }
 
 export const ProductDescriptionTab = ({ formData, updateFormData }: ProductDescriptionTabProps) => {
@@ -34,7 +34,7 @@ export const ProductDescriptionTab = ({ formData, updateFormData }: ProductDescr
   const [seoScore, setSeoScore] = useState(0);
 
   // Calculer le score SEO
-  const calculateSeoScore = () => {
+  const calculateSeoScore = useCallback(() => {
     let score = 0;
     const maxScore = 100;
 
@@ -78,12 +78,12 @@ export const ProductDescriptionTab = ({ formData, updateFormData }: ProductDescr
     }
 
     setSeoScore(Math.min(score, maxScore));
-  };
+  }, [formData.meta_title, formData.meta_description, formData.meta_keywords, formData.description, formData.og_image, formData.og_title]);
 
   // Mettre à jour le score SEO quand les données changent
   React.useEffect(() => {
     calculateSeoScore();
-  }, [formData.meta_title, formData.meta_description, formData.meta_keywords, formData.description, formData.og_image, formData.og_title]);
+  }, [calculateSeoScore]);
 
   const getSeoScoreColor = (score: number) => {
     if (score >= 80) return "text-green-600 bg-green-100";
@@ -193,7 +193,7 @@ export const ProductDescriptionTab = ({ formData, updateFormData }: ProductDescr
             </CardHeader>
             <CardContent>
               <div className="space-y-3">
-                {(formData.features || []).map((feature: any, index: number) => (
+                {(formData.features || []).map((feature: string, index: number) => (
                   <div key={index} className="flex items-center gap-3">
                     <Input
                       value={feature}
@@ -209,7 +209,7 @@ export const ProductDescriptionTab = ({ formData, updateFormData }: ProductDescr
                       variant="outline"
                       size="sm"
                       onClick={() => {
-                        const newFeatures = (formData.features || []).filter((_: any, i: number) => i !== index);
+                        const newFeatures = (formData.features || []).filter((_: string, i: number) => i !== index);
                         updateFormData("features", newFeatures);
                       }}
                     >

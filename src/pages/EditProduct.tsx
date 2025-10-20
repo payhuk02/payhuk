@@ -12,7 +12,7 @@ const EditProduct = () => {
   const { id } = useParams();
   const { store, loading: storeLoading } = useStore();
   const { toast } = useToast();
-  const [product, setProduct] = useState<any>(null);
+  const [product, setProduct] = useState<Record<string, unknown> | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -28,10 +28,10 @@ const EditProduct = () => {
 
         if (error) throw error;
         setProduct(data);
-      } catch (error: any) {
+      } catch (error: unknown) {
         toast({
           title: "Erreur",
-          description: error.message,
+          description: error instanceof Error ? error.message : "Une erreur est survenue",
           variant: "destructive",
         });
       } finally {

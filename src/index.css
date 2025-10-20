@@ -24,7 +24,7 @@ All colors MUST be HSL.
     --secondary-foreground: 0 0% 98%;
 
     --muted: 220 20% 20%;
-    --muted-foreground: 220 10% 45%; /* Amélioration du contraste pour WCAG AA */
+    --muted-foreground: 220 10% 65%; /* Amélioration du contraste pour WCAG AA */
 
     --accent: 45 100% 60%;
     --accent-foreground: 220 30% 12%;
@@ -77,7 +77,7 @@ All colors MUST be HSL.
     --secondary-foreground: 0 0% 98%;
 
     --muted: 220 25% 16%;
-    --muted-foreground: 220 10% 50%; /* Amélioration du contraste pour WCAG AA */
+    --muted-foreground: 220 10% 70%; /* Amélioration du contraste pour WCAG AA */
 
     --accent: 45 100% 62%;
     --accent-foreground: 220 35% 8%;

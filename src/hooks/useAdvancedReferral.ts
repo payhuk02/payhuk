@@ -257,8 +257,8 @@ export const useAdvancedReferral = () => {
         level: currentLevel.name
       });
 
-    } catch (error: any) {
-      const errorMessage = error.message || 'Erreur lors du chargement des statistiques';
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'Erreur lors du chargement des statistiques';
       setError(errorMessage);
       logger.error('Failed to fetch referral stats', { error: errorMessage });
       
@@ -330,8 +330,8 @@ export const useAdvancedReferral = () => {
 
       setReferrals(referralUsers.filter(Boolean) as ReferralUser[]);
 
-    } catch (error: any) {
-      logger.error('Failed to fetch referral users', { error: error.message });
+    } catch (error: unknown) {
+      logger.error('Failed to fetch referral users', { error: error instanceof Error ? error.message : 'Unknown error' });
     }
   };
 
@@ -379,8 +379,8 @@ export const useAdvancedReferral = () => {
 
       setHistory(referralHistory);
 
-    } catch (error: any) {
-      logger.error('Failed to fetch referral history', { error: error.message });
+    } catch (error: unknown) {
+      logger.error('Failed to fetch referral history', { error: error instanceof Error ? error.message : 'Unknown error' });
     }
   };
 
@@ -410,8 +410,8 @@ export const useAdvancedReferral = () => {
         description: "Un nouveau code de parrainage a été généré.",
       });
 
-    } catch (error: any) {
-      logger.error('Failed to generate referral code', { error: error.message });
+    } catch (error: unknown) {
+      logger.error('Failed to generate referral code', { error: error instanceof Error ? error.message : 'Unknown error' });
       toast({
         title: "Erreur",
         description: "Impossible de générer un nouveau code.",

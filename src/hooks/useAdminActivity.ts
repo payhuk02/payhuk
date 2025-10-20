@@ -8,7 +8,7 @@ export interface AdminAction {
   action_type: string;
   target_type: string;
   target_id: string | null;
-  details: any;
+  details: Record<string, unknown>;
   created_at: string;
   admin_name?: string;
 }
@@ -45,10 +45,10 @@ export const useAdminActivity = () => {
       );
 
       setActions(actionsWithNames);
-    } catch (error: any) {
+    } catch (error: unknown) {
       toast({
         title: "Erreur",
-        description: error.message,
+        description: error instanceof Error ? error.message : "Une erreur est survenue.",
         variant: "destructive",
       });
     } finally {

@@ -112,7 +112,7 @@ export const useAdminStats = () => {
         .limit(5);
 
       const topStores = (topStoresData || []).map(store => {
-        const total_sales = store.orders?.reduce((sum: number, o: any) => sum + Number(o.total_amount), 0) || 0;
+        const total_sales = store.orders?.reduce((sum: number, o: Record<string, unknown>) => sum + Number(o.total_amount), 0) || 0;
         
         return {
           id: store.id,
@@ -133,10 +133,10 @@ export const useAdminStats = () => {
         recentUsers: recentUsers.slice(0, 5),
         topStores: topStores.slice(0, 5),
       });
-    } catch (error: any) {
+    } catch (error: unknown) {
       toast({
         title: "Erreur",
-        description: error.message,
+        description: error instanceof Error ? error.message : "Une erreur est survenue.",
         variant: "destructive",
       });
     } finally {

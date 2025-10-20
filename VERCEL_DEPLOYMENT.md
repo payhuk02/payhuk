@@ -8,10 +8,13 @@
 Dans le dashboard Vercel, ajoutez ces variables d'environnement :
 
 ```
-VITE_SUPABASE_URL=https://hbdnzajbyjakdhuavrvb.supabase.co
-VITE_SUPABASE_PUBLISHABLE_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhiZG56YWpieWpha2RodWF2cnZiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTc1OTgyMzEsImV4cCI6MjA3MzE3NDIzMX0.myur8r50wIORQwfcCP4D1ZxlhKFxICdVqjUM80CgtnM
-VITE_SUPABASE_PROJECT_ID=hbdnzajbyjakdhuavrvb
+VITE_SUPABASE_URL=https://your-project.supabase.co
+VITE_SUPABASE_PUBLISHABLE_KEY=your_supabase_anon_key_here
+VITE_SUPABASE_PROJECT_ID=your_project_id_here
+VITE_APP_ENV=production
 ```
+
+⚠️ **IMPORTANT :** Remplacez les valeurs par vos vraies clés Supabase. Ne jamais committer de vraies clés dans le code.
 
 ### 2. Configuration du build
 

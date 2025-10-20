@@ -67,17 +67,21 @@ export const CommissionHistory: React.FC<CommissionHistoryProps> = ({
         const now = new Date();
         
         switch (dateFilter) {
-          case 'today':
-            return itemDate.toDateString() === now.toDateString();
-          case 'week':
-            const weekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
-            return itemDate >= weekAgo;
-          case 'month':
-            const monthAgo = new Date(now.getFullYear(), now.getMonth() - 1, now.getDate());
-            return itemDate >= monthAgo;
-          case 'year':
-            const yearAgo = new Date(now.getFullYear() - 1, now.getMonth(), now.getDate());
-            return itemDate >= yearAgo;
+        case 'today': {
+          return itemDate.toDateString() === now.toDateString();
+        }
+        case 'week': {
+          const weekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+          return itemDate >= weekAgo;
+        }
+        case 'month': {
+          const monthAgo = new Date(now.getFullYear(), now.getMonth() - 1, now.getDate());
+          return itemDate >= monthAgo;
+        }
+        case 'year': {
+          const yearAgo = new Date(now.getFullYear() - 1, now.getMonth(), now.getDate());
+          return itemDate >= yearAgo;
+        }
           default:
             return true;
         }
@@ -86,7 +90,7 @@ export const CommissionHistory: React.FC<CommissionHistoryProps> = ({
       return matchesSearch && matchesType && matchesDate;
     })
     .sort((a, b) => {
-      let aValue: any, bValue: any;
+      let aValue: string | number, bValue: string | number;
       
       switch (sortBy) {
         case 'amount':

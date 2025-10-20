@@ -9,6 +9,7 @@
     "build:dev": "vite build --mode development",
     "lint": "eslint .",
     "preview": "vite preview",
+    "start": "vite preview --port 3000",
     "vercel-build": "vite build",
     "test": "vitest",
     "test:ui": "vitest --ui",
