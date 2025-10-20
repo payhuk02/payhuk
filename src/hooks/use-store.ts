@@ -36,10 +36,21 @@ export const useStore = () => {
         .from('stores')
         .select('*')
         .eq('user_id', user.id)
-        .maybeSingle();
+        .limit(1);
 
-      if (error) throw error;
-      setStore(data);
+      if (error) {
+        console.error('Erreur lors de la récupération de la boutique:', error);
+        setStore(null);
+        return;
+      }
+
+      // Si aucune boutique trouvée, c'est normal
+      if (!data || data.length === 0) {
+        setStore(null);
+        return;
+      }
+
+      setStore(data[0]);
     } catch (error: any) {
       toast({
         title: "Erreur",
