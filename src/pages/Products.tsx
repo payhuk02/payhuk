@@ -36,7 +36,8 @@ const Products = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [category, setCategory] = useState("all");
   const [productType, setProductType] = useState("all");
-  const [status, setStatus] = useState("all");
+  // Par défaut, afficher uniquement les produits publiés (actifs)
+  const [status, setStatus] = useState("active");
   const [sortBy, setSortBy] = useState("recent");
 
   // Extract unique categories and types
