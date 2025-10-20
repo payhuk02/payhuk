@@ -68,7 +68,10 @@ serve(async (req) => {
         );
     }
 
-    // Appel à l'API Moneroo
+    // Appel à l'API Moneroo avec timeout
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 secondes timeout
+    
     const monerooResponse = await fetch(`${MONEROO_API_URL}${endpoint}`, {
       method,
       headers: {
@@ -76,7 +79,10 @@ serve(async (req) => {
         'Content-Type': 'application/json',
       },
       body: body ? JSON.stringify(body) : null,
+      signal: controller.signal,
     });
+    
+    clearTimeout(timeoutId);
 
     const responseData = await monerooResponse.json();
     
@@ -98,10 +104,19 @@ serve(async (req) => {
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
 
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Error in moneroo function:', error);
+    
+    // Gestion spécifique des timeouts
+    if (error instanceof Error && error.name === 'AbortError') {
+      return new Response(
+        JSON.stringify({ error: 'Timeout: La requête a pris trop de temps' }),
+        { status: 408, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+    
     return new Response(
-      JSON.stringify({ error: error.message || 'Erreur interne' }),
+      JSON.stringify({ error: error instanceof Error ? error.message : 'Erreur interne' }),
       { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
   }

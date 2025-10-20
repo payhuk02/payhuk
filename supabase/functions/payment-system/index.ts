@@ -388,10 +388,19 @@ serve(async (req) => {
       { status: 404, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     )
 
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('Unexpected error:', error)
+    
+    // Gestion spécifique des timeouts
+    if (error instanceof Error && error.name === 'AbortError') {
+      return new Response(
+        JSON.stringify({ error: 'Timeout: La requête a pris trop de temps' }),
+        { status: 408, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      )
+    }
+    
     return new Response(
-      JSON.stringify({ error: 'Erreur interne du serveur' }),
+      JSON.stringify({ error: error instanceof Error ? error.message : 'Erreur interne du serveur' }),
       { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     )
   }
