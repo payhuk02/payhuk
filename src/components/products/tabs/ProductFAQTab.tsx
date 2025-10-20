@@ -54,6 +54,7 @@ export const ProductFAQTab = ({ formData, updateFormData }: ProductFAQTabProps) 
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
   const [replaceOnImport, setReplaceOnImport] = useState(false);
   const [showHelp, setShowHelp] = useState(false);
+  const [previousFaqs, setPreviousFaqs] = useState<FAQItem[] | null>(null);
   const fileInputRef = typeof window !== 'undefined' ? document.createElement('input') : null;
   if (fileInputRef) {
     fileInputRef.type = 'file';
@@ -289,6 +290,8 @@ export const ProductFAQTab = ({ formData, updateFormData }: ProductFAQTabProps) 
     } catch {}
     items = items.filter((it) => it.question && it.answer);
     if (items.length === 0) return;
+    // Save current state to allow undo
+    setPreviousFaqs([...(formData.faqs || [])]);
     const base = replaceOnImport ? [] : (formData.faqs || []);
     const merged = [...base, ...items].map((f: FAQItem, idx: number) => ({ ...f, order: idx }));
     updateFormData('faqs', merged);
@@ -297,6 +300,12 @@ export const ProductFAQTab = ({ formData, updateFormData }: ProductFAQTabProps) 
   const resetOrder = () => {
     const normalized = (formData.faqs || []).map((f: FAQItem, idx: number) => ({ ...f, order: idx }));
     updateFormData('faqs', normalized);
+  };
+
+  const undoImport = () => {
+    if (!previousFaqs) return;
+    updateFormData('faqs', previousFaqs.map((f, idx) => ({ ...f, order: typeof f.order === 'number' ? f.order : idx })));
+    setPreviousFaqs(null);
   };
 
   return (
@@ -381,6 +390,9 @@ export const ProductFAQTab = ({ formData, updateFormData }: ProductFAQTabProps) 
               </Button>
               <Button variant="outline" size="sm" onClick={resetOrder}>Réinitialiser l'ordre</Button>
               <Button variant="outline" size="sm" onClick={() => setShowHelp(true)}>Aide</Button>
+              {previousFaqs && (
+                <Button variant="outline" size="sm" onClick={undoImport}>Annuler l'import</Button>
+              )}
               <Button
                 variant="outline"
                 size="sm"
