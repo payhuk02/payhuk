@@ -1,0 +1,192 @@
+{
+  "common": {
+    "loading": "Loading...",
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "edit": "Edit",
+    "create": "Create",
+    "publish": "Publish",
+    "search": "Search",
+    "filter": "Filter",
+    "sort": "Sort",
+    "view": "View",
+    "back": "Back",
+    "next": "Next",
+    "previous": "Previous",
+    "close": "Close",
+    "open": "Open",
+    "yes": "Yes",
+    "no": "No",
+    "confirm": "Confirm",
+    "error": "Error",
+    "success": "Success",
+    "warning": "Warning",
+    "info": "Information"
+  },
+  "navigation": {
+    "dashboard": "Dashboard",
+    "shop": "Shop",
+    "marketplace": "Marketplace",
+    "products": "Products",
+    "orders": "Orders",
+    "customers": "Customers",
+    "analytics": "Analytics",
+    "settings": "Settings",
+    "profile": "Profile",
+    "logout": "Logout",
+    "login": "Login",
+    "register": "Register"
+  },
+  "auth": {
+    "welcome": "Welcome",
+    "signInDescription": "Sign in or create your account to get started",
+    "email": "Email",
+    "password": "Password",
+    "confirmPassword": "Confirm Password",
+    "forgotPassword": "Forgot password?",
+    "signIn": "Sign In",
+    "signUp": "Sign Up",
+    "signOut": "Sign Out",
+    "createAccount": "Create Account",
+    "alreadyHaveAccount": "Already have an account?",
+    "dontHaveAccount": "Don't have an account?",
+    "startFree": "Start Free"
+  },
+  "dashboard": {
+    "title": "Dashboard",
+    "welcome": "Welcome to your dashboard",
+    "description": "Manage your store and track your performance",
+    "createStore": "Create my store",
+    "quickActions": "Quick Actions",
+    "recentActivity": "Recent Activity",
+    "stats": {
+      "totalSales": "Total Sales",
+      "totalOrders": "Total Orders",
+      "totalCustomers": "Total Customers",
+      "totalProducts": "Total Products",
+      "revenue": "Revenue",
+      "growth": "Growth"
+    },
+    "actions": {
+      "addProduct": "Add Product",
+      "addProductDesc": "Create a new product",
+      "newOrder": "New Order",
+      "newOrderDesc": "Record an order",
+      "addCustomer": "Add Customer",
+      "addCustomerDesc": "Register a new customer",
+      "createPromotion": "Create Promotion",
+      "createPromotionDesc": "New promotional offer"
+    }
+  },
+  "products": {
+    "title": "Products",
+    "newProduct": "New Product",
+    "noProducts": "No Products",
+    "noProductsDesc": "Start by creating your first product",
+    "createFirstProduct": "Create my first product",
+    "productCount": "{{count}} product",
+    "productCount_plural": "{{count}} products",
+    "status": {
+      "draft": "Draft",
+      "published": "Published",
+      "archived": "Archived"
+    },
+    "actions": {
+      "buy": "Buy",
+      "buyNow": "Buy Now",
+      "addToCart": "Add to Cart",
+      "quickView": "Quick View",
+      "addToFavorites": "Add to Favorites",
+      "share": "Share",
+      "compare": "Compare"
+    }
+  },
+  "marketplace": {
+    "title": "Payhuk Marketplace",
+    "subtitle": "Discover thousands of digital products: courses, ebooks, templates, software and more.",
+    "subtitleHighlight": "Join the digital commerce revolution in Africa",
+    "stats": {
+      "products": "Products",
+      "sellers": "Sellers",
+      "customers": "Customers",
+      "sales": "Sales"
+    },
+    "search": {
+      "placeholder": "Search products...",
+      "filters": "Filters",
+      "sortBy": "Sort by",
+      "viewMode": "View mode"
+    },
+    "filters": {
+      "all": "All",
+      "digital": "Digital",
+      "physical": "Physical",
+      "services": "Services",
+      "free": "Free",
+      "paid": "Paid",
+      "promo": "Promo"
+    },
+    "sort": {
+      "newest": "Newest",
+      "oldest": "Oldest",
+      "priceLow": "Price: Low to High",
+      "priceHigh": "Price: High to Low",
+      "popular": "Popular",
+      "rating": "Rating"
+    },
+    "view": {
+      "grid": "Grid",
+      "list": "List"
+    },
+    "noProducts": "No products found",
+    "noProductsDesc": "Try modifying your search criteria",
+    "cta": {
+      "title": "Ready to sell your products?",
+      "subtitle": "Join thousands of sellers who trust Payhuk",
+      "button": "Start Selling"
+    }
+  },
+  "landing": {
+    "hero": {
+      "badge": "The all-in-one platform to sell your digital products",
+      "title": "Sell your digital products with ease",
+      "description": "Create your online store, manage your sales in FCFA and other currencies, and grow your business in Africa with no hidden fees.",
+      "cta": "Start Free",
+      "learnMore": "Learn More"
+    },
+    "features": {
+      "title": "Why choose Payhuk?",
+      "subtitle": "A complete solution for your digital business"
+    },
+    "testimonials": {
+      "title": "What our users say",
+      "subtitle": "Join thousands of satisfied sellers"
+    },
+    "cta": {
+      "title": "Ready to start your digital business?",
+      "subtitle": "Join Payhuk today and start selling your products online",
+      "button": "Get Started Now"
+    }
+  },
+  "forms": {
+    "required": "This field is required",
+    "emailInvalid": "Invalid email address",
+    "passwordTooShort": "Password must be at least 8 characters",
+    "passwordsDoNotMatch": "Passwords do not match",
+    "name": "Name",
+    "description": "Description",
+    "price": "Price",
+    "category": "Category",
+    "tags": "Tags",
+    "image": "Image",
+    "upload": "Upload",
+    "selectFile": "Select File"
+  },
+  "language": {
+    "select": "Select Language",
+    "french": "Français",
+    "english": "English",
+    "current": "Current Language"
+  }
+}

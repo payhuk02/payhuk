@@ -9,11 +9,13 @@ import { TopProductsCard } from "@/components/dashboard/TopProductsCard";
 import { QuickActions } from "@/components/dashboard/QuickActions";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 
 const Dashboard = () => {
   const { store, loading: storeLoading } = useStore();
   const { stats, loading } = useDashboardStats();
   const navigate = useNavigate();
+  const { t } = useTranslation();
 
   return (
     <SidebarProvider>
@@ -26,7 +28,7 @@ const Dashboard = () => {
             <div className="flex h-12 sm:h-14 md:h-16 items-center gap-2 sm:gap-4 px-2 sm:px-3 md:px-4 lg:px-6">
               <SidebarTrigger className="h-8 w-8 sm:h-9 sm:w-9 md:h-10 md:w-10" />
               <div className="flex-1 min-w-0">
-                <h1 className="text-base sm:text-lg md:text-xl lg:text-2xl font-bold truncate">Tableau de bord</h1>
+                <h1 className="text-base sm:text-lg md:text-xl lg:text-2xl font-bold truncate">{t("dashboard.title")}</h1>
               </div>
             </div>
           </header>
@@ -37,17 +39,17 @@ const Dashboard = () => {
               <div className="flex items-center justify-center h-48 sm:h-64">
                 <div className="text-center">
                   <div className="inline-block h-6 w-6 sm:h-8 sm:w-8 animate-spin rounded-full border-4 border-solid border-primary border-r-transparent"></div>
-                  <p className="mt-2 text-sm sm:text-base text-muted-foreground">Chargement...</p>
+                  <p className="mt-2 text-sm sm:text-base text-muted-foreground">{t("common.loading")}</p>
                 </div>
               </div>
             ) : !store ? (
               <div className="max-w-3xl mx-auto text-center py-8 sm:py-12 px-4">
-                <h2 className="text-xl sm:text-2xl font-bold mb-3 sm:mb-4">Bienvenue ! 🎉</h2>
+                <h2 className="text-xl sm:text-2xl font-bold mb-3 sm:mb-4">{t("dashboard.welcome")} 🎉</h2>
                 <p className="text-sm sm:text-base text-muted-foreground mb-4 sm:mb-6">
-                  Commencez par créer votre boutique pour accéder au tableau de bord
+                  {t("dashboard.description")}
                 </p>
                 <Button onClick={() => navigate("/dashboard/store")} className="w-full sm:w-auto">
-                  Créer ma boutique
+                  {t("dashboard.createStore")}
                 </Button>
               </div>
             ) : (

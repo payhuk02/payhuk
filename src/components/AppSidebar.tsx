@@ -36,79 +36,83 @@ import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useAdmin } from "@/hooks/useAdmin";
+import { useTranslation } from "react-i18next";
+import { LanguageSelectorCompact } from "@/components/navigation/LanguageSelector";
 
-const menuItems = [
-  {
-    title: "Tableau de bord",
-    url: "/dashboard",
-    icon: LayoutDashboard,
-  },
-  {
-    title: "Boutique",
-    url: "/dashboard/store",
-    icon: Store,
-  },
-  {
-    title: "Marketplace",
-    url: "/marketplace",
-    icon: ShoppingCart,
-  },
-  {
-    title: "Produits",
-    url: "/dashboard/products",
-    icon: Package,
-  },
-  {
-    title: "Commandes",
-    url: "/dashboard/orders",
-    icon: ShoppingCart,
-  },
-  {
-    title: "Clients",
-    url: "/dashboard/customers",
-    icon: Users,
-  },
-  {
-    title: "Promotions",
-    url: "/dashboard/promotions",
-    icon: Tag,
-  },
-  {
-    title: "Statistiques",
-    url: "/dashboard/analytics",
-    icon: BarChart3,
-  },
-  {
-    title: "Paiements",
-    url: "/dashboard/payments",
-    icon: CreditCard,
-  },
-  {
-    title: "KYC",
-    url: "/dashboard/kyc",
-    icon: Shield,
-  },
-  {
-    title: "Parrainage",
-    url: "/dashboard/referrals",
-    icon: UserPlus,
-  },
-  {
-    title: "Mes Pixels",
-    url: "/dashboard/pixels",
-    icon: Target,
-  },
-  {
-    title: "Mon SEO",
-    url: "/dashboard/seo",
-    icon: Search,
-  },
-  {
-    title: "Paramètres",
-    url: "/dashboard/settings",
-    icon: Settings,
-  },
-];
+  const { t } = useTranslation();
+
+  const menuItems = [
+    {
+      title: t("navigation.dashboard"),
+      url: "/dashboard",
+      icon: LayoutDashboard,
+    },
+    {
+      title: t("navigation.shop"),
+      url: "/dashboard/store",
+      icon: Store,
+    },
+    {
+      title: t("navigation.marketplace"),
+      url: "/marketplace",
+      icon: ShoppingCart,
+    },
+    {
+      title: t("navigation.products"),
+      url: "/dashboard/products",
+      icon: Package,
+    },
+    {
+      title: t("navigation.orders"),
+      url: "/dashboard/orders",
+      icon: ShoppingCart,
+    },
+    {
+      title: t("navigation.customers"),
+      url: "/dashboard/customers",
+      icon: Users,
+    },
+    {
+      title: "Promotions",
+      url: "/dashboard/promotions",
+      icon: Tag,
+    },
+    {
+      title: t("navigation.analytics"),
+      url: "/dashboard/analytics",
+      icon: BarChart3,
+    },
+    {
+      title: "Paiements",
+      url: "/dashboard/payments",
+      icon: CreditCard,
+    },
+    {
+      title: "KYC",
+      url: "/dashboard/kyc",
+      icon: Shield,
+    },
+    {
+      title: "Parrainage",
+      url: "/dashboard/referrals",
+      icon: UserPlus,
+    },
+    {
+      title: "Mes Pixels",
+      url: "/dashboard/pixels",
+      icon: Target,
+    },
+    {
+      title: "Mon SEO",
+      url: "/dashboard/seo",
+      icon: Search,
+    },
+    {
+      title: t("navigation.settings"),
+      url: "/dashboard/settings",
+      icon: Settings,
+    },
+  ];
 
 const adminMenuItems = [
   {
@@ -275,14 +279,19 @@ export function AppSidebar() {
       </SidebarContent>
 
       {/* Footer */}
-      <SidebarFooter className="border-t p-2 sm:p-3 md:p-4">
+      <SidebarFooter className="border-t p-2 sm:p-3 md:p-4 space-y-2">
+        {/* Sélecteur de langue */}
+        <div className="flex items-center justify-center">
+          <LanguageSelectorCompact />
+        </div>
+        
         <Button
           variant="ghost"
           className="w-full justify-start !text-black text-xs sm:text-sm h-8 sm:h-10"
           onClick={handleLogout}
         >
           <LogOut className="h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0" />
-          {!isCollapsed && <span className="truncate">Déconnexion</span>}
+          {!isCollapsed && <span className="truncate">{t("navigation.logout")}</span>}
         </Button>
       </SidebarFooter>
     </Sidebar>

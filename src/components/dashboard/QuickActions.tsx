@@ -2,35 +2,37 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Plus, Package, ShoppingCart, Users, Tag } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 
 export const QuickActions = () => {
   const navigate = useNavigate();
+  const { t } = useTranslation();
 
   const actions = [
     {
-      title: "Ajouter un produit",
-      description: "Créer un nouveau produit",
+      title: t("dashboard.actions.addProduct"),
+      description: t("dashboard.actions.addProductDesc"),
       icon: Package,
       onClick: () => navigate("/dashboard/products"),
       variant: "default" as const,
     },
     {
-      title: "Nouvelle commande",
-      description: "Enregistrer une commande",
+      title: t("dashboard.actions.newOrder"),
+      description: t("dashboard.actions.newOrderDesc"),
       icon: ShoppingCart,
       onClick: () => navigate("/dashboard/orders"),
       variant: "secondary" as const,
     },
     {
-      title: "Ajouter un client",
-      description: "Enregistrer un nouveau client",
+      title: t("dashboard.actions.addCustomer"),
+      description: t("dashboard.actions.addCustomerDesc"),
       icon: Users,
       onClick: () => navigate("/dashboard/customers"),
       variant: "outline" as const,
     },
     {
-      title: "Créer une promotion",
-      description: "Nouvelle offre promotionnelle",
+      title: t("dashboard.actions.createPromotion"),
+      description: t("dashboard.actions.createPromotionDesc"),
       icon: Tag,
       onClick: () => navigate("/dashboard/promotions"),
       variant: "outline" as const,
@@ -40,7 +42,7 @@ export const QuickActions = () => {
   return (
     <Card className="shadow-soft">
       <CardHeader>
-        <CardTitle>Actions rapides</CardTitle>
+        <CardTitle>{t("dashboard.quickActions")}</CardTitle>
         <CardDescription>Accédez rapidement aux fonctions principales</CardDescription>
       </CardHeader>
       <CardContent>
