@@ -161,45 +161,46 @@ const Products = () => {
         
         <div className="flex-1 flex flex-col">
           <header className="sticky top-0 z-10 border-b bg-card shadow-soft">
-              <div className="flex h-16 items-center gap-4 px-4 sm:px-6">
-              <SidebarTrigger />
-              <div className="flex-1">
-                <h1 className="text-xl sm:text-2xl font-bold">Produits</h1>
-                  <div className="mt-1 flex gap-2 text-xs">
-                    <Badge variant={status==='all'?'default':'outline'} onClick={()=>setStatus('all')} className="cursor-pointer">Tous</Badge>
-                    <Badge variant={status==='active'?'default':'outline'} onClick={()=>setStatus('active')} className="cursor-pointer">Publiés: {publishedCount}</Badge>
-                    <Badge variant={status==='inactive'?'default':'outline'} onClick={()=>setStatus('inactive')} className="cursor-pointer">Inactifs: {inactiveCount}</Badge>
+              <div className="flex h-12 sm:h-14 md:h-16 items-center gap-2 sm:gap-4 px-2 sm:px-3 md:px-4 lg:px-6">
+              <SidebarTrigger className="h-8 w-8 sm:h-9 sm:w-9 md:h-10 md:w-10" />
+              <div className="flex-1 min-w-0">
+                <h1 className="text-base sm:text-lg md:text-xl lg:text-2xl font-bold truncate">Produits</h1>
+                  <div className="mt-1 flex flex-wrap gap-1 sm:gap-2 text-[10px] sm:text-xs">
+                    <Badge variant={status==='all'?'default':'outline'} onClick={()=>setStatus('all')} className="cursor-pointer text-[9px] sm:text-[10px] md:text-xs">Tous</Badge>
+                    <Badge variant={status==='active'?'default':'outline'} onClick={()=>setStatus('active')} className="cursor-pointer text-[9px] sm:text-[10px] md:text-xs">Publiés: {publishedCount}</Badge>
+                    <Badge variant={status==='inactive'?'default':'outline'} onClick={()=>setStatus('inactive')} className="cursor-pointer text-[9px] sm:text-[10px] md:text-xs">Inactifs: {inactiveCount}</Badge>
                   </div>
               </div>
-              <Button onClick={() => navigate("/dashboard/products/new?tab=faq") }>
-                Nouveau produit
+              <Button onClick={() => navigate("/dashboard/products/new?tab=faq") } className="text-xs sm:text-sm h-8 sm:h-9 md:h-10 px-2 sm:px-3 md:px-4">
+                <span className="hidden sm:inline">Nouveau produit</span>
+                <span className="sm:hidden">+</span>
               </Button>
             </div>
           </header>
 
-          <main className="flex-1 p-4 sm:p-6 bg-gradient-hero">
-            <div className="max-w-7xl mx-auto space-y-6">
+          <main className="flex-1 p-2 sm:p-3 md:p-4 lg:p-6 bg-gradient-hero overflow-x-hidden">
+            <div className="max-w-7xl mx-auto space-y-3 sm:space-y-4 md:space-y-6">
               {productsLoading ? (
                 <Card className="shadow-medium">
-                  <CardContent className="py-12 text-center">
-                    <p className="text-muted-foreground">Chargement des produits...</p>
+                  <CardContent className="py-8 sm:py-12 text-center">
+                    <p className="text-sm sm:text-base text-muted-foreground">Chargement des produits...</p>
                   </CardContent>
                 </Card>
               ) : products.length === 0 ? (
                 <Card className="shadow-medium">
-                  <CardHeader className="text-center py-12">
-                    <div className="flex justify-center mb-4">
-                      <div className="h-20 w-20 rounded-full bg-muted flex items-center justify-center">
-                        <Package className="h-10 w-10 text-muted-foreground" />
+                  <CardHeader className="text-center py-8 sm:py-12 px-4">
+                    <div className="flex justify-center mb-3 sm:mb-4">
+                      <div className="h-16 w-16 sm:h-20 sm:w-20 rounded-full bg-muted flex items-center justify-center">
+                        <Package className="h-8 w-8 sm:h-10 sm:w-10 text-muted-foreground" />
                       </div>
                     </div>
-                    <CardTitle>Aucun produit pour le moment</CardTitle>
-                    <CardDescription className="mt-2">
+                    <CardTitle className="text-lg sm:text-xl">Aucun produit pour le moment</CardTitle>
+                    <CardDescription className="mt-2 text-sm sm:text-base">
                       Créez votre premier produit digital ou service pour commencer à vendre
                     </CardDescription>
                   </CardHeader>
-                  <CardContent className="text-center pb-12">
-                    <Button onClick={() => navigate("/dashboard/products/new?tab=faq") }>
+                  <CardContent className="text-center pb-8 sm:pb-12 px-4">
+                    <Button onClick={() => navigate("/dashboard/products/new?tab=faq") } className="w-full sm:w-auto">
                       Créer mon premier produit
                     </Button>
                   </CardContent>
@@ -223,8 +224,8 @@ const Products = () => {
 
                   {filteredProducts.length === 0 ? (
                     <Card className="shadow-medium">
-                      <CardContent className="py-12 text-center">
-                        <p className="text-muted-foreground">
+                      <CardContent className="py-8 sm:py-12 text-center">
+                        <p className="text-sm sm:text-base text-muted-foreground">
                           Aucun produit ne correspond à vos critères de recherche
                         </p>
                       </CardContent>
@@ -232,12 +233,12 @@ const Products = () => {
                   ) : (
                     <>
                       <div className="flex items-center justify-between">
-                        <p className="text-sm text-muted-foreground">
+                        <p className="text-xs sm:text-sm text-muted-foreground">
                           {filteredProducts.length} produit{filteredProducts.length > 1 ? "s" : ""} trouvé{filteredProducts.length > 1 ? "s" : ""}
                         </p>
                       </div>
 
-                      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
+                      <div className="grid grid-cols-1 xs:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4 md:gap-6">
                         {filteredProducts.map((product) => (
                           <ProductCardDashboard
                             key={product.id}

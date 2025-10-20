@@ -19,6 +19,15 @@ export default {
         "3xl": "1920px",
       },
     },
+    screens: {
+      "xs": "475px",
+      "sm": "640px",
+      "md": "768px",
+      "lg": "1024px",
+      "xl": "1280px",
+      "2xl": "1400px",
+      "3xl": "1920px",
+    },
     extend: {
       fontFamily: {
         sans: ['Poppins', 'system-ui', 'sans-serif'],

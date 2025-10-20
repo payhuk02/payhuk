@@ -23,37 +23,37 @@ const Dashboard = () => {
         <div className="flex-1 flex flex-col">
           {/* Header */}
           <header className="sticky top-0 z-10 border-b bg-card shadow-soft">
-            <div className="flex h-14 sm:h-16 items-center gap-2 sm:gap-4 px-3 sm:px-4 md:px-6">
-              <SidebarTrigger />
+            <div className="flex h-12 sm:h-14 md:h-16 items-center gap-2 sm:gap-4 px-2 sm:px-3 md:px-4 lg:px-6">
+              <SidebarTrigger className="h-8 w-8 sm:h-9 sm:w-9 md:h-10 md:w-10" />
               <div className="flex-1 min-w-0">
-                <h1 className="text-lg sm:text-xl md:text-2xl font-bold truncate">Tableau de bord</h1>
+                <h1 className="text-base sm:text-lg md:text-xl lg:text-2xl font-bold truncate">Tableau de bord</h1>
               </div>
             </div>
           </header>
 
           {/* Main Content */}
-          <main className="flex-1 p-3 sm:p-4 md:p-6 lg:p-8 bg-gradient-hero overflow-x-hidden">
+          <main className="flex-1 p-2 sm:p-3 md:p-4 lg:p-6 xl:p-8 bg-gradient-hero overflow-x-hidden">
             {storeLoading || loading ? (
-              <div className="flex items-center justify-center h-64">
+              <div className="flex items-center justify-center h-48 sm:h-64">
                 <div className="text-center">
-                  <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-primary border-r-transparent"></div>
-                  <p className="mt-2 text-muted-foreground">Chargement...</p>
+                  <div className="inline-block h-6 w-6 sm:h-8 sm:w-8 animate-spin rounded-full border-4 border-solid border-primary border-r-transparent"></div>
+                  <p className="mt-2 text-sm sm:text-base text-muted-foreground">Chargement...</p>
                 </div>
               </div>
             ) : !store ? (
-              <div className="max-w-3xl mx-auto text-center py-12">
-                <h2 className="text-2xl font-bold mb-4">Bienvenue ! 🎉</h2>
-                <p className="text-muted-foreground mb-6">
+              <div className="max-w-3xl mx-auto text-center py-8 sm:py-12 px-4">
+                <h2 className="text-xl sm:text-2xl font-bold mb-3 sm:mb-4">Bienvenue ! 🎉</h2>
+                <p className="text-sm sm:text-base text-muted-foreground mb-4 sm:mb-6">
                   Commencez par créer votre boutique pour accéder au tableau de bord
                 </p>
-                <Button onClick={() => navigate("/dashboard/store")}>
+                <Button onClick={() => navigate("/dashboard/store")} className="w-full sm:w-auto">
                   Créer ma boutique
                 </Button>
               </div>
             ) : (
-              <div className="w-full max-w-7xl mx-auto space-y-4 sm:space-y-6 animate-fade-in">
+              <div className="w-full max-w-7xl mx-auto space-y-3 sm:space-y-4 md:space-y-6 animate-fade-in">
                 {/* Stats Grid */}
-                <div className="grid gap-3 sm:gap-4 grid-cols-2 lg:grid-cols-4">
+                <div className="grid gap-2 sm:gap-3 md:gap-4 grid-cols-1 xs:grid-cols-2 lg:grid-cols-4">
                   <StatsCard
                     title="Produits"
                     value={stats.totalProducts}
@@ -84,7 +84,7 @@ const Dashboard = () => {
                 <QuickActions />
 
                 {/* Recent Activity Grid */}
-                <div className="grid gap-4 sm:gap-6 lg:grid-cols-2">
+                <div className="grid gap-3 sm:gap-4 md:gap-6 grid-cols-1 lg:grid-cols-2">
                   <RecentOrdersCard orders={stats.recentOrders} />
                   <TopProductsCard products={stats.topProducts} />
                 </div>

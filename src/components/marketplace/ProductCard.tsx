@@ -86,10 +86,10 @@ const ProductCard = ({ product, storeSlug }: ProductCardProps) => {
   };
 
   return (
-    <div className="group relative flex flex-col rounded-2xl border border-border bg-card overflow-hidden shadow-sm hover:shadow-md transition-all duration-300 hover:-translate-y-1">
+    <div className="group relative flex flex-col rounded-xl sm:rounded-2xl border border-border bg-card overflow-hidden shadow-sm hover:shadow-md transition-all duration-300 hover:-translate-y-1">
       {hasPromo && (
-        <div className="absolute top-3 left-3 z-10 bg-red-500 text-white text-xs font-bold px-2 py-1 rounded-md flex items-center gap-1">
-          <Percent className="h-3 w-3" /> -{discountPercent}%
+        <div className="absolute top-2 left-2 sm:top-3 sm:left-3 z-10 bg-red-500 text-white text-[10px] sm:text-xs font-bold px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-md flex items-center gap-0.5 sm:gap-1">
+          <Percent className="h-2 w-2 sm:h-3 sm:w-3" /> -{discountPercent}%
         </div>
       )}
 
@@ -104,51 +104,51 @@ const ProductCard = ({ product, storeSlug }: ProductCardProps) => {
           />
         ) : (
           <div className="h-full w-full flex items-center justify-center text-muted-foreground">
-            <ShoppingCart className="h-16 w-16 opacity-20" />
+            <ShoppingCart className="h-12 w-12 sm:h-16 sm:w-16 opacity-20" />
           </div>
         )}
       </div>
 
-      <div className="flex-1 flex flex-col p-4 space-y-2">
+      <div className="flex-1 flex flex-col p-2 sm:p-3 md:p-4 space-y-1 sm:space-y-2">
         {product.category && (
-          <span className="text-xs font-medium text-primary uppercase tracking-wide">
+          <span className="text-[10px] sm:text-xs font-medium text-primary uppercase tracking-wide">
             {product.category}
           </span>
         )}
 
-        <h3 className="text-base font-semibold leading-tight line-clamp-2 group-hover:text-primary transition-colors">
+        <h3 className="text-sm sm:text-base font-semibold leading-tight line-clamp-2 group-hover:text-primary transition-colors">
           {product.name}
         </h3>
 
         {product.rating ? (
-          <div className="flex items-center gap-1 text-sm text-muted-foreground">
+          <div className="flex items-center gap-0.5 sm:gap-1 text-xs sm:text-sm text-muted-foreground">
             {renderStars(product.rating)}
-            <span className="ml-1 text-xs">({product.reviews_count ?? 0})</span>
+            <span className="ml-1 text-[10px] sm:text-xs">({product.reviews_count ?? 0})</span>
           </div>
         ) : (
-          <div className="h-5" />
+          <div className="h-4 sm:h-5" />
         )}
 
-        <div className="flex items-baseline gap-2 mt-1">
+        <div className="flex items-baseline gap-1 sm:gap-2 mt-1">
           {hasPromo && (
-            <span className="text-sm text-muted-foreground line-through">
+            <span className="text-xs sm:text-sm text-muted-foreground line-through">
               {product.price.toLocaleString()} {product.currency ?? "FCFA"}
             </span>
           )}
-          <span className="text-lg font-bold text-primary">
+          <span className="text-base sm:text-lg font-bold text-primary">
             {price.toLocaleString()} {product.currency ?? "FCFA"}
           </span>
         </div>
 
-        <span className="text-xs text-muted-foreground">
+        <span className="text-[10px] sm:text-xs text-muted-foreground">
           {product.purchases_count
             ? `${product.purchases_count} ventes`
             : "Aucune vente"}
         </span>
 
-        <div className="mt-3 flex gap-2">
+        <div className="mt-2 sm:mt-3 flex flex-col sm:flex-row gap-1 sm:gap-2">
           <Link to={`/stores/${storeSlug}/products/${product.slug}`} className="flex-1">
-            <Button variant="outline" className="w-full">
+            <Button variant="outline" className="w-full h-8 sm:h-9 text-xs sm:text-sm">
               Voir le produit
             </Button>
           </Link>
@@ -156,16 +156,17 @@ const ProductCard = ({ product, storeSlug }: ProductCardProps) => {
           <Button
             onClick={handleBuyNow}
             disabled={loading}
-            className="bg-primary text-primary-foreground flex items-center gap-1"
+            className="bg-primary text-primary-foreground flex items-center gap-1 h-8 sm:h-9 text-xs sm:text-sm"
           >
             {loading ? (
               <>
-                <Loader2 className="h-4 w-4 animate-spin" />
-                <span>Paiement...</span>
+                <Loader2 className="h-3 w-3 sm:h-4 sm:w-4 animate-spin" />
+                <span className="hidden sm:inline">Paiement...</span>
+                <span className="sm:hidden">...</span>
               </>
             ) : (
               <>
-                <ShoppingCart className="h-4 w-4" />
+                <ShoppingCart className="h-3 w-3 sm:h-4 sm:w-4" />
                 <span>Acheter</span>
               </>
             )}

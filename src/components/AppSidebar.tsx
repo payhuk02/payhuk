@@ -196,18 +196,18 @@ export function AppSidebar() {
   };
 
   return (
-    <Sidebar collapsible="icon" className="border-r">
-      <SidebarContent>
+    <Sidebar collapsible="icon" className="border-r w-full sm:w-auto">
+      <SidebarContent className="overflow-y-auto">
         {/* Logo */}
-        <div className="p-3 sm:p-4 border-b">
+        <div className="p-2 sm:p-3 md:p-4 border-b">
           <div className="flex items-center gap-2">
             <img 
               src={payhukLogo} 
               alt="Payhuk" 
-              className="h-8 w-8 sm:h-10 sm:w-10 flex-shrink-0 object-contain" 
+              className="h-6 w-6 sm:h-8 sm:w-8 md:h-10 md:w-10 flex-shrink-0 object-contain" 
             />
             {!isCollapsed && (
-              <span className="text-base sm:text-lg font-bold text-black dark:text-white truncate">
+              <span className="text-sm sm:text-base md:text-lg font-bold text-black dark:text-white truncate">
                 Payhuk
               </span>
             )}
@@ -216,25 +216,25 @@ export function AppSidebar() {
 
         {/* Menu Items */}
         <SidebarGroup>
-          <SidebarGroupLabel className="!text-black">Menu principal</SidebarGroupLabel>
+          <SidebarGroupLabel className="!text-black text-xs sm:text-sm px-2 sm:px-3">Menu principal</SidebarGroupLabel>
           <SidebarGroupContent>
-            <SidebarMenu>
+            <SidebarMenu className="space-y-1">
               {menuItems.map((item) => (
                 <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton asChild>
+                  <SidebarMenuButton asChild className="h-8 sm:h-10 px-2 sm:px-3">
                     <NavLink
                       to={item.url}
                       end={item.url === "/dashboard"}
                       className={({ isActive }) =>
-                        `transition-all duration-300 ${
+                        `transition-all duration-300 text-xs sm:text-sm ${
                           isActive
                             ? "bg-primary/20 text-primary font-semibold border-l-2 border-primary"
                             : "!text-black hover:bg-muted hover:translate-x-1"
                         }`
                       }
                     >
-                      <item.icon className="h-4 w-4" />
-                      {!isCollapsed && <span>{item.title}</span>}
+                      <item.icon className="h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0" />
+                      {!isCollapsed && <span className="truncate">{item.title}</span>}
                     </NavLink>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
@@ -246,24 +246,24 @@ export function AppSidebar() {
         {/* Admin Menu Items */}
         {isAdmin && (
           <SidebarGroup>
-            <SidebarGroupLabel className="!text-black">Administration</SidebarGroupLabel>
+            <SidebarGroupLabel className="!text-black text-xs sm:text-sm px-2 sm:px-3">Administration</SidebarGroupLabel>
             <SidebarGroupContent>
-              <SidebarMenu>
+              <SidebarMenu className="space-y-1">
                 {adminMenuItems.map((item) => (
                   <SidebarMenuItem key={item.title}>
-                    <SidebarMenuButton asChild>
+                    <SidebarMenuButton asChild className="h-8 sm:h-10 px-2 sm:px-3">
                       <NavLink
                         to={item.url}
                         className={({ isActive }) =>
-                          `transition-all duration-300 ${
+                          `transition-all duration-300 text-xs sm:text-sm ${
                             isActive
                               ? "bg-primary/20 text-primary font-semibold border-l-2 border-primary"
                               : "!text-black hover:bg-muted hover:translate-x-1"
                           }`
                         }
                       >
-                        <item.icon className="h-4 w-4" />
-                        {!isCollapsed && <span>{item.title}</span>}
+                        <item.icon className="h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0" />
+                        {!isCollapsed && <span className="truncate">{item.title}</span>}
                       </NavLink>
                     </SidebarMenuButton>
                   </SidebarMenuItem>
@@ -275,14 +275,14 @@ export function AppSidebar() {
       </SidebarContent>
 
       {/* Footer */}
-      <SidebarFooter className="border-t p-4">
+      <SidebarFooter className="border-t p-2 sm:p-3 md:p-4">
         <Button
           variant="ghost"
-          className="w-full justify-start !text-black"
+          className="w-full justify-start !text-black text-xs sm:text-sm h-8 sm:h-10"
           onClick={handleLogout}
         >
-          <LogOut className="h-4 w-4" />
-          {!isCollapsed && <span>Déconnexion</span>}
+          <LogOut className="h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0" />
+          {!isCollapsed && <span className="truncate">Déconnexion</span>}
         </Button>
       </SidebarFooter>
     </Sidebar>

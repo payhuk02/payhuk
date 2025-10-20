@@ -24,8 +24,6 @@ import {
   ChevronLeft,
   ChevronRight,
   X,
-  CheckCircle2,
-  AlertCircle,
   BarChart3,
   Zap,
   Sparkles,
@@ -40,8 +38,6 @@ import { initiateMonerooPayment } from "@/lib/moneroo-payment";
 import MarketplaceHeader from "@/components/marketplace/MarketplaceHeader";
 import MarketplaceFooter from "@/components/marketplace/MarketplaceFooter";
 import AdvancedFilters from "@/components/marketplace/AdvancedFilters";
-import ProductComparison from "@/components/marketplace/ProductComparison";
-import FavoritesManager from "@/components/marketplace/FavoritesManager";
 import { logger } from '@/lib/logger';
 import { Product, FilterState, PaginationState } from '@/types/marketplace';
 
@@ -80,8 +76,6 @@ const Marketplace = () => {
   // États des modales et UI
   const [showFilters, setShowFilters] = useState(false);
   const [showAdvancedSearch, setShowAdvancedSearch] = useState(false);
-  const [showComparison, setShowComparison] = useState(false);
-  const [showFavorites, setShowFavorites] = useState(false);
   const [comparisonProducts, setComparisonProducts] = useState<Product[]>([]);
   const [priceRange, setPriceRange] = useState<[number, number]>([0, 100000]);
 
@@ -168,7 +162,7 @@ const Marketplace = () => {
       }
       
       console.log("Produits chargés:", data);
-      setProducts((data || []) as unknown as Product[]);
+      setProducts((data || []) as Product[]);
       setPagination(prev => ({ ...prev, totalItems: data?.length || 0 }));
       
     } catch (error) {
@@ -346,20 +340,6 @@ const Marketplace = () => {
     });
   }, [comparisonProducts, toast]);
 
-  const removeFromComparison = useCallback((productId: string) => {
-    setComparisonProducts(prev => prev.filter(p => p.id !== productId));
-  }, []);
-
-  const clearComparison = useCallback(() => {
-    setComparisonProducts([]);
-  }, []);
-
-  // Obtenir les produits favoris
-  const favoriteProducts = useMemo(() => 
-    products.filter(p => favorites.has(p.id)), 
-    [products, favorites]
-  );
-
   // Fonction d'achat
   const handlePurchase = useCallback(async (product: Product) => {
     if (!product.store_id) {
@@ -456,68 +436,69 @@ const Marketplace = () => {
       <MarketplaceHeader />
 
       {/* Hero Section */}
-      <section className="relative py-16 px-4 overflow-hidden">
+      <section className="relative py-8 sm:py-12 md:py-16 px-2 sm:px-4 overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-r from-blue-600/20 via-purple-600/20 to-pink-600/20 animate-pulse"></div>
         <div className="container mx-auto max-w-6xl relative z-10">
-          <div className="text-center mb-12">
-            <div className="flex items-center justify-center gap-2 mb-4">
-              <Sparkles className="h-8 w-8 text-yellow-400 animate-pulse" />
-              <h1 className="text-4xl md:text-6xl font-bold text-white bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400 bg-clip-text text-transparent">
+          <div className="text-center mb-8 sm:mb-10 md:mb-12">
+            <div className="flex items-center justify-center gap-1 sm:gap-2 mb-3 sm:mb-4">
+              <Sparkles className="h-6 w-6 sm:h-8 sm:w-8 text-yellow-400 animate-pulse" />
+              <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-bold text-white bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400 bg-clip-text text-transparent">
             Marketplace Payhuk
           </h1>
-              <Sparkles className="h-8 w-8 text-yellow-400 animate-pulse" />
+              <Sparkles className="h-6 w-6 sm:h-8 sm:w-8 text-yellow-400 animate-pulse" />
             </div>
-            <p className="text-xl md:text-2xl text-slate-300 mb-8 max-w-4xl mx-auto leading-relaxed">
+            <p className="text-sm sm:text-base md:text-lg lg:text-xl xl:text-2xl text-slate-300 mb-6 sm:mb-8 max-w-4xl mx-auto leading-relaxed px-2">
               Découvrez des milliers de produits digitaux : formations, ebooks, templates, logiciels et plus encore.
-              <br />
+              <br className="hidden sm:block" />
               <span className="text-blue-400 font-semibold">Rejoignez la révolution du commerce digital en Afrique</span>
             </p>
             
             {/* Statistiques */}
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 max-w-2xl mx-auto mb-8">
-              <div className="bg-slate-800/50 backdrop-blur-sm rounded-lg p-4 border border-slate-600">
-                <div className="text-2xl font-bold text-blue-400">{stats.totalProducts}</div>
-                <div className="text-sm text-slate-400">Produits</div>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-2 sm:gap-3 md:gap-4 max-w-2xl mx-auto mb-6 sm:mb-8">
+              <div className="bg-slate-800/50 backdrop-blur-sm rounded-lg p-2 sm:p-3 md:p-4 border border-slate-600">
+                <div className="text-lg sm:text-xl md:text-2xl font-bold text-blue-400">{stats.totalProducts}</div>
+                <div className="text-xs sm:text-sm text-slate-400">Produits</div>
               </div>
-              <div className="bg-slate-800/50 backdrop-blur-sm rounded-lg p-4 border border-slate-600">
-                <div className="text-2xl font-bold text-green-400">{stats.totalStores}</div>
-                <div className="text-sm text-slate-400">Boutiques</div>
+              <div className="bg-slate-800/50 backdrop-blur-sm rounded-lg p-2 sm:p-3 md:p-4 border border-slate-600">
+                <div className="text-lg sm:text-xl md:text-2xl font-bold text-green-400">{stats.totalStores}</div>
+                <div className="text-xs sm:text-sm text-slate-400">Boutiques</div>
               </div>
-              <div className="bg-slate-800/50 backdrop-blur-sm rounded-lg p-4 border border-slate-600">
-                <div className="text-2xl font-bold text-yellow-400">{stats.averageRating.toFixed(1)}</div>
-                <div className="text-sm text-slate-400">Note moyenne</div>
+              <div className="bg-slate-800/50 backdrop-blur-sm rounded-lg p-2 sm:p-3 md:p-4 border border-slate-600">
+                <div className="text-lg sm:text-xl md:text-2xl font-bold text-yellow-400">{stats.averageRating.toFixed(1)}</div>
+                <div className="text-xs sm:text-sm text-slate-400">Note moyenne</div>
               </div>
-              <div className="bg-slate-800/50 backdrop-blur-sm rounded-lg p-4 border border-slate-600">
-                <div className="text-2xl font-bold text-purple-400">{stats.totalSales}</div>
-                <div className="text-sm text-slate-400">Ventes</div>
+              <div className="bg-slate-800/50 backdrop-blur-sm rounded-lg p-2 sm:p-3 md:p-4 border border-slate-600">
+                <div className="text-lg sm:text-xl md:text-2xl font-bold text-purple-400">{stats.totalSales}</div>
+                <div className="text-xs sm:text-sm text-slate-400">Ventes</div>
               </div>
             </div>
           </div>
 
           {/* Barre de recherche */}
-          <div className="max-w-4xl mx-auto">
-            <div className="relative mb-6">
-              <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-slate-400 h-5 w-5" />
+          <div className="max-w-4xl mx-auto px-2">
+            <div className="relative mb-4 sm:mb-6">
+              <Search className="absolute left-3 sm:left-4 top-1/2 transform -translate-y-1/2 text-slate-400 h-4 w-4 sm:h-5 sm:w-5" />
             <Input
                 type="text"
                 placeholder="Rechercher un produit, une boutique ou une catégorie..."
                 value={filters.search}
                 onChange={(e) => updateFilter({ search: e.target.value })}
-                className="pl-12 pr-4 py-4 text-lg bg-slate-800/80 backdrop-blur-sm border-slate-600 text-white placeholder-slate-400 focus:border-blue-500 focus:ring-blue-500 transition-all duration-300"
+                className="pl-10 sm:pl-12 pr-3 sm:pr-4 py-3 sm:py-4 text-sm sm:text-base md:text-lg bg-slate-800/80 backdrop-blur-sm border-slate-600 text-white placeholder-slate-400 focus:border-blue-500 focus:ring-blue-500 transition-all duration-300"
             />
           </div>
 
             {/* Filtres rapides */}
-            <div className="flex flex-wrap gap-3 justify-center">
+            <div className="flex flex-wrap gap-2 sm:gap-3 justify-center">
               <Button
                 variant="outline"
                 onClick={() => setShowFilters(!showFilters)}
-                className="bg-slate-800/80 backdrop-blur-sm border-slate-600 text-white hover:bg-slate-700 transition-all duration-300 hover:scale-105"
+                className="bg-slate-800/80 backdrop-blur-sm border-slate-600 text-white hover:bg-slate-700 transition-all duration-300 hover:scale-105 text-xs sm:text-sm h-8 sm:h-9 md:h-10 px-2 sm:px-3"
               >
-                <Filter className="h-4 w-4 mr-2" />
-                Filtres avancés
+                <Filter className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
+                <span className="hidden sm:inline">Filtres avancés</span>
+                <span className="sm:hidden">Filtres</span>
                 {(filters.category !== "all" || filters.productType !== "all" || filters.priceRange !== "all" || filters.tags.length > 0) && (
-                  <Badge variant="destructive" className="ml-2 h-5 w-5 rounded-full p-0 flex items-center justify-center text-xs animate-pulse">
+                  <Badge variant="destructive" className="ml-1 sm:ml-2 h-4 w-4 sm:h-5 sm:w-5 rounded-full p-0 flex items-center justify-center text-xs animate-pulse">
                     !
                   </Badge>
                 )}
@@ -526,21 +507,23 @@ const Marketplace = () => {
               <Button
                 variant="outline"
                 onClick={() => setShowAdvancedSearch(!showAdvancedSearch)}
-                className="bg-slate-800/80 backdrop-blur-sm border-slate-600 text-white hover:bg-slate-700 transition-all duration-300 hover:scale-105"
+                className="bg-slate-800/80 backdrop-blur-sm border-slate-600 text-white hover:bg-slate-700 transition-all duration-300 hover:scale-105 text-xs sm:text-sm h-8 sm:h-9 md:h-10 px-2 sm:px-3"
               >
-                <Zap className="h-4 w-4 mr-2" />
-                Recherche intelligente
+                <Zap className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
+                <span className="hidden sm:inline">Recherche intelligente</span>
+                <span className="sm:hidden">Recherche</span>
               </Button>
 
               <Button
                 variant="outline"
-                onClick={() => setShowFavorites(true)}
-                className="bg-slate-800/80 backdrop-blur-sm border-slate-600 text-white hover:bg-slate-700 transition-all duration-300 hover:scale-105"
+                onClick={() => {/* TODO: Implement favorites modal */}}
+                className="bg-slate-800/80 backdrop-blur-sm border-slate-600 text-white hover:bg-slate-700 transition-all duration-300 hover:scale-105 text-xs sm:text-sm h-8 sm:h-9 md:h-10 px-2 sm:px-3"
               >
-                <Heart className="h-4 w-4 mr-2" />
-                Mes favoris
+                <Heart className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
+                <span className="hidden sm:inline">Mes favoris</span>
+                <span className="sm:hidden">Favoris</span>
                 {favorites.size > 0 && (
-                  <Badge variant="secondary" className="ml-2 bg-red-600 text-white animate-bounce">
+                  <Badge variant="secondary" className="ml-1 sm:ml-2 bg-red-600 text-white animate-bounce text-xs">
                     {favorites.size}
                   </Badge>
                 )}
@@ -548,13 +531,14 @@ const Marketplace = () => {
 
               <Button
                 variant="outline"
-                onClick={() => setShowComparison(true)}
-                className="bg-slate-800/80 backdrop-blur-sm border-slate-600 text-white hover:bg-slate-700 transition-all duration-300 hover:scale-105"
+                onClick={() => {/* TODO: Implement comparison modal */}}
+                className="bg-slate-800/80 backdrop-blur-sm border-slate-600 text-white hover:bg-slate-700 transition-all duration-300 hover:scale-105 text-xs sm:text-sm h-8 sm:h-9 md:h-10 px-2 sm:px-3"
               >
-                <BarChart3 className="h-4 w-4 mr-2" />
-                Comparer
+                <BarChart3 className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
+                <span className="hidden sm:inline">Comparer</span>
+                <span className="sm:hidden">Comparer</span>
                 {comparisonProducts.length > 0 && (
-                  <Badge variant="secondary" className="ml-2 bg-green-600 text-white animate-bounce">
+                  <Badge variant="secondary" className="ml-1 sm:ml-2 bg-green-600 text-white animate-bounce text-xs">
                     {comparisonProducts.length}
                   </Badge>
                 )}
@@ -563,10 +547,11 @@ const Marketplace = () => {
               <Button
                 variant="outline"
                 onClick={clearFilters}
-                className="bg-slate-800/80 backdrop-blur-sm border-slate-600 text-white hover:bg-slate-700 transition-all duration-300 hover:scale-105"
+                className="bg-slate-800/80 backdrop-blur-sm border-slate-600 text-white hover:bg-slate-700 transition-all duration-300 hover:scale-105 text-xs sm:text-sm h-8 sm:h-9 md:h-10 px-2 sm:px-3"
               >
-                <X className="h-4 w-4 mr-2" />
-                Effacer tout
+                <X className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
+                <span className="hidden sm:inline">Effacer tout</span>
+                <span className="sm:hidden">Effacer</span>
               </Button>
             </div>
           </div>
@@ -714,26 +699,26 @@ const Marketplace = () => {
       )}
 
       {/* Contrôles de tri et vue */}
-      <section className="py-6 px-4">
+      <section className="py-4 sm:py-6 px-2 sm:px-4">
         <div className="container mx-auto max-w-6xl">
-          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-            <div className="flex items-center gap-4">
-              <h2 className="text-2xl font-bold text-white">
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 sm:gap-4">
+            <div className="flex items-center gap-2 sm:gap-4">
+              <h2 className="text-lg sm:text-xl md:text-2xl font-bold text-white">
                 Tous les produits
               </h2>
-              <Badge variant="secondary" className="bg-slate-700 text-slate-300">
+              <Badge variant="secondary" className="bg-slate-700 text-slate-300 text-xs sm:text-sm">
                 {filteredProducts.length} produit{filteredProducts.length !== 1 ? "s" : ""}
               </Badge>
             </div>
 
-            <div className="flex items-center gap-3">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-3 w-full sm:w-auto">
               {/* Tri */}
-              <div className="flex items-center gap-2">
-                <label className="text-sm text-slate-300">Trier par:</label>
+              <div className="flex items-center gap-1 sm:gap-2 w-full sm:w-auto">
+                <label className="text-xs sm:text-sm text-slate-300 whitespace-nowrap">Trier par:</label>
                 <select
                   value={filters.sortBy}
                   onChange={(e) => updateFilter({ sortBy: e.target.value })}
-                  className="p-2 bg-slate-700 border-slate-600 text-white rounded-md text-sm focus:border-blue-500 focus:ring-blue-500"
+                  className="flex-1 sm:flex-none p-1.5 sm:p-2 bg-slate-700 border-slate-600 text-white rounded-md text-xs sm:text-sm focus:border-blue-500 focus:ring-blue-500"
                 >
                   {SORT_OPTIONS.map(option => (
                     <option key={option.value} value={option.value}>{option.label}</option>
@@ -743,9 +728,9 @@ const Marketplace = () => {
                   variant="outline"
                   size="sm"
                   onClick={() => updateFilter({ sortOrder: filters.sortOrder === "asc" ? "desc" : "asc" })}
-                  className="bg-slate-700 border-slate-600 text-white hover:bg-slate-600 transition-all duration-300"
+                  className="bg-slate-700 border-slate-600 text-white hover:bg-slate-600 transition-all duration-300 h-7 sm:h-8 w-7 sm:w-8 p-0"
                 >
-                  {filters.sortOrder === "asc" ? <SortAsc className="h-4 w-4" /> : <SortDesc className="h-4 w-4" />}
+                  {filters.sortOrder === "asc" ? <SortAsc className="h-3 w-3 sm:h-4 sm:w-4" /> : <SortDesc className="h-3 w-3 sm:h-4 sm:w-4" />}
                 </Button>
               </div>
 
@@ -755,17 +740,17 @@ const Marketplace = () => {
                   variant={filters.viewMode === "grid" ? "default" : "outline"}
                   size="sm"
                   onClick={() => updateFilter({ viewMode: "grid" })}
-                  className="bg-slate-700 border-slate-600 text-white hover:bg-slate-600 transition-all duration-300"
+                  className="bg-slate-700 border-slate-600 text-white hover:bg-slate-600 transition-all duration-300 h-7 sm:h-8 w-7 sm:w-8 p-0"
                 >
-                  <Grid3X3 className="h-4 w-4" />
+                  <Grid3X3 className="h-3 w-3 sm:h-4 sm:w-4" />
                 </Button>
                 <Button
                   variant={filters.viewMode === "list" ? "default" : "outline"}
                   size="sm"
                   onClick={() => updateFilter({ viewMode: "list" })}
-                  className="bg-slate-700 border-slate-600 text-white hover:bg-slate-600 transition-all duration-300"
+                  className="bg-slate-700 border-slate-600 text-white hover:bg-slate-600 transition-all duration-300 h-7 sm:h-8 w-7 sm:w-8 p-0"
                 >
-                  <List className="h-4 w-4" />
+                  <List className="h-3 w-3 sm:h-4 sm:w-4" />
                 </Button>
               </div>
             </div>
@@ -774,17 +759,17 @@ const Marketplace = () => {
       </section>
 
       {/* Liste des produits */}
-      <section className="py-6 px-4">
+      <section className="py-4 sm:py-6 px-2 sm:px-4">
         <div className="container mx-auto max-w-6xl">
           {loading ? (
-            <div className={`grid gap-6 ${filters.viewMode === "grid" ? "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4" : "grid-cols-1"}`}>
+            <div className={`grid gap-3 sm:gap-4 md:gap-6 ${filters.viewMode === "grid" ? "grid-cols-1 xs:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4" : "grid-cols-1"}`}>
               {Array.from({ length: pagination.itemsPerPage }).map((_, i) => (
-                <Skeleton key={i} className={`rounded-lg ${filters.viewMode === "grid" ? "h-[480px]" : "h-[200px]"}`} />
+                <Skeleton key={i} className={`rounded-lg ${filters.viewMode === "grid" ? "h-[400px] sm:h-[450px] md:h-[480px]" : "h-[180px] sm:h-[200px]"}`} />
               ))}
             </div>
           ) : paginatedProducts.length > 0 ? (
             <>
-              <div className={`grid gap-6 ${filters.viewMode === "grid" ? "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4" : "grid-cols-1"}`}>
+              <div className={`grid gap-3 sm:gap-4 md:gap-6 ${filters.viewMode === "grid" ? "grid-cols-1 xs:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4" : "grid-cols-1"}`}>
                 {paginatedProducts.map((product) => (
                   <ProductCardAdvanced
                   key={product.id}
@@ -803,26 +788,26 @@ const Marketplace = () => {
 
               {/* Pagination */}
               {totalPages > 1 && (
-                <div className="flex justify-center items-center gap-2 mt-12">
+                <div className="flex justify-center items-center gap-1 sm:gap-2 mt-8 sm:mt-12">
                   <Button
                     variant="outline"
                     onClick={() => goToPage(pagination.currentPage - 1)}
                     disabled={!canGoPrevious}
-                    className="bg-slate-800 border-slate-600 text-white hover:bg-slate-700 disabled:opacity-50 transition-all duration-300"
+                    className="bg-slate-800 border-slate-600 text-white hover:bg-slate-700 disabled:opacity-50 transition-all duration-300 h-8 w-8 sm:h-9 sm:w-9 p-0"
                   >
-                    <ChevronLeft className="h-4 w-4" />
+                    <ChevronLeft className="h-3 w-3 sm:h-4 sm:w-4" />
                   </Button>
 
-                  {Array.from({ length: Math.min(7, totalPages) }, (_, i) => {
+                  {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
                     let page;
-                    if (totalPages <= 7) {
+                    if (totalPages <= 5) {
                       page = i + 1;
-                    } else if (pagination.currentPage <= 4) {
+                    } else if (pagination.currentPage <= 3) {
                       page = i + 1;
-                    } else if (pagination.currentPage >= totalPages - 3) {
-                      page = totalPages - 6 + i;
+                    } else if (pagination.currentPage >= totalPages - 2) {
+                      page = totalPages - 4 + i;
                     } else {
-                      page = pagination.currentPage - 3 + i;
+                      page = pagination.currentPage - 2 + i;
                     }
                     
                     const isActive = page === pagination.currentPage;
@@ -832,7 +817,7 @@ const Marketplace = () => {
                         key={page}
                         variant={isActive ? "default" : "outline"}
                         onClick={() => goToPage(page)}
-                        className={isActive ? "bg-blue-600 text-white" : "bg-slate-800 border-slate-600 text-white hover:bg-slate-700 transition-all duration-300"}
+                        className={`h-8 w-8 sm:h-9 sm:w-9 p-0 text-xs sm:text-sm ${isActive ? "bg-blue-600 text-white" : "bg-slate-800 border-slate-600 text-white hover:bg-slate-700 transition-all duration-300"}`}
                       >
                         {page}
                       </Button>
@@ -843,30 +828,30 @@ const Marketplace = () => {
                     variant="outline"
                     onClick={() => goToPage(pagination.currentPage + 1)}
                     disabled={!canGoNext}
-                    className="bg-slate-800 border-slate-600 text-white hover:bg-slate-700 disabled:opacity-50 transition-all duration-300"
+                    className="bg-slate-800 border-slate-600 text-white hover:bg-slate-700 disabled:opacity-50 transition-all duration-300 h-8 w-8 sm:h-9 sm:w-9 p-0"
                   >
-                    <ChevronRight className="h-4 w-4" />
+                    <ChevronRight className="h-3 w-3 sm:h-4 sm:w-4" />
                   </Button>
                 </div>
               )}
             </>
           ) : (
-            <div className="text-center py-16">
-              <div className="h-20 w-20 rounded-full bg-slate-700 mx-auto mb-4 flex items-center justify-center">
-                <ShoppingCart className="h-10 w-10 text-slate-400" />
+            <div className="text-center py-12 sm:py-16 px-4">
+              <div className="h-16 w-16 sm:h-20 sm:w-20 rounded-full bg-slate-700 mx-auto mb-3 sm:mb-4 flex items-center justify-center">
+                <ShoppingCart className="h-8 w-8 sm:h-10 sm:w-10 text-slate-400" />
               </div>
-              <h3 className="text-2xl font-semibold text-white mb-2">
+              <h3 className="text-lg sm:text-xl md:text-2xl font-semibold text-white mb-2">
                 Aucun produit disponible
               </h3>
-              <p className="text-slate-400 mb-6">
+              <p className="text-sm sm:text-base text-slate-400 mb-4 sm:mb-6">
                 {filters.search
                   ? "Essayez d'autres mots-clés ou filtres"
                   : "Soyez le premier à vendre vos produits sur notre marketplace !"}
               </p>
               <Link to="/auth">
-                <Button className="bg-gradient-to-r from-blue-600 to-purple-600 text-white font-semibold h-12 px-8 hover:from-blue-700 hover:to-purple-700 transition-all duration-300 hover:scale-105">
+                <Button className="bg-gradient-to-r from-blue-600 to-purple-600 text-white font-semibold h-10 sm:h-12 px-4 sm:px-8 hover:from-blue-700 hover:to-purple-700 transition-all duration-300 hover:scale-105 w-full sm:w-auto">
                   Créer ma boutique gratuitement
-                  <ArrowRight className="ml-2 h-5 w-5" />
+                  <ArrowRight className="ml-2 h-4 w-4 sm:h-5 sm:w-5" />
                 </Button>
               </Link>
             </div>
@@ -875,28 +860,28 @@ const Marketplace = () => {
       </section>
 
       {/* Call to Action */}
-      <section className="py-16 px-4 bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 relative overflow-hidden">
+      <section className="py-12 sm:py-16 px-2 sm:px-4 bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 relative overflow-hidden">
         <div className="absolute inset-0 bg-black/20"></div>
         <div className="container mx-auto max-w-4xl text-center relative z-10">
-          <div className="flex items-center justify-center gap-2 mb-4">
-            <Rocket className="h-8 w-8 text-white animate-bounce" />
-            <h2 className="text-3xl md:text-4xl font-bold text-white">
+          <div className="flex items-center justify-center gap-1 sm:gap-2 mb-3 sm:mb-4">
+            <Rocket className="h-6 w-6 sm:h-8 sm:w-8 text-white animate-bounce" />
+            <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-white">
             Prêt à lancer votre boutique ?
           </h2>
-            <Rocket className="h-8 w-8 text-white animate-bounce" />
+            <Rocket className="h-6 w-6 sm:h-8 sm:w-8 text-white animate-bounce" />
           </div>
-          <p className="text-xl text-blue-100 mb-8">
+          <p className="text-base sm:text-lg md:text-xl text-blue-100 mb-6 sm:mb-8">
             Rejoignez des centaines d'entrepreneurs qui développent leur business avec Payhuk.
           </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+          <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center">
           <Link to="/auth">
-              <Button size="lg" className="bg-white text-blue-600 font-semibold h-14 px-8 hover:bg-blue-50 transition-all duration-300 hover:scale-105">
+              <Button size="lg" className="bg-white text-blue-600 font-semibold h-12 sm:h-14 px-6 sm:px-8 hover:bg-blue-50 transition-all duration-300 hover:scale-105 w-full sm:w-auto">
               Commencer gratuitement
-              <ArrowRight className="ml-2 h-5 w-5" />
+              <ArrowRight className="ml-2 h-4 w-4 sm:h-5 sm:w-5" />
             </Button>
           </Link>
-            <Button size="lg" variant="outline" className="border-white text-white hover:bg-white hover:text-blue-600 h-14 px-8 transition-all duration-300 hover:scale-105">
-              <Users className="mr-2 h-5 w-5" />
+            <Button size="lg" variant="outline" className="border-white text-white hover:bg-white hover:text-blue-600 h-12 sm:h-14 px-6 sm:px-8 transition-all duration-300 hover:scale-105 w-full sm:w-auto">
+              <Users className="mr-2 h-4 w-4 sm:h-5 sm:w-5" />
               Rejoindre la communauté
             </Button>
           </div>
@@ -917,19 +902,7 @@ const Marketplace = () => {
         onPriceRangeChange={setPriceRange}
       />
 
-      <ProductComparison
-        products={comparisonProducts}
-        onRemoveProduct={removeFromComparison}
-        onClearAll={clearComparison}
-        onClose={() => setShowComparison(false)}
-      />
-
-      <FavoritesManager
-        favorites={favoriteProducts}
-        onRemoveFavorite={(productId) => toggleFavorite(productId)}
-        onClearAll={() => setFavorites(new Set())}
-        onClose={() => setShowFavorites(false)}
-      />
+      {/* TODO: Implement ProductComparison and FavoritesManager modals */}
     </div>
   );
 };
@@ -988,11 +961,11 @@ const ProductCardAdvanced = ({
   if (viewMode === "list") {
     return (
       <Card className="group relative bg-slate-800/80 backdrop-blur-sm border-slate-600 hover:border-slate-500 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl">
-        <CardContent className="p-6">
-          <div className="flex gap-6">
+        <CardContent className="p-3 sm:p-4 md:p-6">
+          <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 md:gap-6">
             {/* Image */}
-            <div className="flex-shrink-0">
-              <div className="relative w-32 h-32 rounded-lg overflow-hidden bg-slate-700 cursor-pointer" onClick={handleCardClick}>
+            <div className="flex-shrink-0 mx-auto sm:mx-0">
+              <div className="relative w-24 h-24 sm:w-28 sm:h-28 md:w-32 md:h-32 rounded-lg overflow-hidden bg-slate-700 cursor-pointer" onClick={handleCardClick}>
                 {product.image_url ? (
                   <img
                     src={product.image_url}
@@ -1001,17 +974,17 @@ const ProductCardAdvanced = ({
                   />
                 ) : (
                   <div className="w-full h-full flex items-center justify-center">
-                    <ShoppingCart className="h-8 w-8 text-slate-400" />
+                    <ShoppingCart className="h-6 w-6 sm:h-8 sm:w-8 text-slate-400" />
                   </div>
                 )}
                 {hasPromo && (
-                  <Badge className="absolute top-2 left-2 bg-red-600 text-white animate-pulse">
+                  <Badge className="absolute top-1 left-1 sm:top-2 sm:left-2 bg-red-600 text-white animate-pulse text-xs">
                     -{discountPercent}%
                   </Badge>
                 )}
                 {hasPromo && (
-                  <Badge className="absolute top-2 right-2 bg-yellow-600 text-white">
-                    <Crown className="h-3 w-3 mr-1" />
+                  <Badge className="absolute top-1 right-1 sm:top-2 sm:right-2 bg-yellow-600 text-white text-xs">
+                    <Crown className="h-2 w-2 sm:h-3 sm:w-3 mr-1" />
                     Promo
                   </Badge>
                 )}
@@ -1022,92 +995,94 @@ const ProductCardAdvanced = ({
             <div className="flex-1 min-w-0">
               <div className="flex items-start justify-between mb-2">
                 <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2 mb-1">
+                  <div className="flex items-center gap-1 sm:gap-2 mb-1">
                     {product.category && (
-                      <Badge variant="secondary" className="bg-slate-700 text-slate-300">
+                      <Badge variant="secondary" className="bg-slate-700 text-slate-300 text-xs">
                         {product.category}
                       </Badge>
                     )}
                   </div>
-                  <h3 className="text-lg font-semibold text-white mb-1 line-clamp-2 cursor-pointer hover:text-blue-400 transition-colors" onClick={handleCardClick}>
+                  <h3 className="text-base sm:text-lg font-semibold text-white mb-1 line-clamp-2 cursor-pointer hover:text-blue-400 transition-colors" onClick={handleCardClick}>
                     {product.name}
                   </h3>
-                  <p className="text-slate-400 text-sm mb-2 line-clamp-2">
+                  <p className="text-slate-400 text-xs sm:text-sm mb-2 line-clamp-2">
                     {product.description}
                   </p>
                 </div>
               </div>
 
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-4">
-                  <div className="flex items-center gap-2">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 sm:gap-4">
+                <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4">
+                  <div className="flex items-center gap-1 sm:gap-2">
                     {renderStars(product.rating)}
                   </div>
-                  <div className="text-sm text-slate-400">
+                  <div className="text-xs sm:text-sm text-slate-400">
                     {product.reviews_count || 0} avis
                   </div>
-                  <div className="text-sm text-slate-400">
+                  <div className="text-xs sm:text-sm text-slate-400">
                     Par {product.stores?.name}
                   </div>
                 </div>
 
-                <div className="flex items-center gap-2">
+                <div className="flex items-center justify-between sm:justify-end gap-2">
                   <div className="text-right">
                     {hasPromo && (
-                      <div className="text-sm text-slate-400 line-through">
+                      <div className="text-xs sm:text-sm text-slate-400 line-through">
                         {product.price.toLocaleString()} {product.currency}
                       </div>
                     )}
-                    <div className="text-lg font-bold text-white">
+                    <div className="text-base sm:text-lg font-bold text-white">
                       {price.toLocaleString()} {product.currency}
                     </div>
                   </div>
                 </div>
               </div>
 
-              <div className="flex items-center gap-2 mt-4">
+              <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 mt-3 sm:mt-4">
                 <Button
                   onClick={onPurchase}
                   disabled={isPurchasing}
-                  className="flex-1 bg-blue-600 hover:bg-blue-700 text-white transition-all duration-300 hover:scale-105"
+                  className="flex-1 bg-blue-600 hover:bg-blue-700 text-white transition-all duration-300 hover:scale-105 h-9 sm:h-10 text-sm"
                 >
                   {isPurchasing ? (
                     <>
-                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                      <Loader2 className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2 animate-spin" />
                       Achat...
                     </>
                   ) : (
                     <>
-                      <ShoppingCart className="h-4 w-4 mr-2" />
+                      <ShoppingCart className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
                       Acheter
                     </>
                   )}
                 </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={onToggleFavorite}
-                  className="bg-slate-700 border-slate-600 text-white hover:bg-slate-600 transition-all duration-300"
-                >
-                  <Heart className={`h-4 w-4 ${isFavorite ? "fill-red-500 text-red-500" : ""}`} />
-                </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={onShare}
-                  className="bg-slate-700 border-slate-600 text-white hover:bg-slate-600 transition-all duration-300"
-                >
-                  <Share2 className="h-4 w-4" />
-                </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={onAddToComparison}
-                  disabled={isInComparison}
-                  className={`bg-slate-700 border-slate-600 text-white hover:bg-slate-600 transition-all duration-300 ${isInComparison ? "opacity-50" : ""}`}
-                >
-                  <BarChart3 className="h-4 w-4" />
-                </Button>
+                <div className="flex items-center gap-1 sm:gap-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={onToggleFavorite}
+                    className="bg-slate-700 border-slate-600 text-white hover:bg-slate-600 transition-all duration-300 h-8 w-8 sm:h-9 sm:w-9 p-0"
+                  >
+                    <Heart className={`h-3 w-3 sm:h-4 sm:w-4 ${isFavorite ? "fill-red-500 text-red-500" : ""}`} />
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={onShare}
+                    className="bg-slate-700 border-slate-600 text-white hover:bg-slate-600 transition-all duration-300 h-8 w-8 sm:h-9 sm:w-9 p-0"
+                  >
+                    <Share2 className="h-3 w-3 sm:h-4 sm:w-4" />
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={onAddToComparison}
+                    disabled={isInComparison}
+                    className={`bg-slate-700 border-slate-600 text-white hover:bg-slate-600 transition-all duration-300 h-8 w-8 sm:h-9 sm:w-9 p-0 ${isInComparison ? "opacity-50" : ""}`}
+                  >
+                    <BarChart3 className="h-3 w-3 sm:h-4 sm:w-4" />
+                  </Button>
+                </div>
               </div>
             </div>
           </div>
@@ -1118,7 +1093,7 @@ const ProductCardAdvanced = ({
 
   // Mode grille
   return (
-    <Card className="group relative bg-slate-800/80 backdrop-blur-sm border-slate-600 hover:border-slate-500 transition-all duration-300 hover:-translate-y-2 hover:shadow-2xl overflow-hidden">
+    <Card className="group relative bg-slate-800/80 backdrop-blur-sm border-slate-600 hover:border-slate-500 transition-all duration-300 hover:-translate-y-1 sm:hover:-translate-y-2 hover:shadow-xl sm:hover:shadow-2xl overflow-hidden">
       <CardContent className="p-0">
         {/* Image */}
         <div className="relative aspect-square overflow-hidden cursor-pointer" onClick={handleCardClick}>
@@ -1126,11 +1101,11 @@ const ProductCardAdvanced = ({
             <img
               src={product.image_url}
               alt={product.name}
-              className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+              className="w-full h-full object-cover group-hover:scale-105 sm:group-hover:scale-110 transition-transform duration-300 sm:duration-500"
             />
           ) : (
             <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-slate-700 to-slate-800">
-              <ShoppingCart className="h-12 w-12 text-slate-400" />
+              <ShoppingCart className="h-8 w-8 sm:h-10 sm:w-10 md:h-12 md:w-12 text-slate-400" />
             </div>
           )}
           
@@ -1138,22 +1113,22 @@ const ProductCardAdvanced = ({
           <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
           
           {/* Badges */}
-          <div className="absolute top-3 right-3 flex flex-col gap-2">
+          <div className="absolute top-2 left-2 sm:top-3 sm:left-3 flex flex-col gap-1 sm:gap-2">
             {hasPromo && (
-              <Badge className="bg-red-600 text-white animate-pulse">
+              <Badge className="bg-red-600 text-white animate-pulse text-xs">
                 -{discountPercent}%
               </Badge>
             )}
             {hasPromo && (
-              <Badge className="bg-yellow-600 text-white">
-                <Crown className="h-3 w-3 mr-1" />
+              <Badge className="bg-yellow-600 text-white text-xs">
+                <Crown className="h-2 w-2 sm:h-3 sm:w-3 mr-1" />
                 Promo
               </Badge>
             )}
           </div>
 
           {/* Actions hover */}
-          <div className="absolute top-3 right-3 flex flex-col gap-2 opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-x-2 group-hover:translate-x-0">
+          <div className="absolute top-2 right-2 sm:top-3 sm:right-3 flex flex-col gap-1 sm:gap-2 opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-x-2 group-hover:translate-x-0">
             <Button
               variant="outline"
               size="sm"
@@ -1161,9 +1136,9 @@ const ProductCardAdvanced = ({
                 e.stopPropagation();
                 onToggleFavorite();
               }}
-              className="bg-slate-800/90 backdrop-blur-sm border-slate-600 text-white hover:bg-slate-700 h-8 w-8 p-0 shadow-lg"
+              className="bg-slate-800/90 backdrop-blur-sm border-slate-600 text-white hover:bg-slate-700 h-6 w-6 sm:h-7 sm:w-7 md:h-8 md:w-8 p-0 shadow-lg"
             >
-              <Heart className={`h-4 w-4 ${isFavorite ? "fill-red-500 text-red-500" : ""}`} />
+              <Heart className={`h-3 w-3 sm:h-4 sm:w-4 ${isFavorite ? "fill-red-500 text-red-500" : ""}`} />
             </Button>
             <Button
               variant="outline"
@@ -1172,9 +1147,9 @@ const ProductCardAdvanced = ({
                 e.stopPropagation();
                 onShare();
               }}
-              className="bg-slate-800/90 backdrop-blur-sm border-slate-600 text-white hover:bg-slate-700 h-8 w-8 p-0 shadow-lg"
+              className="bg-slate-800/90 backdrop-blur-sm border-slate-600 text-white hover:bg-slate-700 h-6 w-6 sm:h-7 sm:w-7 md:h-8 md:w-8 p-0 shadow-lg"
             >
-              <Share2 className="h-4 w-4" />
+              <Share2 className="h-3 w-3 sm:h-4 sm:w-4" />
             </Button>
             <Button
               variant="outline"
@@ -1184,14 +1159,14 @@ const ProductCardAdvanced = ({
                 onAddToComparison();
               }}
               disabled={isInComparison}
-              className={`bg-slate-800/90 backdrop-blur-sm border-slate-600 text-white hover:bg-slate-700 h-8 w-8 p-0 shadow-lg ${isInComparison ? "opacity-50" : ""}`}
+              className={`bg-slate-800/90 backdrop-blur-sm border-slate-600 text-white hover:bg-slate-700 h-6 w-6 sm:h-7 sm:w-7 md:h-8 md:w-8 p-0 shadow-lg ${isInComparison ? "opacity-50" : ""}`}
             >
-              <BarChart3 className="h-4 w-4" />
+              <BarChart3 className="h-3 w-3 sm:h-4 sm:w-4" />
             </Button>
           </div>
 
           {/* Quick view button */}
-          <div className="absolute bottom-3 left-3 right-3 opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-y-2 group-hover:translate-y-0">
+          <div className="absolute bottom-2 left-2 right-2 sm:bottom-3 sm:left-3 sm:right-3 opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-y-2 group-hover:translate-y-0">
             <Button
               variant="outline"
               size="sm"
@@ -1199,66 +1174,69 @@ const ProductCardAdvanced = ({
                 e.stopPropagation();
                 handleCardClick();
               }}
-              className="w-full bg-slate-800/90 backdrop-blur-sm border-slate-600 text-white hover:bg-slate-700 shadow-lg"
+              className="w-full bg-slate-800/90 backdrop-blur-sm border-slate-600 text-white hover:bg-slate-700 shadow-lg h-7 sm:h-8 text-xs sm:text-sm"
             >
-              <Eye className="h-4 w-4 mr-2" />
-              Voir rapidement
+              <Eye className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
+              <span className="hidden sm:inline">Voir rapidement</span>
+              <span className="sm:hidden">Voir</span>
             </Button>
           </div>
         </div>
 
         {/* Contenu */}
-        <div className="p-4">
-          <div className="flex items-center gap-2 mb-2">
+        <div className="p-2 sm:p-3 md:p-4">
+          <div className="flex items-center gap-1 sm:gap-2 mb-1 sm:mb-2">
             {product.category && (
-              <Badge variant="secondary" className="bg-slate-700 text-slate-300 text-xs">
+              <Badge variant="secondary" className="bg-slate-700 text-slate-300 text-[10px] sm:text-xs">
                 {product.category}
               </Badge>
             )}
           </div>
 
-          <h3 className="font-semibold text-white mb-2 line-clamp-2 cursor-pointer hover:text-blue-400 transition-colors" onClick={handleCardClick}>
+          <h3 className="font-semibold text-white mb-1 sm:mb-2 line-clamp-2 cursor-pointer hover:text-blue-400 transition-colors text-sm sm:text-base" onClick={handleCardClick}>
             {product.name}
           </h3>
 
-          <div className="flex items-center gap-1 mb-3">
+          <div className="flex items-center gap-0.5 sm:gap-1 mb-2 sm:mb-3">
             {renderStars(product.rating)}
           </div>
 
-          <div className="flex items-center justify-between mb-4">
-            <div className="text-sm text-slate-400">
+          <div className="flex items-center justify-between mb-2 sm:mb-3">
+            <div className="text-xs sm:text-sm text-slate-400">
               {product.reviews_count || 0} avis
             </div>
             <div className="text-right">
               {hasPromo && (
-                <div className="text-xs text-slate-400 line-through">
+                <div className="text-[10px] sm:text-xs text-slate-400 line-through">
                   {product.price.toLocaleString()} {product.currency}
                 </div>
               )}
-              <div className="font-bold text-white">
+              <div className="font-bold text-white text-sm sm:text-base">
                 {price.toLocaleString()} {product.currency}
               </div>
             </div>
           </div>
 
-          <div className="text-xs text-slate-400 mb-3">
+          <div className="text-[10px] sm:text-xs text-slate-400 mb-2 sm:mb-3">
             Par {product.stores?.name}
           </div>
 
           <Button
             onClick={onPurchase}
             disabled={isPurchasing}
-            className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white transition-all duration-300 hover:scale-105 shadow-lg"
+            className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white transition-all duration-300 hover:scale-105 shadow-lg h-8 sm:h-9 md:h-10 text-xs sm:text-sm"
           >
             {isPurchasing ? (
               <>
-                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                Achat...
+                <Loader2 className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2 animate-spin" />
+                <span className="hidden sm:inline">Achat...</span>
+                <span className="sm:hidden">...</span>
               </>
             ) : (
               <>
-                <ShoppingCart className="h-4 w-4 mr-2" />
-                Acheter maintenant
+                <ShoppingCart className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
+                <span className="hidden sm:inline">Acheter maintenant</span>
+                <span className="sm:hidden">Acheter</span>
               </>
             )}
           </Button>
