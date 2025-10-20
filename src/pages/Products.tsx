@@ -28,7 +28,7 @@ const Products = () => {
   const navigate = useNavigate();
   const { store, loading: storeLoading } = useStore();
   const { products, loading: productsLoading, refetch } = useProducts(store?.id);
-  const { deleteProduct } = useProductManagement(store?.id || "");
+  const { deleteProduct, updateProduct } = useProductManagement(store?.id || "");
   
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   const [deletingProductId, setDeletingProductId] = useState<string | null>(null);
@@ -149,6 +149,11 @@ const Products = () => {
     }
   };
 
+  const updateProductInline = async (id: string, updates: Partial<Product>) => {
+    await updateProduct(id, updates as any);
+    refetch();
+  };
+
   return (
     <SidebarProvider>
       <div className="flex min-h-screen w-full">
@@ -240,6 +245,9 @@ const Products = () => {
                             storeSlug={store.slug}
                             onEdit={() => setEditingProduct(product)}
                             onDelete={() => setDeletingProductId(product.id)}
+                            onToggleActive={async () => {
+                              await updateProductInline(product.id, { is_active: !product.is_active });
+                            }}
                           />
                         ))}
                       </div>

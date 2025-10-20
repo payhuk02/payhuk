@@ -9,6 +9,7 @@ interface ProductCardDashboardProps {
   storeSlug: string;
   onEdit: () => void;
   onDelete: () => void;
+  onToggleActive?: () => void;
 }
 
 const ProductCardDashboard = ({
@@ -106,6 +107,17 @@ const ProductCardDashboard = ({
         </div>
 
         <div className="flex gap-2 pt-2">
+          {onToggleActive && (
+            <Button
+              variant={product.is_active ? "outline" : "default"}
+              size="sm"
+              className="flex-1"
+              onClick={onToggleActive}
+              title={product.is_active ? "Désactiver" : "Activer"}
+            >
+              {product.is_active ? "Désactiver" : "Activer"}
+            </Button>
+          )}
           <Button
             variant="outline"
             size="sm"
