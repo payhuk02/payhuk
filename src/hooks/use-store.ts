@@ -52,11 +52,9 @@ export const useStore = () => {
 
       setStore(data[0]);
     } catch (error: any) {
-      toast({
-        title: "Erreur",
-        description: error.message,
-        variant: "destructive",
-      });
+      console.error('Erreur dans useStore:', error);
+      // Ne pas afficher de toast - c'est normal qu'il n'y ait pas de boutique
+      setStore(null);
     } finally {
       setLoading(false);
     }
