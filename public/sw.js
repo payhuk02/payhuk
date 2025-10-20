@@ -43,29 +43,33 @@ self.addEventListener('fetch', (event) => {
   const url = new URL(request.url);
 
   // Stratégie différente selon le type de ressource
-  if (request.destination === 'image' || request.destination === 'style' || request.destination === 'script') {
+         if (request.destination === 'image' || request.destination === 'style' || request.destination === 'script') {
     // Cache-first pour les assets statiques
     event.respondWith(
       caches.match(request).then((response) => {
-        return response || fetch(request).then((fetchResponse) => {
-          const responseToCache = fetchResponse.clone();
-          caches.open(STATIC_CACHE).then((cache) => {
-            cache.put(request, responseToCache);
-          });
-          return fetchResponse;
-        });
+               return response || fetch(request).then((fetchResponse) => {
+                 if (request.method === 'GET') {
+                   const responseToCache = fetchResponse.clone();
+                   caches.open(STATIC_CACHE).then((cache) => {
+                     cache.put(request, responseToCache).catch(() => {/* ignore */});
+                   });
+                 }
+                 return fetchResponse;
+               });
       })
     );
   } else if (url.pathname.startsWith('/api/') || url.hostname.includes('supabase')) {
     // Network-first pour les API
     event.respondWith(
-      fetch(request).then((response) => {
-        const responseToCache = response.clone();
-        caches.open(DYNAMIC_CACHE).then((cache) => {
-          cache.put(request, responseToCache);
-        });
-        return response;
-      }).catch(() => {
+             fetch(request).then((response) => {
+               if (request.method === 'GET') {
+                 const responseToCache = response.clone();
+                 caches.open(DYNAMIC_CACHE).then((cache) => {
+                   cache.put(request, responseToCache).catch(() => {/* ignore */});
+                 });
+               }
+               return response;
+             }).catch(() => {
         return caches.match(request);
       })
     );
@@ -73,13 +77,15 @@ self.addEventListener('fetch', (event) => {
     // Stale-while-revalidate pour les pages HTML
     event.respondWith(
       caches.match(request).then((response) => {
-        const fetchPromise = fetch(request).then((fetchResponse) => {
-          const responseToCache = fetchResponse.clone();
-          caches.open(DYNAMIC_CACHE).then((cache) => {
-            cache.put(request, responseToCache);
-          });
-          return fetchResponse;
-        });
+               const fetchPromise = fetch(request).then((fetchResponse) => {
+                 if (request.method === 'GET') {
+                   const responseToCache = fetchResponse.clone();
+                   caches.open(DYNAMIC_CACHE).then((cache) => {
+                     cache.put(request, responseToCache).catch(() => {/* ignore */});
+                   });
+                 }
+                 return fetchResponse;
+               });
         return response || fetchPromise;
       })
     );
