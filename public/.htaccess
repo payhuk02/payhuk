@@ -1,0 +1,35 @@
+# Configuration Apache pour SPA React
+# Assure que les fichiers statiques sont servis correctement
+
+# Activer la réécriture d'URL
+RewriteEngine On
+
+# Servir les fichiers statiques directement
+RewriteCond %{REQUEST_FILENAME} -f
+RewriteRule ^(.*)$ - [L]
+
+# Servir les assets avec les bons headers MIME
+<FilesMatch "\.(js|mjs)$">
+    Header set Content-Type "application/javascript; charset=utf-8"
+</FilesMatch>
+
+<FilesMatch "\.css$">
+    Header set Content-Type "text/css; charset=utf-8"
+</FilesMatch>
+
+# Cache pour les assets
+<FilesMatch "\.(js|css|png|jpg|jpeg|gif|ico|svg)$">
+    ExpiresActive On
+    ExpiresDefault "access plus 1 year"
+    Header set Cache-Control "public, immutable"
+</FilesMatch>
+
+# Rediriger toutes les autres requêtes vers index.html
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule . /index.html [L]
+
+# Headers de sécurité
+Header always set X-Content-Type-Options nosniff
+Header always set X-Frame-Options DENY
+Header always set X-XSS-Protection "1; mode=block"

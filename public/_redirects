@@ -1,8 +1,15 @@
 # Redirections pour SPA (Single Page Application)
-# Toutes les routes non statiques doivent rediriger vers index.html
+# Les routes non statiques doivent rediriger vers index.html
 # pour permettre au router client de gérer la navigation
 
-# Redirection générale pour toutes les routes
+# Exclure les fichiers statiques (assets, images, etc.)
+/assets/*    /assets/:splat    200
+/favicon.ico    /favicon.ico    200
+/manifest.json    /manifest.json    200
+/robots.txt    /robots.txt    200
+/sw.js    /sw.js    200
+
+# Redirection générale pour les routes de l'application
 /*    /index.html   200
 
 # Redirections spécifiques si nécessaire
