@@ -4,7 +4,7 @@ import { AppSidebar } from "@/components/AppSidebar";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Plus, Package } from "lucide-react";
-import { useStore } from "@/hooks/use-store";
+import { useStore } from "@/hooks/useStore";
 import { useOrders } from "@/hooks/useOrders";
 import { CreateOrderDialog } from "@/components/orders/CreateOrderDialog";
 import { OrdersTable } from "@/components/orders/OrdersTable";

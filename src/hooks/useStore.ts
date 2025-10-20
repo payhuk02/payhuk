@@ -109,11 +109,8 @@ export const useStore = () => {
       setStore(data);
     } catch (error) {
       logger.error('Error fetching store:', error);
-      toast({
-        title: "Erreur",
-        description: "Impossible de charger votre boutique",
-        variant: "destructive"
-      });
+      // Ne pas afficher de toast - c'est normal qu'il n'y ait pas de boutique
+      setStore(null);
     } finally {
       setLoading(false);
     }

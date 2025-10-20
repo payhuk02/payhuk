@@ -3,7 +3,7 @@ import { AppSidebar } from "@/components/AppSidebar";
 import { SidebarProvider } from "@/components/ui/sidebar";
 import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
-import { useStore } from "@/hooks/use-store";
+import { useStore } from "@/hooks/useStore";
 import { usePayments } from "@/hooks/usePayments";
 import { CreatePaymentDialog } from "@/components/payments/CreatePaymentDialog";
 import { PaymentsTable } from "@/components/payments/PaymentsTable";

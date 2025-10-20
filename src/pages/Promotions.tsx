@@ -4,7 +4,7 @@ import { AppSidebar } from "@/components/AppSidebar";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Plus, Tag } from "lucide-react";
-import { useStore } from "@/hooks/use-store";
+import { useStore } from "@/hooks/useStore";
 import { usePromotions } from "@/hooks/usePromotions";
 import { CreatePromotionDialog } from "@/components/promotions/CreatePromotionDialog";
 import { PromotionsTable } from "@/components/promotions/PromotionsTable";

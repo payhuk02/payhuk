@@ -1,4 +1,4 @@
-import { Store } from "@/hooks/use-store";
+import { Store } from "@/hooks/useStore";
 import { Users } from "lucide-react";
 
 interface StoreHeaderProps {
