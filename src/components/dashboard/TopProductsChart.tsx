@@ -1,3 +1,4 @@
+import { memo, useMemo } from 'react';
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend } from 'recharts';
 import { Badge } from "@/components/ui/badge";
 
@@ -21,25 +22,12 @@ const COLORS = [
   'hsl(var(--success))',
 ];
 
-export const TopProductsChart = ({ products }: TopProductsChartProps) => {
-  // Grouper par catégorie
-  const categoryData = products.reduce((acc: any, product) => {
-    const category = product.category || 'Sans catégorie';
-    if (!acc[category]) {
-      acc[category] = { name: category, value: 0, count: 0 };
-    }
-    acc[category].value += product.sales_count;
-    acc[category].count += 1;
-    return acc;
-  }, {});
-
-  const chartData = Object.values(categoryData).slice(0, 6); // Top 6 catégories
-
-  const formatNumber = (value: number) => {
+export const TopProductsChart = memo(({ products }: TopProductsChartProps) => {
+  const formatNumber = useMemo(() => (value: number) => {
     return new Intl.NumberFormat('fr-FR').format(value);
-  };
+  }, []);
 
-  const CustomTooltip = ({ active, payload }: any) => {
+  const CustomTooltip = useMemo(() => ({ active, payload }: any) => {
     if (active && payload && payload.length) {
       const data = payload[0];
       return (
@@ -55,9 +43,9 @@ export const TopProductsChart = ({ products }: TopProductsChartProps) => {
       );
     }
     return null;
-  };
+  }, [formatNumber]);
 
-  const CustomLegend = ({ payload }: any) => {
+  const CustomLegend = useMemo(() => ({ payload }: any) => {
     return (
       <div className="flex flex-wrap gap-2 justify-center mt-4">
         {payload.map((entry: any, index: number) => (
@@ -73,7 +61,36 @@ export const TopProductsChart = ({ products }: TopProductsChartProps) => {
         ))}
       </div>
     );
-  };
+  }, []);
+
+  // Grouper par catégorie avec memo
+  const chartData = useMemo(() => {
+    if (!Array.isArray(products) || products.length === 0) {
+      return [];
+    }
+
+    const categoryData = products.reduce((acc: any, product) => {
+      const category = product.category || 'Sans catégorie';
+      if (!acc[category]) {
+        acc[category] = { name: category, value: 0, count: 0 };
+      }
+      acc[category].value += Number(product.sales_count) || 0;
+      acc[category].count += 1;
+      return acc;
+    }, {});
+
+    return Object.values(categoryData).slice(0, 6); // Top 6 catégories
+  }, [products]);
+
+  if (chartData.length === 0) {
+    return (
+      <div className="h-[300px] w-full flex items-center justify-center">
+        <div className="text-center text-muted-foreground">
+          <p>Aucune donnée disponible</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="h-[300px] w-full">
@@ -99,4 +116,6 @@ export const TopProductsChart = ({ products }: TopProductsChartProps) => {
       </ResponsiveContainer>
     </div>
   );
-};
+});
+
+TopProductsChart.displayName = 'TopProductsChart';

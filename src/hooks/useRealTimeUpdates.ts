@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState, useCallback } from 'react';
 
 interface UseRealTimeUpdatesOptions {
   interval?: number;
@@ -9,17 +9,38 @@ interface UseRealTimeUpdatesOptions {
 export const useRealTimeUpdates = (options: UseRealTimeUpdatesOptions = {}) => {
   const { interval = 30000, enabled = true, onUpdate } = options;
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
-  const isActiveRef = useRef(false);
+  const [isActive, setIsActive] = useState(false);
+  const lastUpdateRef = useRef<number>(0);
+
+  const safeOnUpdate = useCallback(() => {
+    if (!onUpdate) return;
+    
+    try {
+      // Éviter les mises à jour trop fréquentes
+      const now = Date.now();
+      if (now - lastUpdateRef.current < 5000) { // Minimum 5 secondes entre les mises à jour
+        return;
+      }
+      
+      lastUpdateRef.current = now;
+      onUpdate();
+    } catch (error) {
+      console.warn('Erreur lors de la mise à jour en temps réel:', error);
+    }
+  }, [onUpdate]);
 
   useEffect(() => {
-    if (!enabled || !onUpdate) return;
+    if (!enabled || !onUpdate) {
+      setIsActive(false);
+      return;
+    }
 
     const startUpdates = () => {
       if (intervalRef.current) return;
       
       intervalRef.current = setInterval(() => {
-        if (isActiveRef.current) {
-          onUpdate();
+        if (document.visibilityState === 'visible') {
+          safeOnUpdate();
         }
       }, interval);
     };
@@ -34,22 +55,22 @@ export const useRealTimeUpdates = (options: UseRealTimeUpdatesOptions = {}) => {
     // Démarrer les mises à jour quand la page devient active
     const handleVisibilityChange = () => {
       if (document.visibilityState === 'visible') {
-        isActiveRef.current = true;
+        setIsActive(true);
         startUpdates();
       } else {
-        isActiveRef.current = false;
+        setIsActive(false);
         stopUpdates();
       }
     };
 
     // Démarrer les mises à jour quand la fenêtre reprend le focus
     const handleFocus = () => {
-      isActiveRef.current = true;
+      setIsActive(true);
       startUpdates();
     };
 
     const handleBlur = () => {
-      isActiveRef.current = false;
+      setIsActive(false);
       stopUpdates();
     };
 
@@ -60,7 +81,7 @@ export const useRealTimeUpdates = (options: UseRealTimeUpdatesOptions = {}) => {
 
     // Démarrer immédiatement si la page est visible
     if (document.visibilityState === 'visible') {
-      isActiveRef.current = true;
+      setIsActive(true);
       startUpdates();
     }
 
@@ -70,9 +91,9 @@ export const useRealTimeUpdates = (options: UseRealTimeUpdatesOptions = {}) => {
       window.removeEventListener('focus', handleFocus);
       window.removeEventListener('blur', handleBlur);
     };
-  }, [interval, enabled, onUpdate]);
+  }, [interval, enabled, safeOnUpdate]);
 
   return {
-    isActive: isActiveRef.current,
+    isActive,
   };
 };

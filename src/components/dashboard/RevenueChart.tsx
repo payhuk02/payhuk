@@ -1,3 +1,4 @@
+import { memo, useMemo } from 'react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { Card, CardContent } from "@/components/ui/card";
 
@@ -8,17 +9,17 @@ interface RevenueChartProps {
   }>;
 }
 
-export const RevenueChart = ({ data }: RevenueChartProps) => {
-  const formatCurrency = (value: number) => {
+export const RevenueChart = memo(({ data }: RevenueChartProps) => {
+  const formatCurrency = useMemo(() => (value: number) => {
     return new Intl.NumberFormat('fr-FR', {
       style: 'currency',
       currency: 'XOF',
       minimumFractionDigits: 0,
       maximumFractionDigits: 0,
     }).format(value);
-  };
+  }, []);
 
-  const CustomTooltip = ({ active, payload, label }: any) => {
+  const CustomTooltip = useMemo(() => ({ active, payload, label }: any) => {
     if (active && payload && payload.length) {
       return (
         <div className="bg-background border rounded-lg p-3 shadow-lg">
@@ -30,12 +31,20 @@ export const RevenueChart = ({ data }: RevenueChartProps) => {
       );
     }
     return null;
-  };
+  }, [formatCurrency]);
+
+  // Données optimisées avec memo
+  const chartData = useMemo(() => {
+    return data.map(item => ({
+      ...item,
+      revenue: Number(item.revenue) || 0
+    }));
+  }, [data]);
 
   return (
     <div className="h-[300px] w-full">
       <ResponsiveContainer width="100%" height="100%">
-        <LineChart data={data} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
+        <LineChart data={chartData} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
           <CartesianGrid strokeDasharray="3 3" className="opacity-30" />
           <XAxis 
             dataKey="month" 
@@ -45,7 +54,7 @@ export const RevenueChart = ({ data }: RevenueChartProps) => {
           <YAxis 
             tick={{ fontSize: 12 }}
             tickLine={{ stroke: 'currentColor', opacity: 0.3 }}
-            tickFormatter={(value) => formatCurrency(value)}
+            tickFormatter={formatCurrency}
           />
           <Tooltip content={<CustomTooltip />} />
           <Line 
@@ -60,4 +69,6 @@ export const RevenueChart = ({ data }: RevenueChartProps) => {
       </ResponsiveContainer>
     </div>
   );
-};
+});
+
+RevenueChart.displayName = 'RevenueChart';

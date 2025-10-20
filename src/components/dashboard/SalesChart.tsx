@@ -1,3 +1,4 @@
+import { memo, useMemo } from 'react';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
@@ -11,30 +12,17 @@ interface SalesChartProps {
   }>;
 }
 
-export const SalesChart = ({ data }: SalesChartProps) => {
-  // Grouper les commandes par jour
-  const dailySales = data.reduce((acc: any, order) => {
-    const date = format(new Date(order.created_at), 'dd/MM', { locale: fr });
-    if (!acc[date]) {
-      acc[date] = { date, sales: 0, orders: 0 };
-    }
-    acc[date].sales += order.total_amount;
-    acc[date].orders += 1;
-    return acc;
-  }, {});
-
-  const chartData = Object.values(dailySales).slice(-7); // 7 derniers jours
-
-  const formatCurrency = (value: number) => {
+export const SalesChart = memo(({ data }: SalesChartProps) => {
+  const formatCurrency = useMemo(() => (value: number) => {
     return new Intl.NumberFormat('fr-FR', {
       style: 'currency',
       currency: 'XOF',
       minimumFractionDigits: 0,
       maximumFractionDigits: 0,
     }).format(value);
-  };
+  }, []);
 
-  const CustomTooltip = ({ active, payload, label }: any) => {
+  const CustomTooltip = useMemo(() => ({ active, payload, label }: any) => {
     if (active && payload && payload.length) {
       return (
         <div className="bg-background border rounded-lg p-3 shadow-lg">
@@ -49,7 +37,30 @@ export const SalesChart = ({ data }: SalesChartProps) => {
       );
     }
     return null;
-  };
+  }, [formatCurrency]);
+
+  // Grouper les commandes par jour avec memo
+  const chartData = useMemo(() => {
+    if (!Array.isArray(data) || data.length === 0) {
+      return [];
+    }
+
+    const dailySales = data.reduce((acc: any, order) => {
+      try {
+        const date = format(new Date(order.created_at), 'dd/MM', { locale: fr });
+        if (!acc[date]) {
+          acc[date] = { date, sales: 0, orders: 0 };
+        }
+        acc[date].sales += Number(order.total_amount) || 0;
+        acc[date].orders += 1;
+      } catch (error) {
+        console.warn('Erreur de formatage de date:', error);
+      }
+      return acc;
+    }, {});
+
+    return Object.values(dailySales).slice(-7); // 7 derniers jours
+  }, [data]);
 
   return (
     <div className="h-[300px] w-full">
@@ -70,7 +81,7 @@ export const SalesChart = ({ data }: SalesChartProps) => {
           <YAxis 
             tick={{ fontSize: 12 }}
             tickLine={{ stroke: 'currentColor', opacity: 0.3 }}
-            tickFormatter={(value) => formatCurrency(value)}
+            tickFormatter={formatCurrency}
           />
           <Tooltip content={<CustomTooltip />} />
           <Area 
@@ -85,4 +96,6 @@ export const SalesChart = ({ data }: SalesChartProps) => {
       </ResponsiveContainer>
     </div>
   );
-};
+});
+
+SalesChart.displayName = 'SalesChart';

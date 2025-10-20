@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -10,7 +10,8 @@ import {
   Calendar,
   Filter,
   CheckCircle,
-  Loader2
+  Loader2,
+  AlertCircle
 } from "lucide-react";
 import { useDashboardStats } from "@/hooks/useDashboardStats";
 import { useStore } from "@/hooks/useStore";
@@ -26,26 +27,27 @@ export const ExportData = ({ onClose }: ExportDataProps) => {
   const { store } = useStore();
   const [isExporting, setIsExporting] = useState(false);
   const [exportFormat, setExportFormat] = useState<'pdf' | 'excel' | null>(null);
+  const [exportError, setExportError] = useState<string | null>(null);
 
-  const formatCurrency = (amount: number) => {
+  const formatCurrency = useCallback((amount: number) => {
     return new Intl.NumberFormat('fr-FR', {
       style: 'currency',
       currency: 'XOF'
     }).format(amount);
-  };
+  }, []);
 
-  const formatNumber = (num: number) => {
+  const formatNumber = useCallback((num: number) => {
     return new Intl.NumberFormat('fr-FR').format(num);
-  };
+  }, []);
 
-  const exportToPDF = async () => {
+  const exportToPDF = useCallback(async () => {
     setIsExporting(true);
     setExportFormat('pdf');
+    setExportError(null);
     
     try {
       // Import dynamique pour éviter les erreurs SSR
       const jsPDF = (await import('jspdf')).default;
-      const html2canvas = (await import('html2canvas')).default;
       
       const doc = new jsPDF();
       
@@ -80,19 +82,22 @@ export const ExportData = ({ onClose }: ExportDataProps) => {
       doc.text(`Produits actifs: ${stats.activeProducts}/${stats.totalProducts}`, 20, 150);
       
       // Sauvegarder le PDF
-      doc.save(`rapport-performance-${store?.name || 'boutique'}-${format(new Date(), 'yyyy-MM-dd')}.pdf`);
+      const fileName = `rapport-performance-${store?.name?.replace(/[^a-zA-Z0-9]/g, '-') || 'boutique'}-${format(new Date(), 'yyyy-MM-dd')}.pdf`;
+      doc.save(fileName);
       
-    } catch (error) {
+    } catch (error: any) {
       console.error('Erreur lors de l\'export PDF:', error);
+      setExportError('Erreur lors de la génération du PDF');
     } finally {
       setIsExporting(false);
       setExportFormat(null);
     }
-  };
+  }, [stats, store, formatCurrency, formatNumber]);
 
-  const exportToExcel = async () => {
+  const exportToExcel = useCallback(async () => {
     setIsExporting(true);
     setExportFormat('excel');
+    setExportError(null);
     
     try {
       // Import dynamique
@@ -153,15 +158,17 @@ export const ExportData = ({ onClose }: ExportDataProps) => {
       XLSX.utils.book_append_sheet(workbook, productsSheet, 'Produits populaires');
       
       // Sauvegarder le fichier Excel
-      XLSX.writeFile(workbook, `rapport-performance-${store?.name || 'boutique'}-${format(new Date(), 'yyyy-MM-dd')}.xlsx`);
+      const fileName = `rapport-performance-${store?.name?.replace(/[^a-zA-Z0-9]/g, '-') || 'boutique'}-${format(new Date(), 'yyyy-MM-dd')}.xlsx`;
+      XLSX.writeFile(workbook, fileName);
       
-    } catch (error) {
+    } catch (error: any) {
       console.error('Erreur lors de l\'export Excel:', error);
+      setExportError('Erreur lors de la génération du fichier Excel');
     } finally {
       setIsExporting(false);
       setExportFormat(null);
     }
-  };
+  }, [stats, store]);
 
   const exportOptions = [
     {
@@ -194,6 +201,14 @@ export const ExportData = ({ onClose }: ExportDataProps) => {
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
+        {/* Message d'erreur */}
+        {exportError && (
+          <div className="flex items-center gap-2 p-3 rounded-lg bg-red-50 border border-red-200 text-red-700">
+            <AlertCircle className="h-4 w-4" />
+            <span className="text-sm">{exportError}</span>
+          </div>
+        )}
+
         {/* Options d'export */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {exportOptions.map((option, index) => (
