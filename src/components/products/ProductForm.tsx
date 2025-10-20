@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { z } from "zod";
 import { productCompleteSchema } from "@/lib/schemas";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -293,9 +293,14 @@ const getEmptyFormData = (): ProductFormData => ({
 
 export const ProductForm = ({ storeId, storeSlug, productId, initialData, onSuccess }: ProductFormProps) => {
   const navigate = useNavigate();
+  const location = useLocation();
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
   const [activeTab, setActiveTab] = useState(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const fromUrl = urlParams.get('tab');
+    const allowed = new Set(['info','description','visual','files','custom','faq','seo','analytics','pixels','variants','promotions','payment']);
+    if (fromUrl && allowed.has(fromUrl)) return fromUrl;
     return sessionStorage.getItem('productFormActiveTab') || 'info';
   });
   const [validationErrors, setValidationErrors] = useState<Record<string, string>>({});
@@ -475,7 +480,22 @@ export const ProductForm = ({ storeId, storeSlug, productId, initialData, onSucc
   // Persistance de l'onglet actif
   useEffect(() => {
     sessionStorage.setItem('productFormActiveTab', activeTab);
+    // Sync URL query param ?tab=activeTab (preserve other params)
+    const search = new URLSearchParams(location.search);
+    if (search.get('tab') !== activeTab) {
+      search.set('tab', activeTab);
+      navigate({ pathname: location.pathname, search: `?${search.toString()}` }, { replace: true });
+    }
   }, [activeTab]);
+
+  // Si le paramètre d'URL change (navigation externe), synchroniser l'état
+  useEffect(() => {
+    const search = new URLSearchParams(location.search);
+    const fromUrl = search.get('tab');
+    if (fromUrl && fromUrl !== activeTab) {
+      setActiveTab(fromUrl);
+    }
+  }, [location.search]);
 
   // Bouton Voir: ouvre la page produit si publié, sinon preview locale
   const handleView = () => {
