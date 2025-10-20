@@ -30,6 +30,7 @@ import { useRealTimeUpdates } from "@/hooks/useRealTimeUpdates";
 import { SkeletonCard, SkeletonChart } from "@/components/ui/skeleton-cards";
 import { LoadingSpinner } from "@/components/ui/loading-spinner";
 import { FadeIn, StaggerContainer } from "@/components/ui/animations";
+import { TimeoutError, ConnectionStatus } from "@/components/ui/timeout-error";
 import { RevenueChart } from "@/components/dashboard/RevenueChart";
 import { SalesChart } from "@/components/dashboard/SalesChart";
 import { TopProductsChart } from "@/components/dashboard/TopProductsChart";
@@ -46,9 +47,10 @@ interface DashboardContentProps {
 }
 
 const DashboardContent = memo(({ store, isTablet }: DashboardContentProps) => {
-  const { stats, loading: statsLoading, refetch } = useDashboardStats();
+  const { stats, loading: statsLoading, error, refetch } = useDashboardStats();
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [showExport, setShowExport] = useState(false);
+  const [lastUpdate, setLastUpdate] = useState<Date>(new Date());
 
   // Mises à jour en temps réel
   const { isActive: isRealTimeActive } = useRealTimeUpdates({
@@ -62,8 +64,36 @@ const DashboardContent = memo(({ store, isTablet }: DashboardContentProps) => {
   const handleRefresh = async () => {
     setIsRefreshing(true);
     await refetch();
+    setLastUpdate(new Date());
     setTimeout(() => setIsRefreshing(false), 1000);
   };
+
+  // Gestion des erreurs de timeout
+  if (error && error.includes('timeout')) {
+    return (
+      <div className="space-y-6">
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-3xl font-bold tracking-tight">Tableau de bord</h1>
+            <p className="text-muted-foreground">
+              Vue d'ensemble de votre boutique • {store.name}
+            </p>
+          </div>
+          <ConnectionStatus 
+            isOnline={navigator.onLine} 
+            isRealTimeActive={false}
+            lastUpdate={lastUpdate}
+          />
+        </div>
+        
+        <TimeoutError 
+          onRetry={handleRefresh}
+          isRetrying={isRefreshing}
+          errorType="timeout"
+        />
+      </div>
+    );
+  }
 
   const formatCurrency = useMemo(() => (amount: number) => {
     return new Intl.NumberFormat('fr-FR', {
@@ -121,20 +151,12 @@ const DashboardContent = memo(({ store, isTablet }: DashboardContentProps) => {
           </p>
         </div>
         <div className="flex items-center gap-2">
-          {/* Indicateur de mise à jour en temps réel */}
-          <div className="flex items-center gap-2 text-xs text-muted-foreground">
-            {isRealTimeActive ? (
-              <div className="flex items-center gap-1 text-green-600">
-                <Wifi className="h-3 w-3" />
-                <span>En direct</span>
-              </div>
-            ) : (
-              <div className="flex items-center gap-1 text-gray-500">
-                <WifiOff className="h-3 w-3" />
-                <span>Hors ligne</span>
-              </div>
-            )}
-          </div>
+          {/* Indicateur de connexion optimisé */}
+          <ConnectionStatus 
+            isOnline={navigator.onLine} 
+            isRealTimeActive={isRealTimeActive}
+            lastUpdate={lastUpdate}
+          />
           
           <Button
             variant="outline"

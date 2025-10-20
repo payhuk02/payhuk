@@ -70,58 +70,88 @@ export const useDashboardStats = () => {
       startLoading();
       retryCountRef.current = 0;
 
-      // Exécuter toutes les requêtes en parallèle pour améliorer les performances
+      // Exécuter les requêtes essentielles d'abord avec timeout
+      const timeoutPromise = new Promise((_, reject) => 
+        setTimeout(() => reject(new Error('Request timeout')), 10000) // 10 secondes timeout
+      );
+
       const [
         productsResult,
         ordersResult,
-        customersResult,
+        customersResult
+      ] = await Promise.allSettled([
+        // Products stats (requête simple)
+        Promise.race([
+          supabase
+            .from("products")
+            .select("id, is_active, name, price, image_url, category")
+            .eq("store_id", store.id)
+            .limit(100), // Limiter les résultats
+          timeoutPromise
+        ]),
+        
+        // Orders stats (requête simple)
+        Promise.race([
+          supabase
+            .from("orders")
+            .select("id, status, total_amount, created_at")
+            .eq("store_id", store.id)
+            .limit(100), // Limiter les résultats
+          timeoutPromise
+        ]),
+        
+        // Customers count (requête rapide)
+        Promise.race([
+          supabase
+            .from("customers")
+            .select("*", { count: "exact", head: true })
+            .eq("store_id", store.id),
+          timeoutPromise
+        ])
+      ]);
+
+      // Requêtes secondaires avec timeout plus court
+      const [
         recentOrdersResult,
         orderItemsResult,
         revenueResult
       ] = await Promise.allSettled([
-        // Products stats
-        supabase
-          .from("products")
-          .select("id, is_active, name, price, image_url, category")
-          .eq("store_id", store.id),
+        // Recent orders (limité à 5)
+        Promise.race([
+          supabase
+            .from("orders")
+            .select("id, order_number, total_amount, status, created_at, customers(name)")
+            .eq("store_id", store.id)
+            .order("created_at", { ascending: false })
+            .limit(5),
+          new Promise((_, reject) => setTimeout(() => reject(new Error('Recent orders timeout')), 5000))
+        ]),
         
-        // Orders stats
-        supabase
-          .from("orders")
-          .select("id, status, total_amount, created_at")
-          .eq("store_id", store.id),
+        // Order items (limité)
+        Promise.race([
+          supabase
+            .from("order_items")
+            .select(`
+              product_id,
+              product_name,
+              order_id,
+              orders!inner(store_id)
+            `)
+            .eq("orders.store_id", store.id)
+            .limit(50), // Limiter les résultats
+          new Promise((_, reject) => setTimeout(() => reject(new Error('Order items timeout')), 5000))
+        ]),
         
-        // Customers count
-        supabase
-          .from("customers")
-          .select("*", { count: "exact", head: true })
-          .eq("store_id", store.id),
-        
-        // Recent orders
-        supabase
-          .from("orders")
-          .select("id, order_number, total_amount, status, created_at, customers(name)")
-          .eq("store_id", store.id)
-          .order("created_at", { ascending: false })
-          .limit(5),
-        
-        // Order items for top products
-        supabase
-          .from("order_items")
-          .select(`
-            product_id,
-            product_name,
-            order_id,
-            orders!inner(store_id)
-          `)
-          .eq("orders.store_id", store.id),
-        
-        // Revenue data
-        supabase
-          .from("orders")
-          .select("total_amount, created_at")
-          .eq("store_id", store.id)
-          .gte("created_at", new Date(Date.now() - 6 * 30 * 24 * 60 * 60 * 1000).toISOString())
+        // Revenue data (limité à 3 mois)
+        Promise.race([
+          supabase
+            .from("orders")
+            .select("total_amount, created_at")
+            .eq("store_id", store.id)
+            .gte("created_at", new Date(Date.now() - 3 * 30 * 24 * 60 * 60 * 1000).toISOString()) // 3 mois au lieu de 6
+            .limit(100), // Limiter les résultats
+          new Promise((_, reject) => setTimeout(() => reject(new Error('Revenue timeout')), 5000))
+        ])
       ]);
 
       // Traiter les résultats avec gestion d'erreurs robuste

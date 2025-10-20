@@ -1,4 +1,9 @@
 {
+  "functions": {
+    "app/api/**/*.ts": {
+      "maxDuration": 30
+    }
+  },
   "routes": [
     { "handle": "filesystem" },
     { "src": "/assets/(.*)", "dest": "/assets/$1" },
@@ -7,5 +12,24 @@
     { "src": "/robots.txt", "dest": "/robots.txt" },
     { "src": "/sw.js", "dest": "/sw.js" },
     { "src": "/(.*)", "dest": "/index.html" }
+  ],
+  "headers": [
+    {
+      "source": "/(.*)",
+      "headers": [
+        {
+          "key": "X-Content-Type-Options",
+          "value": "nosniff"
+        },
+        {
+          "key": "X-Frame-Options",
+          "value": "DENY"
+        },
+        {
+          "key": "X-XSS-Protection",
+          "value": "1; mode=block"
+        }
+      ]
+    }
   ]
 }
