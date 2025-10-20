@@ -25,27 +25,8 @@ export const MobilePerformanceOptimizer = () => {
           }
         });
         
-      // Charger les ressources critiques correctement (as="style" + stylesheet)
-      const preloadLink = document.createElement('link');
-      preloadLink.rel = 'preload';
-      preloadLink.href = '/assets/critical.css';
-      preloadLink.as = 'style';
-      document.head.appendChild(preloadLink);
-      const cssLink = document.createElement('link');
-      cssLink.rel = 'stylesheet';
-      cssLink.href = '/assets/critical.css';
-      document.head.appendChild(cssLink);
-        
-        // Optimiser les polices pour mobile
-      const fontPreload = document.createElement('link');
-      fontPreload.rel = 'preload';
-      fontPreload.href = '/assets/fonts.css';
-      fontPreload.as = 'style';
-      document.head.appendChild(fontPreload);
-      const fontStyles = document.createElement('link');
-      fontStyles.rel = 'stylesheet';
-      fontStyles.href = '/assets/fonts.css';
-      document.head.appendChild(fontStyles);
+        // Les styles critiques sont déjà inclus dans le CSS principal
+        // Pas besoin de charger des fichiers CSS supplémentaires
       }
     };
 
@@ -75,9 +56,10 @@ export const AccessibilityEnhancer = () => {
   useEffect(() => {
     // Ajouter des attributs ARIA manquants
     const enhanceAccessibility = () => {
-      // Boutons sans texte - Amélioration des labels ARIA
-      const buttons = document.querySelectorAll('button');
-      buttons.forEach(button => {
+      try {
+        // Boutons sans texte - Amélioration des labels ARIA
+        const buttons = document.querySelectorAll('button');
+        buttons.forEach(button => {
         if (!button.getAttribute('aria-label') && !button.textContent?.trim()) {
           // Essayer de déterminer le contexte du bouton
           const icon = button.querySelector('svg, i, [class*="icon"]');
@@ -85,15 +67,17 @@ export const AccessibilityEnhancer = () => {
           
           let ariaLabel = 'Bouton';
           if (icon) {
-            const iconClass = icon.className;
-            if (iconClass.includes('search') || iconClass.includes('loupe')) ariaLabel = 'Rechercher';
-            else if (iconClass.includes('heart') || iconClass.includes('favorite')) ariaLabel = 'Ajouter aux favoris';
-            else if (iconClass.includes('cart') || iconClass.includes('shopping')) ariaLabel = 'Ajouter au panier';
-            else if (iconClass.includes('edit') || iconClass.includes('modifier')) ariaLabel = 'Modifier';
-            else if (iconClass.includes('delete') || iconClass.includes('supprimer')) ariaLabel = 'Supprimer';
-            else if (iconClass.includes('close') || iconClass.includes('fermer')) ariaLabel = 'Fermer';
-            else if (iconClass.includes('menu') || iconClass.includes('hamburger')) ariaLabel = 'Ouvrir le menu';
-            else if (iconClass.includes('chevron') || iconClass.includes('arrow')) ariaLabel = 'Navigation';
+            const iconClass = icon.className || '';
+            if (typeof iconClass === 'string') {
+              if (iconClass.includes('search') || iconClass.includes('loupe')) ariaLabel = 'Rechercher';
+              else if (iconClass.includes('heart') || iconClass.includes('favorite')) ariaLabel = 'Ajouter aux favoris';
+              else if (iconClass.includes('cart') || iconClass.includes('shopping')) ariaLabel = 'Ajouter au panier';
+              else if (iconClass.includes('edit') || iconClass.includes('modifier')) ariaLabel = 'Modifier';
+              else if (iconClass.includes('delete') || iconClass.includes('supprimer')) ariaLabel = 'Supprimer';
+              else if (iconClass.includes('close') || iconClass.includes('fermer')) ariaLabel = 'Fermer';
+              else if (iconClass.includes('menu') || iconClass.includes('hamburger')) ariaLabel = 'Ouvrir le menu';
+              else if (iconClass.includes('chevron') || iconClass.includes('arrow')) ariaLabel = 'Navigation';
+            }
           }
           
           if (parentText && parentText.length < 50) {
@@ -130,20 +114,29 @@ export const AccessibilityEnhancer = () => {
           }
         });
       });
+      } catch (error) {
+        console.warn('Erreur lors de l\'amélioration de l\'accessibilité:', error);
+      }
     };
 
     // Appliquer les améliorations
     enhanceAccessibility();
 
     // Observer les changements DOM pour appliquer aux nouveaux éléments
-    const observer = new MutationObserver(() => {
-      enhanceAccessibility();
+    const observer = new MutationObserver((mutations) => {
+      try {
+        enhanceAccessibility();
+      } catch (error) {
+        console.warn('Erreur lors de l\'amélioration de l\'accessibilité:', error);
+      }
     });
 
-    observer.observe(document.body, {
-      childList: true,
-      subtree: true
-    });
+    if (document.body) {
+      observer.observe(document.body, {
+        childList: true,
+        subtree: true
+      });
+    }
 
     return () => {
       observer.disconnect();
@@ -234,16 +227,8 @@ export const PerformanceOptimizer = () => {
 
       images.forEach(img => imageObserver.observe(img));
 
-      // Précharger les ressources critiques
-      // Charger proprement les styles si non présents
-      ['/assets/critical.css','/assets/fonts.css'].forEach(href => {
-        if (!document.querySelector(`link[href="${href}"][rel="stylesheet"]`)) {
-          const link = document.createElement('link');
-          link.rel = 'stylesheet';
-          link.href = href;
-          document.head.appendChild(link);
-        }
-      });
+      // Les styles sont déjà inclus dans le bundle principal
+      // Pas besoin de charger des fichiers CSS supplémentaires
     };
 
     optimizePerformance();
