@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/AppSidebar";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Package } from "lucide-react";
 import { useStore } from "@/hooks/useStore";
@@ -48,6 +49,11 @@ const Products = () => {
   const productTypes = useMemo(() => {
     return Array.from(new Set(products.map((p) => p.product_type).filter(Boolean))) as string[];
   }, [products]);
+
+  // Compteurs par statut
+  const publishedCount = useMemo(() => products.filter(p => p.is_active).length, [products]);
+  const inactiveCount = useMemo(() => products.filter(p => !p.is_active).length, [products]);
+  const draftCount = 0; // si la colonne existe côté BDD on l'ajoutera dans la sélection
 
   // Filter and sort products
   const filteredProducts = useMemo(() => {
@@ -150,10 +156,15 @@ const Products = () => {
         
         <div className="flex-1 flex flex-col">
           <header className="sticky top-0 z-10 border-b bg-card shadow-soft">
-            <div className="flex h-16 items-center gap-4 px-4 sm:px-6">
+              <div className="flex h-16 items-center gap-4 px-4 sm:px-6">
               <SidebarTrigger />
               <div className="flex-1">
                 <h1 className="text-xl sm:text-2xl font-bold">Produits</h1>
+                  <div className="mt-1 flex gap-2 text-xs">
+                    <Badge variant="secondary">Publiés: {publishedCount}</Badge>
+                    <Badge variant="outline">Inactifs: {inactiveCount}</Badge>
+                    <Badge>Drafts: {draftCount}</Badge>
+                  </div>
               </div>
               <Button onClick={() => navigate("/dashboard/products/new")}>
                 Nouveau produit

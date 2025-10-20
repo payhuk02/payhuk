@@ -13,8 +13,8 @@ export interface Product {
   image_url: string | null;
   category: string | null;
   product_type: string | null;
-  rating: number;
-  reviews_count: number;
+  rating: number | null;
+  reviews_count: number | null;
   is_active: boolean;
   digital_file_url: string | null;
   created_at: string;
@@ -37,7 +37,7 @@ export const useProducts = (storeId?: string) => {
 
       const query = supabase
         .from('products')
-        .select('id, store_id, name, slug, description, price, currency, image_url, category, product_type, rating, reviews_count, is_active, created_at, updated_at')
+        .select('id, store_id, name, slug, description, price, currency, image_url, category, product_type, rating, reviews_count, is_active, digital_file_url, created_at, updated_at')
         // Dashboard: afficher tous les produits (y compris drafts/inactifs)
         .eq('store_id', storeId)
         .order('created_at', { ascending: false });
@@ -59,6 +59,22 @@ export const useProducts = (storeId?: string) => {
 
   useEffect(() => {
     fetchProducts();
+
+    if (!storeId) return;
+
+    // Abonnement temps réel aux changements de la table products pour ce store
+    const channel = supabase
+      .channel(`products-store-${storeId}`)
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'products', filter: `store_id=eq.${storeId}` },
+        () => fetchProducts()
+      )
+      .subscribe();
+
+    return () => {
+      try { supabase.removeChannel(channel); } catch { /* noop */ }
+    };
   }, [storeId]);
 
   return { products, loading, refetch: fetchProducts };
