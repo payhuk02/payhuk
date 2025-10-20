@@ -171,7 +171,7 @@ const Products = () => {
                     <Badge variant={status==='inactive'?'default':'outline'} onClick={()=>setStatus('inactive')} className="cursor-pointer">Inactifs: {inactiveCount}</Badge>
                   </div>
               </div>
-              <Button onClick={() => navigate("/dashboard/products/new")}>
+              <Button onClick={() => navigate("/dashboard/products/new?tab=faq") }>
                 Nouveau produit
               </Button>
             </div>
@@ -199,7 +199,7 @@ const Products = () => {
                     </CardDescription>
                   </CardHeader>
                   <CardContent className="text-center pb-12">
-                    <Button onClick={() => navigate("/dashboard/products/new")}>
+                    <Button onClick={() => navigate("/dashboard/products/new?tab=faq") }>
                       Créer mon premier produit
                     </Button>
                   </CardContent>
