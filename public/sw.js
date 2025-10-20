@@ -1,11 +1,11 @@
-const CACHE_NAME = 'payhuk-v1';
-const STATIC_CACHE = 'payhuk-static-v1';
-const DYNAMIC_CACHE = 'payhuk-dynamic-v1';
+const CACHE_NAME = 'payhuk-v3';
+const STATIC_CACHE = 'payhuk-static-v3';
+const DYNAMIC_CACHE = 'payhuk-dynamic-v3';
 
 const urlsToCache = [
   '/',
   '/index.html',
-  '/manifest.json',
+  '/manifest.json?v=3',
   '/favicon.ico',
   // Ajouter les assets critiques
   '/assets/payhuk-logo.png'
