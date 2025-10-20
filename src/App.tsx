@@ -12,6 +12,7 @@ import { useDarkMode } from "@/hooks/useDarkMode";
 import { PerformanceOptimizer } from "@/components/optimization/PerformanceOptimizer";
 import { I18nProvider } from "@/components/I18nProvider";
 import { ConfigChecker } from "@/components/ConfigChecker";
+import { AppFallback } from "@/components/AppFallback";
 
 // Pages principales
 import Landing from "./pages/Landing";
@@ -113,22 +114,30 @@ const AppContent = () => {
 
 const queryClient = new QueryClient();
 
-const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
-      <Toaster />
-      <Sonner />
-      <BrowserRouter>
-        <I18nProvider>
-          <ConfigChecker>
-            <AuthProvider>
-              <AppContent />
-            </AuthProvider>
-          </ConfigChecker>
-        </I18nProvider>
-      </BrowserRouter>
-    </TooltipProvider>
-  </QueryClientProvider>
-);
+const App = () => {
+  // Vérifier si i18n est initialisé avant de rendre l'application
+  try {
+    return (
+      <QueryClientProvider client={queryClient}>
+        <TooltipProvider>
+          <Toaster />
+          <Sonner />
+          <BrowserRouter>
+            <I18nProvider>
+              <ConfigChecker>
+                <AuthProvider>
+                  <AppContent />
+                </AuthProvider>
+              </ConfigChecker>
+            </I18nProvider>
+          </BrowserRouter>
+        </TooltipProvider>
+      </QueryClientProvider>
+    );
+  } catch (error) {
+    console.error('❌ Erreur dans App:', error);
+    return <AppFallback />;
+  }
+};
 
 export default App;
