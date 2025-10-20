@@ -2,10 +2,7 @@ import React from "react";
 import { createRoot } from "react-dom/client";
 import App from "./App.tsx";
 import "./index.css";
-import "./i18n"; // ⚠️ garde bien le chemin correct, sans `../`
-
-import { I18nextProvider } from "react-i18next";
-import i18n from "./i18n"; // Assure-toi que c’est bien le même fichier importé
+import "../i18n"; // Import de la configuration i18n depuis la racine
 
 // Enregistrement du Service Worker (facultatif)
 if ('serviceWorker' in navigator) {
@@ -21,10 +18,7 @@ const root = document.getElementById("root");
 if (root) {
   createRoot(root).render(
     <React.StrictMode>
-      {/* ✅ Fournit i18n à toute l’application */}
-      <I18nextProvider i18n={i18n}>
-        <App />
-      </I18nextProvider>
+      <App />
     </React.StrictMode>
   );
 } else {
