@@ -2,6 +2,7 @@ import { Product } from "@/hooks/useProducts";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Edit, Trash2, Copy, ExternalLink, MessageSquare, Megaphone, Search } from "lucide-react";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 
@@ -120,45 +121,47 @@ const ProductCardDashboard = ({
               {product.is_active ? "Désactiver" : "Activer"}
             </Button>
           )}
-          <Button
-            variant="outline"
-            size="sm"
-            className="flex-1"
-            onClick={onEdit}
-          >
-            <Edit className="h-4 w-4 mr-1" />
-            Modifier
-          </Button>
-          <Button
-            variant="outline"
-            size="sm"
-            className="flex-1"
-            onClick={() => navigate(`/admin/products/${product.id}?tab=faq`)}
-            title="Éditer FAQ"
-          >
-            <MessageSquare className="h-4 w-4 mr-1" />
-            FAQ
-          </Button>
-          <Button
-            variant="outline"
-            size="sm"
-            className="flex-1"
-            onClick={() => navigate(`/admin/products/${product.id}?tab=seo`)}
-            title="Éditer SEO"
-          >
-            <Search className="h-4 w-4 mr-1" />
-            SEO
-          </Button>
-          <Button
-            variant="outline"
-            size="sm"
-            className="flex-1"
-            onClick={() => navigate(`/admin/products/${product.id}?tab=promotions`)}
-            title="Éditer Promotions"
-          >
-            <Megaphone className="h-4 w-4 mr-1" />
-            Promo
-          </Button>
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button variant="outline" size="sm" className="flex-1" onClick={onEdit}>
+                  <Edit className="h-4 w-4 mr-1" />
+                  Modifier
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>Ouvrir l’édition générale</TooltipContent>
+            </Tooltip>
+
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button variant="outline" size="sm" className="flex-1" onClick={() => navigate(`/admin/products/${product.id}?tab=faq`)}>
+                  <MessageSquare className="h-4 w-4 mr-1" />
+                  FAQ
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>Aller directement à l’onglet FAQ</TooltipContent>
+            </Tooltip>
+
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button variant="outline" size="sm" className="flex-1" onClick={() => navigate(`/admin/products/${product.id}?tab=seo`)}>
+                  <Search className="h-4 w-4 mr-1" />
+                  SEO
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>Aller directement à l’onglet SEO</TooltipContent>
+            </Tooltip>
+
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button variant="outline" size="sm" className="flex-1" onClick={() => navigate(`/admin/products/${product.id}?tab=promotions`)}>
+                  <Megaphone className="h-4 w-4 mr-1" />
+                  Promo
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>Aller directement à l’onglet Promotions</TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
           <Button
             variant="outline"
             size="sm"
