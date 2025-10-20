@@ -37,7 +37,7 @@ interface ProductFormData {
   category: string;
   product_type: string;
   pricing_model: "one-time" | "subscription" | "pay-what-you-want" | "free";
-  price: number;
+  price: number | null;
   promotional_price: number | null;
   currency: string;
   
@@ -167,7 +167,7 @@ const getEmptyFormData = (): ProductFormData => ({
   category: "",
   product_type: "",
   pricing_model: "one-time",
-  price: 0,
+  price: null,
   promotional_price: null,
   currency: "XOF",
   
@@ -361,7 +361,9 @@ export const ProductForm = ({ storeId, storeSlug, productId, initialData, onSucc
       errors.pricing_model = "Le modèle de tarification est requis";
     }
     
-    if (formData.price < 0) {
+    if (formData.price === null || formData.price === undefined) {
+      errors.price = "Le prix est requis";
+    } else if (formData.price < 0) {
       errors.price = "Le prix doit être positif";
     }
     

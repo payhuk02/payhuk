@@ -16,8 +16,8 @@ import { cn } from "@/lib/utils";
 import { generateSlug } from "@/lib/store-utils";
 
 interface ProductInfoTabProps {
-  formData: any;
-  updateFormData: (field: string, value: any) => void;
+  formData: Record<string, unknown>;
+  updateFormData: (field: string, value: string | number | boolean | string[] | Record<string, unknown>[]) => void;
   storeId: string;
   storeSlug: string;
   checkSlugAvailability: (slug: string) => Promise<boolean>;
@@ -292,9 +292,9 @@ export const ProductInfoTab = ({ formData, updateFormData, storeSlug, checkSlugA
               <label className="theme-label">Prix *</label>
               <Input
                 type="number"
-                value={formData.price}
-                onChange={(e) => updateFormData("price", parseFloat(e.target.value) || 0)}
-                placeholder="0"
+                value={formData.price || ""}
+                onChange={(e) => updateFormData("price", e.target.value ? parseFloat(e.target.value) : null)}
+                placeholder="Entrez le prix"
                 className={cn("theme-input", validationErrors.price && "border-red-500")}
               />
               {validationErrors.price && (

@@ -32,8 +32,8 @@ import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
 
 interface ProductFilesTabProps {
-  formData: any;
-  updateFormData: (field: string, value: any) => void;
+  formData: Record<string, unknown>;
+  updateFormData: (field: string, value: string | number | boolean | string[] | Record<string, unknown>[]) => void;
   storeId: string;
 }
 
