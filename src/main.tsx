@@ -3,14 +3,14 @@ import { createRoot } from "react-dom/client";
 import App from "./App.tsx";
 import "./index.css";
 
-// Enregistrement du Service Worker (facultatif)
-if ('serviceWorker' in navigator) {
-  window.addEventListener('load', () => {
-    navigator.serviceWorker.register('/sw.js').catch(() => {
-      // Silent fail - PWA est optionnelle
-    });
-  });
-}
+// Service Worker désactivé pour éviter les erreurs de cache
+// if ('serviceWorker' in navigator) {
+//   window.addEventListener('load', () => {
+//     navigator.serviceWorker.register('/sw.js').catch(() => {
+//       // Silent fail - PWA est optionnelle
+//     });
+//   });
+// }
 
 // Rendu simple sans i18n
 const root = document.getElementById("root");

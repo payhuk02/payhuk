@@ -50,9 +50,9 @@ const Dashboard = () => {
                 <StatsCards stats={stats} />
                 <div className="grid gap-6 md:grid-cols-2">
                   <QuickActions />
-                  <RecentOrdersCard />
+                  <RecentOrdersCard orders={stats.recentOrders} />
                 </div>
-                <TopProductsCard />
+                <TopProductsCard products={stats.topProducts} />
               </div>
             )}
           </div>

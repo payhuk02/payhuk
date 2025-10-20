@@ -147,14 +147,14 @@ export const useDashboardStats = () => {
       }, {});
 
       setStats({
-        totalProducts: products?.length || 0,
-        activeProducts: products?.filter((p) => p.is_active).length || 0,
-        totalOrders: orders?.length || 0,
-        pendingOrders: orders?.filter((o) => o.status === "pending").length || 0,
+        totalProducts: Array.isArray(products) ? products.length : 0,
+        activeProducts: Array.isArray(products) ? products.filter((p) => p.is_active).length : 0,
+        totalOrders: Array.isArray(orders) ? orders.length : 0,
+        pendingOrders: Array.isArray(orders) ? orders.filter((o) => o.status === "pending").length : 0,
         totalCustomers: customersCount || 0,
-        totalRevenue: orders?.reduce((sum, order) => sum + parseFloat(order.total_amount.toString()), 0) || 0,
-        recentOrders: recentOrders || [],
-        topProducts,
+        totalRevenue: Array.isArray(orders) ? orders.reduce((sum, order) => sum + parseFloat(order.total_amount.toString()), 0) : 0,
+        recentOrders: Array.isArray(recentOrders) ? recentOrders : [],
+        topProducts: Array.isArray(topProducts) ? topProducts : [],
         revenueByMonth: Object.entries(revenueByMonth).map(([month, revenue]) => ({
           month,
           revenue: revenue as number,

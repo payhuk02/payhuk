@@ -15,7 +15,7 @@ interface TopProductsCardProps {
   products: Product[];
 }
 
-export const TopProductsCard = ({ products }: TopProductsCardProps) => {
+export const TopProductsCard = ({ products = [] }: TopProductsCardProps) => {
   const navigate = useNavigate();
 
   if (products.length === 0) {

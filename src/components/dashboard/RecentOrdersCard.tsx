@@ -19,7 +19,7 @@ interface RecentOrdersCardProps {
   orders: Order[];
 }
 
-export const RecentOrdersCard = ({ orders }: RecentOrdersCardProps) => {
+export const RecentOrdersCard = ({ orders = [] }: RecentOrdersCardProps) => {
   const navigate = useNavigate();
 
   const getStatusBadge = (status: string) => {
