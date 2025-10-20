@@ -5,7 +5,6 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
-import { useTranslation } from "react-i18next";
 import { 
   Search, 
   ShoppingCart, 
@@ -44,7 +43,6 @@ import { Product, FilterState, PaginationState } from '@/types/marketplace';
 
 const Marketplace = () => {
   const { toast } = useToast();
-  const { t } = useTranslation();
   
   // États principaux
   const [products, setProducts] = useState<Product[]>([]);
@@ -445,21 +443,21 @@ const Marketplace = () => {
             <div className="flex items-center justify-center gap-1 sm:gap-2 mb-3 sm:mb-4">
               <Sparkles className="h-6 w-6 sm:h-8 sm:w-8 text-yellow-400 animate-pulse" />
               <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-bold text-white bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400 bg-clip-text text-transparent">
-            {t("marketplace.title")}
+            Marketplace Payhuk
           </h1>
               <Sparkles className="h-6 w-6 sm:h-8 sm:w-8 text-yellow-400 animate-pulse" />
             </div>
             <p className="text-sm sm:text-base md:text-lg lg:text-xl xl:text-2xl text-slate-300 mb-6 sm:mb-8 max-w-4xl mx-auto leading-relaxed px-2">
-              {t("marketplace.subtitle")}
+              Découvrez des produits exceptionnels de boutiques indépendantes
               <br className="hidden sm:block" />
-              <span className="text-blue-400 font-semibold">{t("marketplace.subtitleHighlight")}</span>
+              <span className="text-blue-400 font-semibold">Commencez votre shopping maintenant !</span>
             </p>
             
             {/* Statistiques */}
             <div className="grid grid-cols-2 md:grid-cols-4 gap-2 sm:gap-3 md:gap-4 max-w-2xl mx-auto mb-6 sm:mb-8">
               <div className="bg-slate-800/50 backdrop-blur-sm rounded-lg p-2 sm:p-3 md:p-4 border border-slate-600">
                 <div className="text-lg sm:text-xl md:text-2xl font-bold text-blue-400">{stats.totalProducts}</div>
-                <div className="text-xs sm:text-sm text-slate-400">{t("marketplace.stats.products")}</div>
+                Produits
               </div>
               <div className="bg-slate-800/50 backdrop-blur-sm rounded-lg p-2 sm:p-3 md:p-4 border border-slate-600">
                 <div className="text-lg sm:text-xl md:text-2xl font-bold text-green-400">{stats.totalStores}</div>
@@ -482,7 +480,7 @@ const Marketplace = () => {
               <Search className="absolute left-3 sm:left-4 top-1/2 transform -translate-y-1/2 text-slate-400 h-4 w-4 sm:h-5 sm:w-5" />
             <Input
                 type="text"
-                placeholder={t("marketplace.search.placeholder")}
+                placeholder="Rechercher des produits..."
                 value={filters.search}
                 onChange={(e) => updateFilter({ search: e.target.value })}
                 className="pl-10 sm:pl-12 pr-3 sm:pr-4 py-3 sm:py-4 text-sm sm:text-base md:text-lg bg-slate-800/80 backdrop-blur-sm border-slate-600 text-white placeholder-slate-400 focus:border-blue-500 focus:ring-blue-500 transition-all duration-300"
@@ -706,7 +704,7 @@ const Marketplace = () => {
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 sm:gap-4">
             <div className="flex items-center gap-2 sm:gap-4">
               <h2 className="text-lg sm:text-xl md:text-2xl font-bold text-white">
-                {t("marketplace.filters.all")} {t("marketplace.stats.products").toLowerCase()}
+                Tous les produits
               </h2>
               <Badge variant="secondary" className="bg-slate-700 text-slate-300 text-xs sm:text-sm">
                 {filteredProducts.length} produit{filteredProducts.length !== 1 ? "s" : ""}
@@ -843,7 +841,7 @@ const Marketplace = () => {
                 <ShoppingCart className="h-8 w-8 sm:h-10 sm:w-10 text-slate-400" />
               </div>
               <h3 className="text-lg sm:text-xl md:text-2xl font-semibold text-white mb-2">
-                {t("marketplace.noProducts")}
+                Aucun produit trouvé
               </h3>
               <p className="text-sm sm:text-base text-slate-400 mb-4 sm:mb-6">
                 {filters.search

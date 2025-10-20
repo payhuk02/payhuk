@@ -13,7 +13,6 @@ import EditProductDialog from "@/components/products/EditProductDialog";
 import ProductCardDashboard from "@/components/products/ProductCardDashboard";
 import ProductFiltersDashboard from "@/components/products/ProductFiltersDashboard";
 import { Product } from "@/hooks/useProducts";
-import { useTranslation } from "react-i18next";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -30,7 +29,6 @@ const Products = () => {
   const { store, loading: storeLoading } = useStore();
   const { products, loading: productsLoading, refetch } = useProducts(store?.id);
   const { deleteProduct, updateProduct } = useProductManagement(store?.id || "");
-  const { t } = useTranslation();
   
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   const [deletingProductId, setDeletingProductId] = useState<string | null>(null);
@@ -117,7 +115,7 @@ const Products = () => {
         <div className="flex min-h-screen w-full">
           <AppSidebar />
           <div className="flex-1 flex items-center justify-center">
-            <p className="text-muted-foreground">{t("common.loading")}</p>
+            <p className="text-muted-foreground">Chargement...</p>
           </div>
         </div>
       </SidebarProvider>
@@ -166,7 +164,7 @@ const Products = () => {
               <div className="flex h-12 sm:h-14 md:h-16 items-center gap-2 sm:gap-4 px-2 sm:px-3 md:px-4 lg:px-6">
               <SidebarTrigger className="h-8 w-8 sm:h-9 sm:w-9 md:h-10 md:w-10" />
               <div className="flex-1 min-w-0">
-                <h1 className="text-base sm:text-lg md:text-xl lg:text-2xl font-bold truncate">{t("products.title")}</h1>
+                <h1 className="text-base sm:text-lg md:text-xl lg:text-2xl font-bold truncate">Mes Produits</h1>
                   <div className="mt-1 flex flex-wrap gap-1 sm:gap-2 text-[10px] sm:text-xs">
                     <Badge variant={status==='all'?'default':'outline'} onClick={()=>setStatus('all')} className="cursor-pointer text-[9px] sm:text-[10px] md:text-xs">Tous</Badge>
                     <Badge variant={status==='active'?'default':'outline'} onClick={()=>setStatus('active')} className="cursor-pointer text-[9px] sm:text-[10px] md:text-xs">Publiés: {publishedCount}</Badge>
@@ -174,7 +172,7 @@ const Products = () => {
                   </div>
               </div>
               <Button onClick={() => navigate("/dashboard/products/new?tab=faq") } className="text-xs sm:text-sm h-8 sm:h-9 md:h-10 px-2 sm:px-3 md:px-4">
-                <span className="hidden sm:inline">{t("products.newProduct")}</span>
+                <span className="hidden sm:inline">Nouveau Produit</span>
                 <span className="sm:hidden">+</span>
               </Button>
             </div>
@@ -185,7 +183,7 @@ const Products = () => {
               {productsLoading ? (
                 <Card className="shadow-medium">
                   <CardContent className="py-8 sm:py-12 text-center">
-                    <p className="text-sm sm:text-base text-muted-foreground">{t("common.loading")}</p>
+                    <p className="text-sm sm:text-base text-muted-foreground">Chargement...</p>
                   </CardContent>
                 </Card>
               ) : products.length === 0 ? (
@@ -196,9 +194,9 @@ const Products = () => {
                         <Package className="h-8 w-8 sm:h-10 sm:w-10 text-muted-foreground" />
                       </div>
                     </div>
-                    <CardTitle className="text-lg sm:text-xl">{t("products.noProducts")}</CardTitle>
+                    <CardTitle className="text-lg sm:text-xl">Aucun produit trouvé</CardTitle>
                     <CardDescription className="mt-2 text-sm sm:text-base">
-                      {t("products.noProductsDesc")}
+                      Commencez par créer votre premier produit pour votre boutique.
                     </CardDescription>
                   </CardHeader>
                   <CardContent className="text-center pb-8 sm:pb-12 px-4">
@@ -228,7 +226,7 @@ const Products = () => {
                     <Card className="shadow-medium">
                       <CardContent className="py-8 sm:py-12 text-center">
                         <p className="text-sm sm:text-base text-muted-foreground">
-                          {t("products.noProductsDesc")}
+                          Commencez par créer votre premier produit pour votre boutique.
                         </p>
                       </CardContent>
                     </Card>
