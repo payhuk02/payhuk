@@ -10,6 +10,7 @@ import { TrendingUp, DollarSign, ShoppingCart, Users, Package } from "lucide-rea
 import { SalesChart } from "@/components/analytics/SalesChart";
 import { TopProducts } from "@/components/analytics/TopProducts";
 import { RecentOrders } from "@/components/analytics/RecentOrders";
+import { PixelEventsAnalytics } from "@/components/analytics/PixelEventsAnalytics";
 
 const Analytics = () => {
   const { store, loading: storeLoading } = useStore();
@@ -159,6 +160,9 @@ const Analytics = () => {
             </div>
 
             <RecentOrders orders={orders?.slice(0, 5) || []} loading={isLoading} />
+
+            {/* Pixel Events Analytics */}
+            <PixelEventsAnalytics loading={isLoading} />
           </div>
         </main>
       </div>

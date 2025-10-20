@@ -5,7 +5,7 @@ import { Edit, Trash2, Copy, ExternalLink, MessageSquare, Megaphone, Search } fr
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
-import { usePixels } from "@/hooks/usePixels";
+import { useInternalAnalytics } from "@/hooks/useInternalAnalytics";
 
 interface ProductCardDashboardProps {
   product: Product;
@@ -23,7 +23,7 @@ const ProductCardDashboard = ({
 }: ProductCardDashboardProps) => {
   const { toast } = useToast();
   const navigate = useNavigate();
-  const { trackEvent } = usePixels();
+  const { trackInternalEvent } = useInternalAnalytics();
 
   const productUrl = `${window.location.origin}/stores/${storeSlug}/products/${product.slug}`;
 
@@ -127,7 +127,11 @@ const ProductCardDashboard = ({
             <Tooltip>
               <TooltipTrigger asChild>
                 <Button variant="outline" size="sm" className="flex-1" onClick={() => {
-                  trackEvent?.('', 'pageview', { product_id: product.id, product_name: product.name });
+                  trackInternalEvent('pageview', { 
+                    product_id: product.id, 
+                    product_name: product.name,
+                    action: 'edit_product'
+                  });
                   onEdit();
                 }}>
                   <Edit className="h-4 w-4 mr-1" />
@@ -140,7 +144,12 @@ const ProductCardDashboard = ({
             <Tooltip>
               <TooltipTrigger asChild>
                 <Button variant="outline" size="sm" className="flex-1" onClick={() => {
-                  trackEvent?.('', 'pageview', { product_id: product.id, product_name: product.name });
+                  trackInternalEvent('pageview', { 
+                    product_id: product.id, 
+                    product_name: product.name,
+                    action: 'edit_faq',
+                    tab: 'faq'
+                  });
                   navigate(`/admin/products/${product.id}?tab=faq`);
                 }}>
                   <MessageSquare className="h-4 w-4 mr-1" />
@@ -153,7 +162,12 @@ const ProductCardDashboard = ({
             <Tooltip>
               <TooltipTrigger asChild>
                 <Button variant="outline" size="sm" className="flex-1" onClick={() => {
-                  trackEvent?.('', 'pageview', { product_id: product.id, product_name: product.name });
+                  trackInternalEvent('pageview', { 
+                    product_id: product.id, 
+                    product_name: product.name,
+                    action: 'edit_seo',
+                    tab: 'seo'
+                  });
                   navigate(`/admin/products/${product.id}?tab=seo`);
                 }}>
                   <Search className="h-4 w-4 mr-1" />
@@ -166,7 +180,12 @@ const ProductCardDashboard = ({
             <Tooltip>
               <TooltipTrigger asChild>
                 <Button variant="outline" size="sm" className="flex-1" onClick={() => {
-                  trackEvent?.('', 'pageview', { product_id: product.id, product_name: product.name });
+                  trackInternalEvent('pageview', { 
+                    product_id: product.id, 
+                    product_name: product.name,
+                    action: 'edit_promotions',
+                    tab: 'promotions'
+                  });
                   navigate(`/admin/products/${product.id}?tab=promotions`);
                 }}>
                   <Megaphone className="h-4 w-4 mr-1" />
