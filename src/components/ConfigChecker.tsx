@@ -14,6 +14,7 @@ export const ConfigChecker = ({ children }: ConfigCheckerProps) => {
       try {
         // Vérifier que les variables d'environnement critiques sont présentes
         const requiredVars = [
+          'VITE_SUPABASE_PROJECT_ID',
           'VITE_SUPABASE_URL',
           'VITE_SUPABASE_PUBLISHABLE_KEY',
           'VITE_APP_ENV'
@@ -48,7 +49,10 @@ export const ConfigChecker = ({ children }: ConfigCheckerProps) => {
       }
     };
 
-    checkConfig();
+    // Délai pour éviter les problèmes de contexte
+    const timeoutId = setTimeout(checkConfig, 100);
+    
+    return () => clearTimeout(timeoutId);
   }, []);
 
   if (isChecking) {

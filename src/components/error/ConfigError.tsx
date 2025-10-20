@@ -42,17 +42,18 @@ export const ConfigError = ({ error, onRetry }: ConfigErrorProps) => {
             <div className="bg-blue-900/20 rounded-lg p-4 border border-blue-500/20">
               <h3 className="font-semibold text-blue-400 mb-3 flex items-center gap-2">
                 <Settings className="h-4 w-4" />
-                Configuration requise
+                Configuration requise pour Vercel
               </h3>
               <div className="space-y-2 text-sm text-slate-300">
-                <p>Les variables d'environnement suivantes sont requises :</p>
-                <ul className="list-disc list-inside space-y-1 ml-4">
-                  <li><code className="bg-slate-800 px-2 py-1 rounded">VITE_SUPABASE_URL</code></li>
-                  <li><code className="bg-slate-800 px-2 py-1 rounded">VITE_SUPABASE_PUBLISHABLE_KEY</code></li>
-                  <li><code className="bg-slate-800 px-2 py-1 rounded">VITE_APP_ENV</code></li>
-                </ul>
-                <p className="mt-3">
-                  <strong>Pour Vercel :</strong> Ajoutez ces variables dans les paramètres du projet.
+                <p>Ajoutez ces variables dans les paramètres Vercel :</p>
+                <div className="bg-slate-800 rounded p-3 space-y-2">
+                  <div><code className="bg-slate-700 px-2 py-1 rounded">VITE_SUPABASE_PROJECT_ID</code> = hbdnzajbyjakdhuavrvb</div>
+                  <div><code className="bg-slate-700 px-2 py-1 rounded">VITE_SUPABASE_URL</code> = https://hbdnzajbyjakdhuavrvb.supabase.co</div>
+                  <div><code className="bg-slate-700 px-2 py-1 rounded">VITE_SUPABASE_PUBLISHABLE_KEY</code> = [votre clé publique]</div>
+                  <div><code className="bg-slate-700 px-2 py-1 rounded">VITE_APP_ENV</code> = production</div>
+                </div>
+                <p className="mt-3 text-blue-300">
+                  <strong>Instructions :</strong> Settings → Environment Variables → Ajouter chaque variable
                 </p>
               </div>
             </div>
@@ -82,7 +83,7 @@ export const ConfigError = ({ error, onRetry }: ConfigErrorProps) => {
 
           {/* Informations de débogage */}
           <div className="text-xs text-slate-500 text-center">
-            <p>Si le problème persiste, contactez l'administrateur du système.</p>
+            <p>Si le problème persiste, vérifiez la configuration Vercel.</p>
             <p className="mt-1">
               Timestamp: {new Date().toLocaleString()}
             </p>

@@ -119,13 +119,13 @@ const App = () => (
       <Toaster />
       <Sonner />
       <BrowserRouter>
-        <ConfigChecker>
-          <I18nProvider>
+        <I18nProvider>
+          <ConfigChecker>
             <AuthProvider>
               <AppContent />
             </AuthProvider>
-          </I18nProvider>
-        </ConfigChecker>
+          </ConfigChecker>
+        </I18nProvider>
       </BrowserRouter>
     </TooltipProvider>
   </QueryClientProvider>
