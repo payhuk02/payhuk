@@ -30,6 +30,52 @@ export const useProductManagement = (storeId: string) => {
     }
   };
 
+  // Backward-compatible simple creator used by older UIs
+  const createProduct = async (product: {
+    name: string;
+    slug: string;
+    description?: string | null;
+    price?: number | null;
+    category?: string | null;
+    product_type?: string | null;
+    image_url?: string | null;
+  }): Promise<boolean> => {
+    setLoading(true);
+    try {
+      const { error } = await supabase
+        .from('products')
+        .insert([
+          {
+            store_id: storeId,
+            name: product.name,
+            slug: product.slug,
+            description: product.description || null,
+            price: product.price ?? null,
+            currency: 'XOF',
+            category: product.category || null,
+            product_type: product.product_type || null,
+            image_url: product.image_url || null,
+            is_active: false,
+            is_draft: true,
+            status: 'draft',
+          },
+        ]);
+
+      if (error) throw error;
+      toast({ title: 'Succès', description: 'Produit créé' });
+      return true;
+    } catch (error: unknown) {
+      toast({
+        title: 'Erreur',
+        description: error instanceof Error ? error.message : 'Une erreur est survenue.',
+        variant: 'destructive',
+      });
+      return false;
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const createProductComplete = async (productData: Record<string, unknown>): Promise<boolean> => {
     setLoading(true);
     try {
