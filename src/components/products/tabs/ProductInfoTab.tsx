@@ -89,58 +89,58 @@ export const ProductInfoTab = ({ formData, updateFormData, storeSlug, checkSlugA
   };
 
   return (
-    <div className="theme-space-y-6">
+    <div className="space-y-6">
       {/* Sélecteur de type de produit */}
-      <div className="theme-section-card">
-        <div className="flex items-center gap-2 mb-3">
-          <Package className="h-5 w-5 text-blue-400" />
-          <h3 className="theme-section-title">Type de produit</h3>
+      <div className="modern-section">
+        <div className="modern-section-header">
+          <Package className="modern-icon modern-icon-primary" />
+          <h3 className="modern-section-title">Type de produit</h3>
         </div>
-        <p className="theme-section-description">
+        <p className="modern-section-description">
           Choisissez le type de produit que vous souhaitez vendre
         </p>
         
-        <div className="theme-grid theme-grid-cols-3">
+        <div className="modern-grid modern-grid-cols-3">
           {PRODUCT_TYPES.map((type) => {
             const Icon = type.icon;
             return (
               <div
                 key={type.value}
                 className={cn(
-                  "p-4 border-2 rounded-lg cursor-pointer transition-all hover:shadow-md",
+                  "p-4 border rounded-lg cursor-pointer transition-all hover:shadow-md",
                   formData.product_type === type.value 
-                    ? "border-blue-400 bg-blue-400/10" 
-                    : "border-gray-600 hover:border-blue-400"
+                    ? "border-[var(--primary)] bg-[var(--primary-light)]" 
+                    : "border-[var(--border)] hover:border-[var(--primary)]"
                 )}
                 onClick={() => updateFormData("product_type", type.value)}
               >
                 <div className="flex items-center gap-3 mb-2">
-                  <Icon className="h-6 w-6 text-blue-400" />
-                  <h3 className="font-semibold text-white">{type.label}</h3>
+                  <Icon className="h-6 w-6 modern-icon modern-icon-primary" />
+                  <h3 className="font-semibold">{type.label}</h3>
                 </div>
-                <p className="text-sm text-gray-400 mb-3">
+                <p className="text-sm modern-description mb-3">
                   {type.description}
                 </p>
                 <div className="flex flex-wrap gap-1">
                   {type.value === "digital" && (
                     <>
-                      <span className="theme-badge">Téléchargement instantané</span>
-                      <span className="theme-badge">Pas de stock</span>
-                      <span className="theme-badge">Livraison automatique</span>
+                      <span className="modern-badge modern-badge-success">Téléchargement instantané</span>
+                      <span className="modern-badge modern-badge-primary">Pas de stock</span>
+                      <span className="modern-badge modern-badge-success">Livraison automatique</span>
                     </>
                   )}
                   {type.value === "physical" && (
                     <>
-                      <span className="theme-badge">Livraison requise</span>
-                      <span className="theme-badge">Gestion stock</span>
-                      <span className="theme-badge">Adresse client</span>
+                      <span className="modern-badge modern-badge-warning">Livraison requise</span>
+                      <span className="modern-badge modern-badge-primary">Gestion stock</span>
+                      <span className="modern-badge modern-badge-primary">Adresse client</span>
                     </>
                   )}
                   {type.value === "service" && (
                     <>
-                      <span className="theme-badge">Rendez-vous</span>
-                      <span className="theme-badge">Prestation</span>
-                      <span className="theme-badge">Sur mesure</span>
+                      <span className="modern-badge modern-badge-primary">Rendez-vous</span>
+                      <span className="modern-badge modern-badge-primary">Prestation</span>
+                      <span className="modern-badge modern-badge-primary">Sur mesure</span>
                     </>
                   )}
                 </div>
@@ -158,23 +158,23 @@ export const ProductInfoTab = ({ formData, updateFormData, storeSlug, checkSlugA
       </div>
 
       {/* Informations de base */}
-      <div className="theme-section-card">
-        <div className="flex items-center gap-2 mb-3">
-          <Info className="h-5 w-5 text-gray-400" />
-          <h3 className="theme-section-title">Informations de base</h3>
+      <div className="modern-section">
+        <div className="modern-section-header">
+          <Info className="modern-icon" />
+          <h3 className="modern-section-title">Informations de base</h3>
         </div>
-        <p className="theme-section-description">
+        <p className="modern-section-description">
           Renseignez les informations essentielles de votre produit
         </p>
         
-        <div className="theme-space-y-4">
+        <div className="space-y-4">
           <div>
-            <label className="theme-label">Nom du produit *</label>
+            <Label className="product-label">Nom du produit *</Label>
             <Input
               value={formData.name}
               onChange={(e) => updateFormData("name", e.target.value)}
               placeholder="Ex: Guide complet Facebook Ads 2025"
-              className={cn("theme-input", validationErrors.name && "border-red-500")}
+              className={cn("modern-input", validationErrors.name && "border-red-500")}
             />
             {validationErrors.name && (
               <p className="text-red-400 text-sm mt-1 flex items-center gap-1">
@@ -185,14 +185,14 @@ export const ProductInfoTab = ({ formData, updateFormData, storeSlug, checkSlugA
           </div>
 
           <div>
-            <label className="theme-label">URL du produit *</label>
-            <div className="theme-space-y-2">
+            <Label className="product-label">URL du produit *</Label>
+            <div className="space-y-2">
               <div className="flex gap-2">
                 <Input
                   value={formData.slug}
                   onChange={(e) => updateFormData("slug", generateSlug(e.target.value))}
                   placeholder="guide-facebook-ads-2025"
-                  className={cn("theme-input flex-1", validationErrors.slug && "border-red-500")}
+                  className={cn("modern-input flex-1", validationErrors.slug && "border-red-500")}
                 />
                 {checkingSlug ? (
                   <div className="flex items-center text-gray-400">
@@ -208,8 +208,8 @@ export const ProductInfoTab = ({ formData, updateFormData, storeSlug, checkSlugA
                   </div>
                 ) : null}
               </div>
-              <p className="text-sm text-gray-400 break-all">
-                URL complète : <span className="font-mono bg-gray-700 px-2 py-1 rounded text-xs">{productUrl}</span>
+              <p className="text-sm text-gray-600 break-all">
+                URL complète : <span className="font-mono bg-gray-100 px-2 py-1 rounded text-xs text-gray-800">{productUrl}</span>
               </p>
               {validationErrors.slug && (
                 <p className="text-red-400 text-sm flex items-center gap-1">
@@ -220,19 +220,19 @@ export const ProductInfoTab = ({ formData, updateFormData, storeSlug, checkSlugA
             </div>
           </div>
 
-          <div className="theme-grid theme-grid-cols-2">
+          <div className="modern-grid modern-grid-cols-2">
             <div>
-              <label className="theme-label">Catégorie *</label>
+              <Label className="product-label">Catégorie *</Label>
               <Select 
                 value={formData.category} 
                 onValueChange={(value) => updateFormData("category", value)}
               >
-                <SelectTrigger className={cn("theme-input", validationErrors.category && "border-red-500")}>
+                <SelectTrigger className={cn("modern-input", validationErrors.category && "border-red-500")}>
                   <SelectValue placeholder="Sélectionnez une catégorie" />
                 </SelectTrigger>
-                <SelectContent className="bg-gray-800 border-gray-600">
+                <SelectContent>
                   {getCategories().map((category) => (
-                    <SelectItem key={category} value={category} className="text-white hover:bg-gray-700">
+                    <SelectItem key={category} value={category}>
                       {category}
                     </SelectItem>
                   ))}
@@ -246,20 +246,20 @@ export const ProductInfoTab = ({ formData, updateFormData, storeSlug, checkSlugA
               )}
             </div>
             <div>
-              <label className="theme-label">Modèle de tarification *</label>
+              <Label className="product-label">Modèle de tarification *</Label>
               <Select 
                 value={formData.pricing_model} 
                 onValueChange={(value) => updateFormData("pricing_model", value)}
               >
-                <SelectTrigger className={cn("theme-input", validationErrors.pricing_model && "border-red-500")}>
+                <SelectTrigger className={cn("modern-input", validationErrors.pricing_model && "border-red-500")}>
                   <SelectValue placeholder="Sélectionnez un modèle" />
                 </SelectTrigger>
-                <SelectContent className="bg-gray-800 border-gray-600">
+                <SelectContent>
                   {PRICING_MODELS.map((model) => (
-                    <SelectItem key={model.value} value={model.value} className="text-white hover:bg-gray-700">
+                    <SelectItem key={model.value} value={model.value}>
                       <div>
                         <div className="font-medium">{model.label}</div>
-                        <div className="text-xs text-gray-400">{model.description}</div>
+                        <div className="text-xs text-gray-600">{model.description}</div>
                       </div>
                     </SelectItem>
                   ))}
@@ -277,25 +277,25 @@ export const ProductInfoTab = ({ formData, updateFormData, storeSlug, checkSlugA
       </div>
 
       {/* Prix et tarification */}
-      <div className="theme-section-card">
-        <div className="flex items-center gap-2 mb-3">
-          <Zap className="h-5 w-5 text-gray-400" />
-          <h3 className="theme-section-title">Prix et tarification</h3>
+      <div className="modern-section">
+        <div className="modern-section-header">
+          <Zap className="modern-icon" />
+          <h3 className="modern-section-title">Prix et tarification</h3>
         </div>
-        <p className="theme-section-description">
+        <p className="modern-section-description">
           Configurez le prix et le modèle de tarification de votre produit
         </p>
         
-        <div className="theme-space-y-4">
-          <div className="theme-grid theme-grid-cols-2">
+        <div className="space-y-4">
+          <div className="modern-grid modern-grid-cols-2">
             <div>
-              <label className="theme-label">Prix *</label>
+              <Label className="product-label">Prix *</Label>
               <Input
                 type="number"
                 value={formData.price || ""}
                 onChange={(e) => updateFormData("price", e.target.value ? parseFloat(e.target.value) : null)}
                 placeholder="Entrez le prix"
-                className={cn("theme-input", validationErrors.price && "border-red-500")}
+                className={cn("modern-input", validationErrors.price && "border-red-500")}
               />
               {validationErrors.price && (
                 <p className="text-red-400 text-sm mt-1 flex items-center gap-1">
@@ -305,23 +305,23 @@ export const ProductInfoTab = ({ formData, updateFormData, storeSlug, checkSlugA
               )}
             </div>
             <div>
-              <label className="theme-label">Devise *</label>
+              <Label className="product-label">Devise *</Label>
               <CurrencySelect
                 value={formData.currency}
                 onValueChange={(value) => updateFormData("currency", value)}
-                className="theme-input"
+                className="modern-input"
               />
             </div>
           </div>
 
           <div>
-            <label className="theme-label">Prix promotionnel</label>
+            <Label className="product-label">Prix promotionnel</Label>
             <Input
               type="number"
               value={formData.promotional_price || ""}
               onChange={(e) => updateFormData("promotional_price", e.target.value ? parseFloat(e.target.value) : null)}
               placeholder="0"
-              className={cn("theme-input", validationErrors.promotional_price && "border-red-500")}
+              className={cn("modern-input", validationErrors.promotional_price && "border-red-500")}
             />
             {validationErrors.promotional_price && (
               <p className="text-red-400 text-sm mt-1 flex items-center gap-1">
@@ -334,92 +334,88 @@ export const ProductInfoTab = ({ formData, updateFormData, storeSlug, checkSlugA
       </div>
 
       {/* Visibilité et accès */}
-      <div className="theme-section-card">
-        <div className="flex items-center gap-2 mb-3">
-          <Eye className="h-5 w-5 text-gray-400" />
-          <h3 className="theme-section-title">Visibilité et accès</h3>
+      <div className="modern-section">
+        <div className="modern-section-header">
+          <Eye className="modern-icon" />
+          <h3 className="modern-section-title">Visibilité et accès</h3>
         </div>
-        <p className="theme-section-description">
+        <p className="modern-section-description">
           Contrôlez qui peut voir et acheter votre produit
         </p>
         
-        <div className="theme-space-y-4">
+        <div className="space-y-4">
           <div className="flex items-center justify-between">
             <div className="space-y-0.5">
-              <label className="theme-label">Produit actif</label>
-              <p className="theme-label-description">Rendre le produit visible et achetable</p>
+              <Label className="product-label">Produit actif</Label>
+              <p className="modern-description">Rendre le produit visible et achetable</p>
             </div>
             <Switch
               checked={formData.is_active}
               onCheckedChange={(checked) => updateFormData("is_active", checked)}
-              className="theme-switch"
             />
           </div>
 
           <div className="flex items-center justify-between">
             <div className="space-y-0.5">
-              <label className="theme-label">Mettre en avant</label>
-              <p className="theme-label-description">Afficher ce produit sur la page d'accueil</p>
+              <Label className="product-label">Mettre en avant</Label>
+              <p className="modern-description">Afficher ce produit sur la page d'accueil</p>
             </div>
             <Switch
               checked={formData.is_featured}
               onCheckedChange={(checked) => updateFormData("is_featured", checked)}
-              className="theme-switch"
             />
           </div>
 
           <div className="flex items-center justify-between">
             <div className="space-y-0.5">
-              <label className="theme-label">Masquer de la boutique</label>
-              <p className="theme-label-description">Le produit ne sera pas listé publiquement</p>
+              <Label className="product-label">Masquer de la boutique</Label>
+              <p className="modern-description">Le produit ne sera pas listé publiquement</p>
             </div>
             <Switch
               checked={formData.hide_from_store}
               onCheckedChange={(checked) => updateFormData("hide_from_store", checked)}
-              className="theme-switch"
             />
           </div>
 
           <div className="flex items-center justify-between">
             <div className="space-y-0.5">
-              <label className="theme-label">Protéger par mot de passe</label>
-              <p className="theme-label-description">Un mot de passe sera requis pour accéder au produit</p>
+              <Label className="product-label">Protéger par mot de passe</Label>
+              <p className="modern-description">Un mot de passe sera requis pour accéder au produit</p>
             </div>
             <Switch
               checked={formData.password_protected}
               onCheckedChange={(checked) => updateFormData("password_protected", checked)}
-              className="theme-switch"
             />
           </div>
           
           {formData.password_protected && (
             <div>
-              <label className="theme-label">Mot de passe du produit</label>
+              <Label className="product-label">Mot de passe du produit</Label>
               <Input
                 type="password"
                 value={formData.product_password}
                 onChange={(e) => updateFormData("product_password", e.target.value)}
                 placeholder="Mot de passe sécurisé"
-                className="theme-input"
+                className="modern-input"
               />
             </div>
           )}
 
           <div>
-            <label className="theme-label">Contrôle d'accès</label>
+            <Label className="product-label">Contrôle d'accès</Label>
             <Select 
               value={formData.access_control} 
               onValueChange={(value) => updateFormData("access_control", value)}
             >
-              <SelectTrigger className="theme-input">
+              <SelectTrigger className="modern-input">
                 <SelectValue placeholder="Sélectionner le contrôle d'accès" />
               </SelectTrigger>
-              <SelectContent className="bg-gray-800 border-gray-600">
+              <SelectContent>
                 {ACCESS_CONTROLS.map((control) => (
-                  <SelectItem key={control.value} value={control.value} className="text-white hover:bg-gray-700">
+                  <SelectItem key={control.value} value={control.value}>
                     <div>
                       <div className="font-medium">{control.label}</div>
-                      <div className="text-xs text-gray-400">{control.description}</div>
+                      <div className="text-xs text-gray-600">{control.description}</div>
                     </div>
                   </SelectItem>
                 ))}
@@ -430,103 +426,100 @@ export const ProductInfoTab = ({ formData, updateFormData, storeSlug, checkSlugA
       </div>
 
       {/* Options d'achat */}
-      <div className="theme-section-card">
-        <div className="flex items-center gap-2 mb-3">
-          <ShoppingCart className="h-5 w-5 text-gray-400" />
-          <h3 className="theme-section-title">Options d'achat</h3>
+      <div className="modern-section">
+        <div className="modern-section-header">
+          <ShoppingCart className="modern-icon" />
+          <h3 className="modern-section-title">Options d'achat</h3>
         </div>
-        <p className="theme-section-description">
+        <p className="modern-section-description">
           Configurez les règles d'achat pour ce produit
         </p>
         
-        <div className="theme-space-y-4">
+        <div className="space-y-4">
           <div className="flex items-center justify-between">
             <div className="space-y-0.5">
-              <label className="theme-label">Limite d'achat par client</label>
-              <p className="theme-label-description">Nombre maximum d'achats par client</p>
+              <Label className="product-label">Limite d'achat par client</Label>
+              <p className="modern-description">Nombre maximum d'achats par client</p>
             </div>
             <Input
               type="number"
               value={formData.purchase_limit || ""}
               onChange={(e) => updateFormData("purchase_limit", parseInt(e.target.value) || null)}
               placeholder="0 = illimité"
-              className="theme-input w-24"
+              className="modern-input w-24"
             />
           </div>
 
           <div className="flex items-center justify-between">
             <div className="space-y-0.5">
-              <label className="theme-label">Masquer le nombre d'achats</label>
-              <p className="theme-label-description">Ne pas afficher le nombre d'achats</p>
+              <Label className="product-label">Masquer le nombre d'achats</Label>
+              <p className="modern-description">Ne pas afficher le nombre d'achats</p>
             </div>
             <Switch
               checked={formData.hide_purchase_count}
               onCheckedChange={(checked) => updateFormData("hide_purchase_count", checked)}
-              className="theme-switch"
             />
           </div>
         </div>
       </div>
 
       {/* Dates de vente */}
-      <div className="theme-section-card">
-        <div className="flex items-center gap-2 mb-3">
-          <CalendarIcon className="h-5 w-5 text-gray-400" />
-          <h3 className="theme-section-title">Dates de vente</h3>
+      <div className="modern-section">
+        <div className="modern-section-header">
+          <CalendarIcon className="modern-icon" />
+          <h3 className="modern-section-title">Dates de vente</h3>
         </div>
-        <p className="theme-section-description">
+        <p className="modern-section-description">
           Définissez des périodes spécifiques pour la vente
         </p>
         
-        <div className="theme-grid theme-grid-cols-2">
+        <div className="modern-grid modern-grid-cols-2">
           <div>
-            <label className="theme-label">Date de début de vente</label>
+            <Label className="product-label">Date de début de vente</Label>
             <Popover>
               <PopoverTrigger asChild>
                 <Button
                   variant={"outline"}
                   className={cn(
-                    "w-full justify-start text-left font-normal theme-input",
-                    !formData.sale_start_date && "text-gray-400"
+                    "w-full justify-start text-left font-normal modern-input",
+                    !formData.sale_start_date && "text-gray-500"
                   )}
                 >
                   <CalendarIcon className="mr-2 h-4 w-4" />
                   {formData.sale_start_date ? format(new Date(formData.sale_start_date), "PPP") : <span>Sélectionner une date</span>}
                 </Button>
               </PopoverTrigger>
-              <PopoverContent className="w-auto p-0 bg-gray-800 border-gray-600">
+              <PopoverContent className="w-auto p-0 product-popover">
                 <Calendar
                   mode="single"
                   selected={formData.sale_start_date ? new Date(formData.sale_start_date) : undefined}
                   onSelect={(date) => updateFormData("sale_start_date", date?.toISOString() || null)}
                   initialFocus
-                  className="bg-gray-800 text-white"
                 />
               </PopoverContent>
             </Popover>
           </div>
           <div>
-            <label className="theme-label">Date de fin de vente</label>
+            <Label className="product-label">Date de fin de vente</Label>
             <Popover>
               <PopoverTrigger asChild>
                 <Button
                   variant={"outline"}
                   className={cn(
-                    "w-full justify-start text-left font-normal theme-input",
-                    !formData.sale_end_date && "text-gray-400"
+                    "w-full justify-start text-left font-normal modern-input",
+                    !formData.sale_end_date && "text-gray-500"
                   )}
                 >
                   <CalendarIcon className="mr-2 h-4 w-4" />
                   {formData.sale_end_date ? format(new Date(formData.sale_end_date), "PPP") : <span>Sélectionner une date</span>}
                 </Button>
               </PopoverTrigger>
-              <PopoverContent className="w-auto p-0 bg-gray-800 border-gray-600">
+              <PopoverContent className="w-auto p-0 product-popover">
                 <Calendar
                   mode="single"
                   selected={formData.sale_end_date ? new Date(formData.sale_end_date) : undefined}
                   onSelect={(date) => updateFormData("sale_end_date", date?.toISOString() || null)}
                   initialFocus
-                  className="bg-gray-800 text-white"
                 />
               </PopoverContent>
             </Popover>
@@ -535,46 +528,46 @@ export const ProductInfoTab = ({ formData, updateFormData, storeSlug, checkSlugA
       </div>
 
       {/* Métadonnées techniques */}
-      <div className="theme-section-card">
-        <div className="flex items-center gap-2 mb-3">
-          <Globe className="h-5 w-5 text-gray-400" />
-          <h3 className="theme-section-title">Métadonnées techniques</h3>
+      <div className="modern-section">
+        <div className="modern-section-header">
+          <Globe className="modern-icon" />
+          <h3 className="modern-section-title">Métadonnées techniques</h3>
         </div>
-        <p className="theme-section-description">
+        <p className="modern-section-description">
           Informations système sur le produit
         </p>
         
-        <div className="theme-grid theme-grid-cols-2">
+        <div className="modern-grid modern-grid-cols-2">
           <div>
-            <label className="theme-label">Créé le</label>
+            <Label className="product-label">Créé le</Label>
             <Input 
               value={formData.created_at ? format(new Date(formData.created_at), "PPP p") : "N/A"} 
               readOnly 
-              className="theme-input bg-gray-700" 
+              className="modern-input" 
             />
           </div>
           <div>
-            <label className="theme-label">Dernière mise à jour</label>
+            <Label className="product-label">Dernière mise à jour</Label>
             <Input 
               value={formData.updated_at ? format(new Date(formData.updated_at), "PPP p") : "N/A"} 
               readOnly 
-              className="theme-input bg-gray-700" 
+              className="modern-input" 
             />
           </div>
           <div>
-            <label className="theme-label">Version</label>
+            <Label className="product-label">Version</Label>
             <Input 
               value={formData.version || "1.0.0"} 
               readOnly 
-              className="theme-input bg-gray-700" 
+              className="modern-input" 
             />
           </div>
           <div>
-            <label className="theme-label">Statut</label>
+            <Label className="product-label">Statut</Label>
             <Input 
               value={formData.status || "Brouillon"} 
               readOnly 
-              className="theme-input bg-gray-700" 
+              className="modern-input" 
             />
           </div>
         </div>

@@ -103,8 +103,8 @@ export const ProductDescriptionTab = ({ formData, updateFormData }: ProductDescr
       {/* En-tête avec score SEO */}
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-2xl font-bold">Description et SEO</h2>
-          <p className="text-gray-600">Créez une description attrayante et optimisez votre référencement</p>
+          <h2 className="modern-title modern-title-lg">Description et SEO</h2>
+          <p className="modern-description">Créez une description attrayante et optimisez votre référencement</p>
         </div>
         <div className="flex items-center gap-4">
           <div className="text-right">
@@ -145,7 +145,7 @@ export const ProductDescriptionTab = ({ formData, updateFormData }: ProductDescr
                 placeholder="Décrivez brièvement votre produit en une phrase..."
                 rows={3}
                 maxLength={160}
-                className="resize-none"
+                className="resize-none modern-input"
               />
               <p className="text-xs text-gray-500 mt-1">
                 {(formData.short_description || "").length}/160 caractères
@@ -203,7 +203,7 @@ export const ProductDescriptionTab = ({ formData, updateFormData }: ProductDescr
                         updateFormData("features", newFeatures);
                       }}
                       placeholder="Caractéristique..."
-                      className="flex-1"
+                      className="flex-1 modern-input"
                     />
                     <Button
                       variant="outline"
@@ -290,6 +290,7 @@ export const ProductDescriptionTab = ({ formData, updateFormData }: ProductDescr
                   onChange={(e) => updateFormData("meta_title", e.target.value)}
                   placeholder={formData.name || "Titre pour les moteurs de recherche"}
                   maxLength={60}
+                  className="modern-input"
                 />
                 <p className="text-xs text-gray-500 mt-1">
                   {(formData.meta_title || "").length}/60 caractères
@@ -305,6 +306,7 @@ export const ProductDescriptionTab = ({ formData, updateFormData }: ProductDescr
                   placeholder="Description pour les moteurs de recherche..."
                   rows={3}
                   maxLength={160}
+                  className="modern-input"
                 />
                 <p className="text-xs text-gray-500 mt-1">
                   {(formData.meta_description || "").length}/160 caractères
@@ -318,6 +320,7 @@ export const ProductDescriptionTab = ({ formData, updateFormData }: ProductDescr
                   value={formData.meta_keywords || ""}
                   onChange={(e) => updateFormData("meta_keywords", e.target.value)}
                   placeholder="mot-clé1, mot-clé2, mot-clé3"
+                  className="modern-input"
                 />
                 <p className="text-xs text-gray-500 mt-1">
                   Séparez les mots-clés par des virgules
@@ -342,6 +345,7 @@ export const ProductDescriptionTab = ({ formData, updateFormData }: ProductDescr
                   value={formData.og_title || ""}
                   onChange={(e) => updateFormData("og_title", e.target.value)}
                   placeholder="Titre pour Facebook, Twitter..."
+                  className="modern-input"
                 />
               </div>
 
@@ -353,6 +357,7 @@ export const ProductDescriptionTab = ({ formData, updateFormData }: ProductDescr
                   onChange={(e) => updateFormData("og_description", e.target.value)}
                   placeholder="Description pour les réseaux sociaux..."
                   rows={3}
+                  className="modern-input"
                 />
               </div>
 
@@ -363,6 +368,7 @@ export const ProductDescriptionTab = ({ formData, updateFormData }: ProductDescr
                   value={formData.og_image || ""}
                   onChange={(e) => updateFormData("og_image", e.target.value)}
                   placeholder="https://example.com/image.jpg"
+                  className="modern-input"
                 />
                 <p className="text-xs text-gray-500 mt-1">
                   Image recommandée: 1200x630px
