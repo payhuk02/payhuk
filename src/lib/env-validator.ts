@@ -115,7 +115,20 @@ try {
   envConfig = envValidator.validate();
 } catch (error) {
   console.error('❌ Erreur de configuration des variables d\'environnement:', error);
-  throw error;
+  
+  // En production, créer une configuration de fallback pour éviter le crash
+  if (import.meta.env.PROD) {
+    console.warn('⚠️ Utilisation de la configuration de fallback en production');
+    envConfig = {
+      VITE_SUPABASE_URL: import.meta.env.VITE_SUPABASE_URL || 'https://fallback.supabase.co',
+      VITE_SUPABASE_PUBLISHABLE_KEY: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY || 'fallback-key',
+      VITE_APP_ENV: (import.meta.env.VITE_APP_ENV as any) || 'production',
+      VITE_MONEROO_API_KEY: import.meta.env.VITE_MONEROO_API_KEY,
+      VITE_SENTRY_DSN: import.meta.env.VITE_SENTRY_DSN,
+    };
+  } else {
+    throw error;
+  }
 }
 
 export { envValidator, envConfig };

@@ -11,6 +11,7 @@ import { useScrollRestoration } from "@/hooks/useScrollRestoration";
 import { useDarkMode } from "@/hooks/useDarkMode";
 import { PerformanceOptimizer } from "@/components/optimization/PerformanceOptimizer";
 import { I18nProvider } from "@/components/I18nProvider";
+import { ConfigChecker } from "@/components/ConfigChecker";
 
 // Pages principales
 import Landing from "./pages/Landing";
@@ -118,11 +119,13 @@ const App = () => (
       <Toaster />
       <Sonner />
       <BrowserRouter>
-        <I18nProvider>
-          <AuthProvider>
-            <AppContent />
-          </AuthProvider>
-        </I18nProvider>
+        <ConfigChecker>
+          <I18nProvider>
+            <AuthProvider>
+              <AppContent />
+            </AuthProvider>
+          </I18nProvider>
+        </ConfigChecker>
       </BrowserRouter>
     </TooltipProvider>
   </QueryClientProvider>
