@@ -5,6 +5,7 @@ import { Edit, Trash2, Copy, ExternalLink, MessageSquare, Megaphone, Search } fr
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
+import { usePixels } from "@/hooks/usePixels";
 
 interface ProductCardDashboardProps {
   product: Product;
@@ -22,6 +23,7 @@ const ProductCardDashboard = ({
 }: ProductCardDashboardProps) => {
   const { toast } = useToast();
   const navigate = useNavigate();
+  const { trackEvent } = usePixels();
 
   const productUrl = `${window.location.origin}/stores/${storeSlug}/products/${product.slug}`;
 
@@ -124,7 +126,10 @@ const ProductCardDashboard = ({
           <TooltipProvider>
             <Tooltip>
               <TooltipTrigger asChild>
-                <Button variant="outline" size="sm" className="flex-1" onClick={onEdit}>
+                <Button variant="outline" size="sm" className="flex-1" onClick={() => {
+                  trackEvent?.('', 'pageview', { product_id: product.id, product_name: product.name });
+                  onEdit();
+                }}>
                   <Edit className="h-4 w-4 mr-1" />
                   Modifier
                 </Button>
@@ -134,7 +139,10 @@ const ProductCardDashboard = ({
 
             <Tooltip>
               <TooltipTrigger asChild>
-                <Button variant="outline" size="sm" className="flex-1" onClick={() => navigate(`/admin/products/${product.id}?tab=faq`)}>
+                <Button variant="outline" size="sm" className="flex-1" onClick={() => {
+                  trackEvent?.('', 'pageview', { product_id: product.id, product_name: product.name });
+                  navigate(`/admin/products/${product.id}?tab=faq`);
+                }}>
                   <MessageSquare className="h-4 w-4 mr-1" />
                   FAQ
                 </Button>
@@ -144,7 +152,10 @@ const ProductCardDashboard = ({
 
             <Tooltip>
               <TooltipTrigger asChild>
-                <Button variant="outline" size="sm" className="flex-1" onClick={() => navigate(`/admin/products/${product.id}?tab=seo`)}>
+                <Button variant="outline" size="sm" className="flex-1" onClick={() => {
+                  trackEvent?.('', 'pageview', { product_id: product.id, product_name: product.name });
+                  navigate(`/admin/products/${product.id}?tab=seo`);
+                }}>
                   <Search className="h-4 w-4 mr-1" />
                   SEO
                 </Button>
@@ -154,7 +165,10 @@ const ProductCardDashboard = ({
 
             <Tooltip>
               <TooltipTrigger asChild>
-                <Button variant="outline" size="sm" className="flex-1" onClick={() => navigate(`/admin/products/${product.id}?tab=promotions`)}>
+                <Button variant="outline" size="sm" className="flex-1" onClick={() => {
+                  trackEvent?.('', 'pageview', { product_id: product.id, product_name: product.name });
+                  navigate(`/admin/products/${product.id}?tab=promotions`);
+                }}>
                   <Megaphone className="h-4 w-4 mr-1" />
                   Promo
                 </Button>
