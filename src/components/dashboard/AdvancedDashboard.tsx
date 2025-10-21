@@ -40,6 +40,8 @@ import { useNotification } from '@/components/ui/NotificationContainer';
 import { LoadingSpinner } from '@/components/ui/loading-spinner';
 import ConfigChecker from '@/components/dashboard/ConfigChecker';
 import { AuthDiagnostic } from '@/components/dashboard/AuthDiagnostic';
+import { DatabaseDiagnostic } from '@/components/dashboard/DatabaseDiagnostic';
+import { ConnectionTest } from '@/components/dashboard/ConnectionTest';
 import { motion, AnimatePresence } from 'framer-motion';
 
 // Composant pour les cartes de statistiques
@@ -576,6 +578,8 @@ const AdvancedDashboard: React.FC = () => {
         <TabsContent value="performance" className="space-y-6">
           <ConfigChecker />
           <AuthDiagnostic />
+          <ConnectionTest />
+          <DatabaseDiagnostic />
           
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             <Card className="hover:shadow-lg transition-shadow duration-300">
