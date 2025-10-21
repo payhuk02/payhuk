@@ -10,6 +10,9 @@ import { LoadingBar } from "@/components/navigation/LoadingBar";
 import { useScrollRestoration } from "@/hooks/useScrollRestoration";
 import { useDarkMode } from "@/hooks/useDarkMode";
 import { PerformanceOptimizer } from "@/components/optimization/PerformanceOptimizer";
+import { NotificationContainer } from "@/components/ui/NotificationContainer";
+import { ErrorBoundary } from "@/components/ui/ErrorBoundary";
+import { useThemeManager } from "@/hooks/useThemeManager";
 
 // Pages principales
 import Landing from "./pages/Landing";
@@ -54,12 +57,14 @@ import PaymentCancel from "./pages/payments/PaymentCancel";
 const AppContent = () => {
   useScrollRestoration();
   useDarkMode(); // Active le mode sombre globalement
+  useThemeManager(); // Initialise le gestionnaire de thème
 
   return (
-    <>
+    <ErrorBoundary>
       <PerformanceOptimizer />
       <LoadingBar />
       <ScrollToTop />
+      <NotificationContainer />
       <Routes>
         {/* --- Routes publiques --- */}
         <Route path="/" element={<Landing />} />
@@ -105,7 +110,7 @@ const AppContent = () => {
         {/* --- Route de fallback --- */}
         <Route path="*" element={<NotFound />} />
       </Routes>
-    </>
+    </ErrorBoundary>
   );
 };
 
