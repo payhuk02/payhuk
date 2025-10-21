@@ -180,7 +180,7 @@ export const useDashboardStats = () => {
         : [];
 
       // Calculer les top products
-      const productCounts = orderItems.reduce((acc: any, item: any) => {
+      const productCounts = orderItems.reduce((acc: Record<string, number>, item: { product_id: string }) => {
         if (item.product_id) {
           acc[item.product_id] = (acc[item.product_id] || 0) + 1;
         }

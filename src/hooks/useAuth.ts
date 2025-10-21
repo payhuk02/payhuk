@@ -24,7 +24,17 @@ interface AuthState {
   user: AuthUser | null;
   isLoading: boolean;
   isAuthenticated: boolean;
-  session: any;
+  session: {
+    user: {
+      id: string;
+      email: string;
+      user_metadata: Record<string, unknown>;
+      email_confirmed_at: string | null;
+      created_at: string;
+    };
+    access_token: string;
+    refresh_token: string;
+  } | null;
 }
 
 export const useAuth = () => {
@@ -153,9 +163,10 @@ export const useAuth = () => {
       }
 
       return { data, error: null };
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Sign in error:', error);
-      showError('Erreur de connexion', error.message || 'Impossible de se connecter');
+      const errorMessage = error instanceof Error ? error.message : 'Impossible de se connecter';
+      showError('Erreur de connexion', errorMessage);
       return { data: null, error };
     } finally {
       setLoading(false);
@@ -186,9 +197,10 @@ export const useAuth = () => {
       }
 
       return { data, error: null };
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Sign up error:', error);
-      showError('Erreur d\'inscription', error.message || 'Impossible de créer le compte');
+      const errorMessage = error instanceof Error ? error.message : 'Impossible de créer le compte';
+      showError('Erreur d\'inscription', errorMessage);
       return { data: null, error };
     } finally {
       setLoading(false);
@@ -212,9 +224,10 @@ export const useAuth = () => {
       }
 
       return { data, error: null };
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Google sign in error:', error);
-      showError('Erreur Google', error.message || 'Impossible de se connecter avec Google');
+      const errorMessage = error instanceof Error ? error.message : 'Impossible de se connecter avec Google';
+      showError('Erreur Google', errorMessage);
       return { data: null, error };
     } finally {
       setLoading(false);
@@ -238,9 +251,10 @@ export const useAuth = () => {
       }
 
       return { data, error: null };
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('GitHub sign in error:', error);
-      showError('Erreur GitHub', error.message || 'Impossible de se connecter avec GitHub');
+      const errorMessage = error instanceof Error ? error.message : 'Impossible de se connecter avec GitHub';
+      showError('Erreur GitHub', errorMessage);
       return { data: null, error };
     } finally {
       setLoading(false);
@@ -260,9 +274,10 @@ export const useAuth = () => {
 
       logout();
       showSuccess('Déconnexion réussie', 'Vous avez été déconnecté avec succès');
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Sign out error:', error);
-      showError('Erreur de déconnexion', error.message || 'Impossible de se déconnecter');
+      const errorMessage = error instanceof Error ? error.message : 'Impossible de se déconnecter';
+      showError('Erreur de déconnexion', errorMessage);
     } finally {
       setLoading(false);
     }
@@ -283,9 +298,10 @@ export const useAuth = () => {
 
       showSuccess('Email envoyé', 'Vérifiez votre email pour réinitialiser votre mot de passe');
       return { data, error: null };
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Reset password error:', error);
-      showError('Erreur de réinitialisation', error.message || 'Impossible d\'envoyer l\'email');
+      const errorMessage = error instanceof Error ? error.message : 'Impossible d\'envoyer l\'email';
+      showError('Erreur de réinitialisation', errorMessage);
       return { data: null, error };
     } finally {
       setLoading(false);
@@ -321,9 +337,10 @@ export const useAuth = () => {
 
       showSuccess('Profil mis à jour', 'Votre profil a été modifié avec succès');
       return { error: null };
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Update profile error:', error);
-      showError('Erreur de mise à jour', error.message || 'Impossible de mettre à jour le profil');
+      const errorMessage = error instanceof Error ? error.message : 'Impossible de mettre à jour le profil';
+      showError('Erreur de mise à jour', errorMessage);
       return { error };
     } finally {
       setLoading(false);

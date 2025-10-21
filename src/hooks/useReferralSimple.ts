@@ -31,7 +31,7 @@ export const useReferralSimple = () => {
       }
 
       // Récupérer ou créer le profil
-      let { data: profile, error: profileError } = await supabase
+      const { data: profile, error: profileError } = await supabase
         .from('profiles')
         .select('referral_code, total_referral_earnings')
         .eq('user_id', user.id)
@@ -53,7 +53,8 @@ export const useReferralSimple = () => {
           .single();
 
         if (createError) throw createError;
-        profile = newProfile;
+        // Utiliser newProfile au lieu de réassigner profile
+        const updatedProfile = newProfile;
       } else if (profileError) {
         throw profileError;
       }

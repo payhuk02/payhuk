@@ -164,11 +164,11 @@ export const useStore = () => {
     }
   };
 
-  const updateStore = async (updates: any) => {
+  const updateStore = async (updates: Partial<Store>) => {
     if (!store) return false;
 
     try {
-      let updateData: any = { ...updates };
+      const updateData: Partial<Store> = { ...updates };
 
       // Si le nom change, regénérer le slug
       if (updates.name && updates.name !== store.name) {
