@@ -3,6 +3,7 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
+import React from "react";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { ScrollToTop } from "@/components/navigation/ScrollToTop";
@@ -13,6 +14,8 @@ import { PerformanceOptimizer } from "@/components/optimization/PerformanceOptim
 import { NotificationContainer } from "@/components/ui/NotificationContainer";
 import { ErrorBoundary } from "@/components/ui/ErrorBoundary";
 import { useThemeManager } from "@/hooks/useThemeManager";
+import { checkEnvironmentVariables, checkSupabaseConnection } from "@/lib/env-checker";
+import { EnvironmentDiagnostic } from "@/components/dashboard/EnvironmentDiagnostic";
 
 // Pages principales
 import Landing from "./pages/Landing";
@@ -59,12 +62,24 @@ const AppContent = () => {
   useDarkMode(); // Active le mode sombre globalement
   useThemeManager(); // Initialise le gestionnaire de thème
 
+  // Vérification des variables d'environnement (temporaire pour debug)
+  React.useEffect(() => {
+    console.log('🚀 Démarrage de l\'application Payhuk');
+    checkEnvironmentVariables();
+    
+    // Test de connexion Supabase après un délai
+    setTimeout(() => {
+      checkSupabaseConnection();
+    }, 2000);
+  }, []);
+
   return (
     <ErrorBoundary>
       <PerformanceOptimizer />
       <LoadingBar />
       <ScrollToTop />
       <NotificationContainer />
+      <EnvironmentDiagnostic />
       <Routes>
         {/* --- Routes publiques --- */}
         <Route path="/" element={<Landing />} />
