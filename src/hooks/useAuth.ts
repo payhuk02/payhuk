@@ -1,3 +1,4 @@
+import React, { useState, useEffect } from 'react';
 import { createClient } from '@supabase/supabase-js';
 import { useAppStore } from '../store/useAppStore';
 import { useNotification } from '../components/ui/NotificationContainer';

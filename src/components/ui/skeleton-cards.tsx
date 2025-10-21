@@ -37,11 +37,13 @@ export const SkeletonChart = ({ className }: SkeletonChartProps) => {
   return (
     <div className={cn("rounded-lg border bg-card p-6", className)}>
       <div className="space-y-4">
-        <div className="flex items-center justify-between">
-          <div className="h-5 w-32 bg-muted animate-pulse rounded" />
-          <div className="h-4 w-20 bg-muted animate-pulse rounded" />
+        <div className="h-4 w-32 bg-muted animate-pulse rounded" />
+        <div className="h-64 w-full bg-muted animate-pulse rounded" />
+        <div className="flex justify-between">
+          <div className="h-3 w-16 bg-muted animate-pulse rounded" />
+          <div className="h-3 w-16 bg-muted animate-pulse rounded" />
+          <div className="h-3 w-16 bg-muted animate-pulse rounded" />
         </div>
-        <div className="h-[300px] w-full bg-muted animate-pulse rounded" />
       </div>
     </div>
   );

@@ -37,7 +37,7 @@ import {
 import { useDashboardData, useDashboardActions } from '@/hooks/useDashboardData';
 import { useAuth } from '@/hooks/useAuth';
 import { useNotification } from '@/components/ui/NotificationContainer';
-import { LoadingSpinner } from '@/components/ui/LoadingSpinner';
+import { LoadingSpinner } from '@/components/ui/loading-spinner';
 import ConfigChecker from '@/components/dashboard/ConfigChecker';
 import { motion, AnimatePresence } from 'framer-motion';
 
