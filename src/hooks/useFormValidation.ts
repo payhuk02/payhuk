@@ -1,4 +1,4 @@
-import { useState, useCallback, useMemo } from 'react';
+import React, { useState, useCallback, useMemo } from 'react';
 
 // Types de base pour la validation
 type ValidationRule<T = any> = {

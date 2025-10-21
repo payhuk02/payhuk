@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useRef, useEffect } from 'react';
+import { useState, useCallback, useMemo, useRef, useEffect } from 'react';
 import { debounce, throttle } from 'lodash-es';
 
 // Hook pour le debouncing des valeurs
