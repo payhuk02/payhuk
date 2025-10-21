@@ -48,29 +48,67 @@ export const useAuth = () => {
         
         if (session?.user) {
           try {
-            // Récupérer les données utilisateur complètes
-            const { data: profile, error } = await supabase
-              .from('profiles')
-              .select('*')
-              .eq('id', session.user.id)
-              .single();
-
-            if (error) {
-              console.error('Error fetching profile:', error);
-              showError('Erreur de profil', 'Impossible de charger votre profil');
-              return;
-            }
-
+            // Créer l'utilisateur avec les données de base de Supabase Auth
             const user: AuthUser = {
               id: session.user.id,
               email: session.user.email!,
-              name: profile?.name || session.user.user_metadata?.name || session.user.email!.split('@')[0],
-              avatar: profile?.avatar_url || session.user.user_metadata?.avatar_url,
-              role: profile?.role || 'customer',
+              name: session.user.user_metadata?.name || session.user.email!.split('@')[0],
+              avatar: session.user.user_metadata?.avatar_url,
+              role: session.user.user_metadata?.role || 'customer',
               isVerified: session.user.email_confirmed_at ? true : false,
-              createdAt: profile?.created_at || session.user.created_at,
-              updatedAt: profile?.updated_at || new Date().toISOString()
+              createdAt: session.user.created_at,
+              updatedAt: new Date().toISOString()
             };
+
+            // Essayer de récupérer le profil depuis la base de données (optionnel)
+            try {
+              const { data: profile, error } = await supabase
+                .from('profiles')
+                .select('*')
+                .eq('id', session.user.id)
+                .single();
+
+              if (!error && profile) {
+                // Mettre à jour avec les données du profil si disponible
+                user.name = profile.name || user.name;
+                user.avatar = profile.avatar_url || user.avatar;
+                user.role = profile.role || user.role;
+                user.createdAt = profile.created_at || user.createdAt;
+                user.updatedAt = profile.updated_at || user.updatedAt;
+              } else if (error && error.code === 'PGRST116') {
+                // Profil n'existe pas, essayer de le créer
+                console.log('Profile not found, creating new profile...');
+                try {
+                  const { data: newProfile, error: createError } = await supabase
+                    .from('profiles')
+                    .insert([{
+                      id: session.user.id,
+                      name: user.name,
+                      email: user.email,
+                      avatar_url: user.avatar,
+                      role: user.role,
+                      created_at: new Date().toISOString(),
+                      updated_at: new Date().toISOString()
+                    }])
+                    .select()
+                    .single();
+
+                  if (!createError && newProfile) {
+                    console.log('Profile created successfully:', newProfile);
+                    user.createdAt = newProfile.created_at;
+                    user.updatedAt = newProfile.updated_at;
+                  } else {
+                    console.warn('Failed to create profile:', createError);
+                  }
+                } catch (createError) {
+                  console.warn('Profile creation failed:', createError);
+                }
+              } else {
+                console.warn('Profile fetch error:', error.message);
+              }
+            } catch (profileError) {
+              console.warn('Profile fetch failed, using auth data:', profileError);
+            }
 
             setAuthState({
               user,
