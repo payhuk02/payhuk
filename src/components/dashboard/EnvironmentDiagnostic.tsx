@@ -2,7 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { CheckCircle, XCircle, AlertTriangle, RefreshCw, ExternalLink } from 'lucide-react';
+import { CheckCircle, XCircle, AlertTriangle, RefreshCw, ExternalLink, Info, Shield, Bug } from 'lucide-react';
+import { useEnvironment, logEnvironmentInfo } from '@/hooks/useEnvironment';
 
 interface EnvStatus {
   name: string;
@@ -12,51 +13,64 @@ interface EnvStatus {
 }
 
 export const EnvironmentDiagnostic: React.FC = () => {
-  const [envStatus, setEnvStatus] = useState<EnvStatus[]>([]);
+  const env = useEnvironment();
   const [supabaseStatus, setSupabaseStatus] = useState<'checking' | 'connected' | 'error'>('checking');
   const [isVisible, setIsVisible] = useState(false);
 
   const checkEnvironment = () => {
+    // Utilise les données du validateur avancé
     const variables: EnvStatus[] = [
       {
         name: 'VITE_SUPABASE_PROJECT_ID',
-        value: import.meta.env.VITE_SUPABASE_PROJECT_ID,
+        value: env.config.VITE_SUPABASE_PROJECT_ID,
         required: true,
-        status: import.meta.env.VITE_SUPABASE_PROJECT_ID ? 'present' : 'missing'
+        status: env.config.VITE_SUPABASE_PROJECT_ID ? 'present' : 'missing'
       },
       {
         name: 'VITE_SUPABASE_URL',
-        value: import.meta.env.VITE_SUPABASE_URL,
+        value: env.config.VITE_SUPABASE_URL,
         required: true,
-        status: import.meta.env.VITE_SUPABASE_URL ? 'present' : 'missing'
+        status: env.config.VITE_SUPABASE_URL ? 'present' : 'missing'
       },
       {
         name: 'VITE_SUPABASE_PUBLISHABLE_KEY',
-        value: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
+        value: env.config.VITE_SUPABASE_PUBLISHABLE_KEY,
         required: true,
-        status: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY ? 'present' : 'missing'
+        status: env.config.VITE_SUPABASE_PUBLISHABLE_KEY ? 'present' : 'missing'
       },
       {
         name: 'VITE_APP_ENV',
-        value: import.meta.env.VITE_APP_ENV,
+        value: env.config.VITE_APP_ENV,
         required: true,
-        status: import.meta.env.VITE_APP_ENV ? 'present' : 'missing'
+        status: env.config.VITE_APP_ENV ? 'present' : 'missing'
       },
       {
         name: 'VITE_MONEROO_API_KEY',
-        value: import.meta.env.VITE_MONEROO_API_KEY,
+        value: env.config.VITE_MONEROO_API_KEY,
         required: false,
-        status: import.meta.env.VITE_MONEROO_API_KEY ? 'present' : 'missing'
+        status: env.config.VITE_MONEROO_API_KEY ? 'present' : 'missing'
       },
       {
         name: 'VITE_SENTRY_DSN',
-        value: import.meta.env.VITE_SENTRY_DSN,
+        value: env.config.VITE_SENTRY_DSN,
         required: false,
-        status: import.meta.env.VITE_SENTRY_DSN ? 'present' : 'missing'
+        status: env.config.VITE_SENTRY_DSN ? 'present' : 'missing'
+      },
+      {
+        name: 'VITE_APP_VERSION',
+        value: env.config.VITE_APP_VERSION,
+        required: false,
+        status: env.config.VITE_APP_VERSION ? 'present' : 'missing'
+      },
+      {
+        name: 'VITE_DEBUG_MODE',
+        value: env.config.VITE_DEBUG_MODE,
+        required: false,
+        status: env.config.VITE_DEBUG_MODE ? 'present' : 'missing'
       }
     ];
 
-    setEnvStatus(variables);
+    return variables;
   };
 
   const testSupabaseConnection = async () => {
@@ -76,9 +90,10 @@ export const EnvironmentDiagnostic: React.FC = () => {
   };
 
   useEffect(() => {
-    checkEnvironment();
     testSupabaseConnection();
   }, []);
+
+  const envStatus = checkEnvironment();
 
   const getStatusIcon = (status: EnvStatus['status'], required: boolean) => {
     if (status === 'present') return <CheckCircle className="h-4 w-4 text-green-500" />;
@@ -94,7 +109,7 @@ export const EnvironmentDiagnostic: React.FC = () => {
     return <Badge variant="secondary">Inconnue</Badge>;
   };
 
-  const criticalMissing = envStatus.filter(v => v.required && v.status === 'missing').length;
+  const criticalMissing = env.validation.errors.length;
   const isHealthy = criticalMissing === 0 && supabaseStatus === 'connected';
 
   if (!isVisible) {
@@ -141,7 +156,29 @@ export const EnvironmentDiagnostic: React.FC = () => {
         </CardHeader>
         
         <CardContent className="space-y-6">
-          {/* Résumé */}
+          {/* Informations de l'application */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="text-center p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
+              <div className="text-lg font-bold text-blue-600 dark:text-blue-400">
+                {env.appName}
+              </div>
+              <div className="text-sm text-muted-foreground">v{env.appVersion}</div>
+            </div>
+            <div className="text-center p-4 bg-green-50 dark:bg-green-900/20 rounded-lg">
+              <div className="text-lg font-bold text-green-600 dark:text-green-400">
+                {env.environment}
+              </div>
+              <div className="text-sm text-muted-foreground">Environnement</div>
+            </div>
+            <div className="text-center p-4 bg-purple-50 dark:bg-purple-900/20 rounded-lg">
+              <div className="text-lg font-bold text-purple-600 dark:text-purple-400">
+                {env.isDebugMode ? 'ON' : 'OFF'}
+              </div>
+              <div className="text-sm text-muted-foreground">Mode Debug</div>
+            </div>
+          </div>
+
+          {/* Résumé des erreurs */}
           <div className="grid grid-cols-2 gap-4">
             <div className="text-center p-4 bg-muted rounded-lg">
               <div className="text-2xl font-bold text-green-500">
@@ -153,7 +190,35 @@ export const EnvironmentDiagnostic: React.FC = () => {
               <div className="text-2xl font-bold text-red-500">
                 {criticalMissing}
               </div>
-              <div className="text-sm text-muted-foreground">Variables critiques manquantes</div>
+              <div className="text-sm text-muted-foreground">Erreurs critiques</div>
+            </div>
+          </div>
+
+          {/* Statut de sécurité */}
+          <div className="grid grid-cols-2 gap-4">
+            <div className="flex items-center gap-3 p-3 bg-muted rounded-lg">
+              <Shield className="h-5 w-5 text-blue-500" />
+              <div>
+                <div className="font-medium">Moneroo</div>
+                <div className="text-sm text-muted-foreground">
+                  {env.security.hasMoneroo ? 'Configuré' : 'Non configuré'}
+                </div>
+              </div>
+              <Badge variant={env.security.hasMoneroo ? "default" : "secondary"}>
+                {env.security.hasMoneroo ? '✅' : '❌'}
+              </Badge>
+            </div>
+            <div className="flex items-center gap-3 p-3 bg-muted rounded-lg">
+              <Bug className="h-5 w-5 text-orange-500" />
+              <div>
+                <div className="font-medium">Sentry</div>
+                <div className="text-sm text-muted-foreground">
+                  {env.security.hasSentry ? 'Configuré' : 'Non configuré'}
+                </div>
+              </div>
+              <Badge variant={env.security.hasSentry ? "default" : "secondary"}>
+                {env.security.hasSentry ? '✅' : '❌'}
+              </Badge>
             </div>
           </div>
 
@@ -207,17 +272,45 @@ export const EnvironmentDiagnostic: React.FC = () => {
             </div>
           </div>
 
+          {/* Avertissements du validateur */}
+          {env.validation.warnings.length > 0 && (
+            <div>
+              <h3 className="font-semibold mb-3 flex items-center gap-2">
+                <AlertTriangle className="h-4 w-4 text-yellow-500" />
+                Avertissements
+              </h3>
+              <div className="space-y-2">
+                {env.validation.warnings.map((warning, index) => (
+                  <div key={index} className="p-3 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg border border-yellow-200 dark:border-yellow-800">
+                    <div className="text-sm text-yellow-800 dark:text-yellow-200">
+                      {warning}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
           {/* Actions */}
           <div className="flex gap-2 pt-4 border-t">
             <Button
               onClick={() => {
-                checkEnvironment();
+                env.revalidate();
                 testSupabaseConnection();
               }}
               className="flex-1"
             >
               <RefreshCw className="h-4 w-4 mr-2" />
               Actualiser
+            </Button>
+            <Button
+              variant="outline"
+              onClick={() => {
+                logEnvironmentInfo();
+              }}
+            >
+              <Info className="h-4 w-4 mr-2" />
+              Log Console
             </Button>
             <Button
               variant="outline"

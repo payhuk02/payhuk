@@ -16,6 +16,7 @@ import { ErrorBoundary } from "@/components/ui/ErrorBoundary";
 import { useThemeManager } from "@/hooks/useThemeManager";
 import { checkEnvironmentVariables, checkSupabaseConnection } from "@/lib/env-checker";
 import { EnvironmentDiagnostic } from "@/components/dashboard/EnvironmentDiagnostic";
+// import { EnvironmentInfo } from "@/hooks/useEnvironment";
 
 // Pages principales
 import Landing from "./pages/Landing";
@@ -80,6 +81,7 @@ const AppContent = () => {
       <ScrollToTop />
       <NotificationContainer />
       <EnvironmentDiagnostic />
+      {/* <EnvironmentInfo /> */}
       <Routes>
         {/* --- Routes publiques --- */}
         <Route path="/" element={<Landing />} />
