@@ -17,6 +17,7 @@ interface EnvConfig {
   VITE_SENTRY_DSN?: string;
   VITE_APP_VERSION?: string;
   VITE_APP_NAME?: string;
+  VITE_APP_URL?: string;
   VITE_DEBUG_MODE?: string;
 }
 
@@ -106,6 +107,14 @@ class EnvValidator {
       required: false,
       defaultValue: 'Payhuk',
       description: 'Nom de l\'application'
+    },
+    {
+      key: 'VITE_APP_URL',
+      label: 'URL de l\'application',
+      required: false,
+      validator: (value) => this.validateUrl(value),
+      defaultValue: 'https://payhuk.vercel.app',
+      description: 'URL de base de l\'application'
     },
     {
       key: 'VITE_DEBUG_MODE',
@@ -308,13 +317,25 @@ class EnvValidator {
     }
   }
 
-  private validateBoolean(value: string): boolean | string {
-    const validValues = ['true', 'false', '1', '0'];
-    if (!validValues.includes(value.toLowerCase())) {
-      return 'La valeur doit être un booléen valide (true/false)';
-    }
-    return true;
-  }
+        private validateBoolean(value: string): boolean | string {
+          const validValues = ['true', 'false', '1', '0'];
+          if (!validValues.includes(value.toLowerCase())) {
+            return 'La valeur doit être un booléen valide (true/false)';
+          }
+          return true;
+        }
+
+        private validateUrl(value: string): boolean | string {
+          try {
+            const url = new URL(value);
+            if (!url.protocol.includes('https')) {
+              return 'L\'URL doit utiliser HTTPS';
+            }
+            return true;
+          } catch {
+            return 'L\'URL doit être une URL valide';
+          }
+        }
 
   /**
    * Utilitaires
@@ -340,21 +361,22 @@ class EnvValidator {
     return variable?.defaultValue || '';
   }
 
-  private createFinalConfig(): EnvConfig {
-    const finalConfig: EnvConfig = {
-      VITE_SUPABASE_PROJECT_ID: this.config.VITE_SUPABASE_PROJECT_ID || this.getDefaultValue('VITE_SUPABASE_PROJECT_ID'),
-      VITE_SUPABASE_URL: this.config.VITE_SUPABASE_URL || this.getDefaultValue('VITE_SUPABASE_URL'),
-      VITE_SUPABASE_PUBLISHABLE_KEY: this.config.VITE_SUPABASE_PUBLISHABLE_KEY || this.getDefaultValue('VITE_SUPABASE_PUBLISHABLE_KEY'),
-      VITE_APP_ENV: (this.config.VITE_APP_ENV as any) || 'production',
-      VITE_MONEROO_API_KEY: this.config.VITE_MONEROO_API_KEY,
-      VITE_SENTRY_DSN: this.config.VITE_SENTRY_DSN,
-      VITE_APP_VERSION: this.config.VITE_APP_VERSION || this.getDefaultValue('VITE_APP_VERSION'),
-      VITE_APP_NAME: this.config.VITE_APP_NAME || this.getDefaultValue('VITE_APP_NAME'),
-      VITE_DEBUG_MODE: this.config.VITE_DEBUG_MODE || this.getDefaultValue('VITE_DEBUG_MODE')
-    };
+        private createFinalConfig(): EnvConfig {
+          const finalConfig: EnvConfig = {
+            VITE_SUPABASE_PROJECT_ID: this.config.VITE_SUPABASE_PROJECT_ID || this.getDefaultValue('VITE_SUPABASE_PROJECT_ID'),
+            VITE_SUPABASE_URL: this.config.VITE_SUPABASE_URL || this.getDefaultValue('VITE_SUPABASE_URL'),
+            VITE_SUPABASE_PUBLISHABLE_KEY: this.config.VITE_SUPABASE_PUBLISHABLE_KEY || this.getDefaultValue('VITE_SUPABASE_PUBLISHABLE_KEY'),
+            VITE_APP_ENV: (this.config.VITE_APP_ENV as any) || 'production',
+            VITE_MONEROO_API_KEY: this.config.VITE_MONEROO_API_KEY,
+            VITE_SENTRY_DSN: this.config.VITE_SENTRY_DSN,
+            VITE_APP_VERSION: this.config.VITE_APP_VERSION || this.getDefaultValue('VITE_APP_VERSION'),
+            VITE_APP_NAME: this.config.VITE_APP_NAME || this.getDefaultValue('VITE_APP_NAME'),
+            VITE_APP_URL: this.config.VITE_APP_URL || this.getDefaultValue('VITE_APP_URL'),
+            VITE_DEBUG_MODE: this.config.VITE_DEBUG_MODE || this.getDefaultValue('VITE_DEBUG_MODE')
+          };
 
-    return finalConfig;
-  }
+          return finalConfig;
+        }
 
   private resetValidation(): void {
     this.config = {};
@@ -481,15 +503,16 @@ try {
   // En production, utiliser les valeurs par défaut plutôt que de faire planter l'app
   if (import.meta.env.PROD) {
     console.warn('⚠️ Fallback vers la configuration par défaut');
-    envConfig = {
-      VITE_SUPABASE_PROJECT_ID: 'hbdnzajbyjakdhuavrvb',
-      VITE_SUPABASE_URL: 'https://hbdnzajbyjakdhuavrvb.supabase.co',
-      VITE_SUPABASE_PUBLISHABLE_KEY: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhiZG56YWpieWpha2RodWF2cnZiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTc1OTgyMzEsImV4cCI6MjA3MzE3NDIzMX0.myur8r50wIORQwfcCP4D1ZxlhKFxICdVqjUM80CgtnM',
-      VITE_APP_ENV: 'production',
-      VITE_APP_VERSION: '1.0.0',
-      VITE_APP_NAME: 'Payhuk',
-      VITE_DEBUG_MODE: 'false'
-    };
+        envConfig = {
+          VITE_SUPABASE_PROJECT_ID: 'hbdnzajbyjakdhuavrvb',
+          VITE_SUPABASE_URL: 'https://hbdnzajbyjakdhuavrvb.supabase.co',
+          VITE_SUPABASE_PUBLISHABLE_KEY: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhiZG56YWpieWpha2RodWF2cnZiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTc1OTgyMzEsImV4cCI6MjA3MzE3NDIzMX0.myur8r50wIORQwfcCP4D1ZxlhKFxICdVqjUM80CgtnM',
+          VITE_APP_ENV: 'production',
+          VITE_APP_VERSION: '1.0.0',
+          VITE_APP_NAME: 'Payhuk',
+          VITE_APP_URL: 'https://payhuk.vercel.app',
+          VITE_DEBUG_MODE: 'false'
+        };
   } else {
     throw err;
   }

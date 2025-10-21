@@ -1,10 +1,11 @@
 import { createClient } from '@supabase/supabase-js';
 import { useAppStore } from '../store/useAppStore';
 import { useNotification } from '../components/ui/NotificationContainer';
+import { envConfig } from '@/lib/env-validator';
 
 const supabase = createClient(
-  process.env.REACT_APP_SUPABASE_URL!,
-  process.env.REACT_APP_SUPABASE_ANON_KEY!
+  envConfig.VITE_SUPABASE_URL,
+  envConfig.VITE_SUPABASE_PUBLISHABLE_KEY
 );
 
 interface AuthUser {

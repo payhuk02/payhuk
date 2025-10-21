@@ -1,5 +1,6 @@
 import React from 'react';
 import { Helmet } from 'react-helmet';
+import { envConfig } from '@/lib/env-validator';
 
 interface SEOHeadProps {
   title?: string;
@@ -45,8 +46,8 @@ export const SEOHead: React.FC<SEOHeadProps> = ({
   nofollow = false,
 }) => {
   const fullTitle = title.includes('Payhuk') ? title : `${title} | Payhuk`;
-  const fullUrl = url ? `${process.env.VITE_APP_URL || 'https://payhuk.com'}${url}` : undefined;
-  const fullImage = image.startsWith('http') ? image : `${process.env.VITE_APP_URL || 'https://payhuk.com'}${image}`;
+  const fullUrl = url ? `${envConfig.VITE_APP_URL || 'https://payhuk.com'}${url}` : undefined;
+  const fullImage = image.startsWith('http') ? image : `${envConfig.VITE_APP_URL || 'https://payhuk.com'}${image}`;
   const canonicalUrl = canonical || fullUrl;
 
   // Schema.org structured data
@@ -63,7 +64,7 @@ export const SEOHead: React.FC<SEOHeadProps> = ({
       name: siteName,
       logo: {
         '@type': 'ImageObject',
-        url: `${process.env.VITE_APP_URL || 'https://payhuk.com'}/images/logo.png`,
+        url: `${envConfig.VITE_APP_URL || 'https://payhuk.com'}/images/logo.png`,
       },
     },
     datePublished: publishedTime,
@@ -74,7 +75,7 @@ export const SEOHead: React.FC<SEOHeadProps> = ({
         '@type': 'SearchAction',
         target: {
           '@type': 'EntryPoint',
-          urlTemplate: `${process.env.VITE_APP_URL || 'https://payhuk.com'}/marketplace?q={search_term_string}`,
+          urlTemplate: `${envConfig.VITE_APP_URL || 'https://payhuk.com'}/marketplace?q={search_term_string}`,
         },
         'query-input': 'required name=search_term_string',
       },
