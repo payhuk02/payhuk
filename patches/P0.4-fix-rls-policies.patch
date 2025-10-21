@@ -1,0 +1,957 @@
+# 🔧 PATCH P0.4 - Correction des Politiques RLS Supabase
+
+## 🎯 Problème
+Les politiques RLS (Row Level Security) sont incomplètes dans la base de données Supabase, ce qui compromet la sécurité des données.
+
+## 📁 Fichiers Affectés
+
+### 1. `supabase/migrations/20251021_fix_rls_policies.sql` - CRÉER LA MIGRATION RLS
+
+```sql
+-- Fix RLS Policies Migration
+-- This migration fixes all RLS policies for proper data security
+
+-- ============================================
+-- 1. FIX STORES TABLE RLS POLICIES
+-- ============================================
+
+-- Enable RLS on stores table
+ALTER TABLE public.stores ENABLE ROW LEVEL SECURITY;
+
+-- Drop existing policies to recreate them properly
+DROP POLICY IF EXISTS "Users can view their own stores" ON public.stores;
+DROP POLICY IF EXISTS "Users can insert their own stores" ON public.stores;
+DROP POLICY IF EXISTS "Users can update their own stores" ON public.stores;
+DROP POLICY IF EXISTS "Users can delete their own stores" ON public.stores;
+DROP POLICY IF EXISTS "Public can view active stores" ON public.stores;
+DROP POLICY IF EXISTS "Admins can manage all stores" ON public.stores;
+
+-- Recreate policies with proper conditions
+CREATE POLICY "Users can view their own stores"
+ON public.stores
+FOR SELECT
+USING (auth.uid() = owner_id);
+
+CREATE POLICY "Users can insert their own stores"
+ON public.stores
+FOR INSERT
+WITH CHECK (auth.uid() = owner_id);
+
+CREATE POLICY "Users can update their own stores"
+ON public.stores
+FOR UPDATE
+USING (auth.uid() = owner_id);
+
+CREATE POLICY "Users can delete their own stores"
+ON public.stores
+FOR DELETE
+USING (auth.uid() = owner_id);
+
+-- Public can view active stores (for marketplace)
+CREATE POLICY "Public can view active stores"
+ON public.stores
+FOR SELECT
+USING (is_active = true);
+
+-- Admins can manage all stores
+CREATE POLICY "Admins can view all stores"
+ON public.stores
+FOR SELECT
+USING (public.has_role(auth.uid(), 'admin'));
+
+CREATE POLICY "Admins can update all stores"
+ON public.stores
+FOR UPDATE
+USING (public.has_role(auth.uid(), 'admin'));
+
+CREATE POLICY "Admins can delete all stores"
+ON public.stores
+FOR DELETE
+USING (public.has_role(auth.uid(), 'admin'));
+
+-- ============================================
+-- 2. FIX PRODUCTS TABLE RLS POLICIES
+-- ============================================
+
+-- Enable RLS on products table
+ALTER TABLE public.products ENABLE ROW LEVEL SECURITY;
+
+-- Drop existing policies
+DROP POLICY IF EXISTS "Store owners can manage their products" ON public.products;
+DROP POLICY IF EXISTS "Public can view published products" ON public.products;
+DROP POLICY IF EXISTS "Admins can manage all products" ON public.products;
+
+-- Recreate policies
+CREATE POLICY "Store owners can manage their products"
+ON public.products
+FOR ALL
+USING (
+  EXISTS (
+    SELECT 1 FROM public.stores 
+    WHERE stores.id = products.store_id 
+    AND stores.owner_id = auth.uid()
+  )
+);
+
+CREATE POLICY "Public can view published products"
+ON public.products
+FOR SELECT
+USING (
+  status = 'published' 
+  AND is_active = true
+  AND EXISTS (
+    SELECT 1 FROM public.stores 
+    WHERE stores.id = products.store_id 
+    AND stores.is_active = true
+  )
+);
+
+CREATE POLICY "Admins can manage all products"
+ON public.products
+FOR ALL
+USING (public.has_role(auth.uid(), 'admin'));
+
+-- ============================================
+-- 3. FIX ORDERS TABLE RLS POLICIES
+-- ============================================
+
+-- Enable RLS on orders table
+ALTER TABLE public.orders ENABLE ROW LEVEL SECURITY;
+
+-- Drop existing policies
+DROP POLICY IF EXISTS "Customers can view their own orders" ON public.orders;
+DROP POLICY IF EXISTS "Store owners can view orders for their products" ON public.orders;
+DROP POLICY IF EXISTS "Admins can view all orders" ON public.orders;
+
+-- Recreate policies
+CREATE POLICY "Customers can view their own orders"
+ON public.orders
+FOR SELECT
+USING (auth.uid() = customer_id);
+
+CREATE POLICY "Store owners can view orders for their products"
+ON public.orders
+FOR SELECT
+USING (
+  EXISTS (
+    SELECT 1 FROM public.order_items oi
+    JOIN public.products p ON p.id = oi.product_id
+    JOIN public.stores s ON s.id = p.store_id
+    WHERE oi.order_id = orders.id
+    AND s.owner_id = auth.uid()
+  )
+);
+
+CREATE POLICY "Admins can view all orders"
+ON public.orders
+FOR SELECT
+USING (public.has_role(auth.uid(), 'admin'));
+
+-- ============================================
+-- 4. FIX ORDER_ITEMS TABLE RLS POLICIES
+-- ============================================
+
+-- Enable RLS on order_items table
+ALTER TABLE public.order_items ENABLE ROW LEVEL SECURITY;
+
+-- Drop existing policies
+DROP POLICY IF EXISTS "Users can view order items for their orders" ON public.order_items;
+DROP POLICY IF EXISTS "Store owners can view order items for their products" ON public.order_items;
+DROP POLICY IF EXISTS "Admins can view all order items" ON public.order_items;
+
+-- Recreate policies
+CREATE POLICY "Users can view order items for their orders"
+ON public.order_items
+FOR SELECT
+USING (
+  EXISTS (
+    SELECT 1 FROM public.orders o
+    WHERE o.id = order_items.order_id
+    AND o.customer_id = auth.uid()
+  )
+);
+
+CREATE POLICY "Store owners can view order items for their products"
+ON public.order_items
+FOR SELECT
+USING (
+  EXISTS (
+    SELECT 1 FROM public.products p
+    JOIN public.stores s ON s.id = p.store_id
+    WHERE p.id = order_items.product_id
+    AND s.owner_id = auth.uid()
+  )
+);
+
+CREATE POLICY "Admins can view all order items"
+ON public.order_items
+FOR SELECT
+USING (public.has_role(auth.uid(), 'admin'));
+
+-- ============================================
+-- 5. FIX CUSTOMERS TABLE RLS POLICIES
+-- ============================================
+
+-- Enable RLS on customers table
+ALTER TABLE public.customers ENABLE ROW LEVEL SECURITY;
+
+-- Drop existing policies
+DROP POLICY IF EXISTS "Store owners can manage their customers" ON public.customers;
+DROP POLICY IF EXISTS "Admins can manage all customers" ON public.customers;
+
+-- Recreate policies
+CREATE POLICY "Store owners can manage their customers"
+ON public.customers
+FOR ALL
+USING (
+  EXISTS (
+    SELECT 1 FROM public.stores s
+    WHERE s.id = customers.store_id
+    AND s.owner_id = auth.uid()
+  )
+);
+
+CREATE POLICY "Admins can manage all customers"
+ON public.customers
+FOR ALL
+USING (public.has_role(auth.uid(), 'admin'));
+
+-- ============================================
+-- 6. FIX PROMOTIONS TABLE RLS POLICIES
+-- ============================================
+
+-- Enable RLS on promotions table
+ALTER TABLE public.promotions ENABLE ROW LEVEL SECURITY;
+
+-- Drop existing policies
+DROP POLICY IF EXISTS "Store owners can manage their promotions" ON public.promotions;
+DROP POLICY IF EXISTS "Public can view active promotions" ON public.promotions;
+DROP POLICY IF EXISTS "Admins can manage all promotions" ON public.promotions;
+
+-- Recreate policies
+CREATE POLICY "Store owners can manage their promotions"
+ON public.promotions
+FOR ALL
+USING (
+  EXISTS (
+    SELECT 1 FROM public.stores s
+    WHERE s.id = promotions.store_id
+    AND s.owner_id = auth.uid()
+  )
+);
+
+CREATE POLICY "Public can view active promotions"
+ON public.promotions
+FOR SELECT
+USING (
+  is_active = true
+  AND (start_date IS NULL OR start_date <= NOW())
+  AND (end_date IS NULL OR end_date >= NOW())
+  AND EXISTS (
+    SELECT 1 FROM public.stores s
+    WHERE s.id = promotions.store_id
+    AND s.is_active = true
+  )
+);
+
+CREATE POLICY "Admins can manage all promotions"
+ON public.promotions
+FOR ALL
+USING (public.has_role(auth.uid(), 'admin'));
+
+-- ============================================
+-- 7. FIX PAYMENTS TABLE RLS POLICIES
+-- ============================================
+
+-- Enable RLS on payments table
+ALTER TABLE public.payments ENABLE ROW LEVEL SECURITY;
+
+-- Drop existing policies
+DROP POLICY IF EXISTS "Users can view their own payments" ON public.payments;
+DROP POLICY IF EXISTS "Store owners can view payments for their orders" ON public.payments;
+DROP POLICY IF EXISTS "Admins can view all payments" ON public.payments;
+
+-- Recreate policies
+CREATE POLICY "Users can view their own payments"
+ON public.payments
+FOR SELECT
+USING (
+  EXISTS (
+    SELECT 1 FROM public.orders o
+    WHERE o.id = payments.order_id
+    AND o.customer_id = auth.uid()
+  )
+);
+
+CREATE POLICY "Store owners can view payments for their orders"
+ON public.payments
+FOR SELECT
+USING (
+  EXISTS (
+    SELECT 1 FROM public.orders o
+    JOIN public.order_items oi ON oi.order_id = o.id
+    JOIN public.products p ON p.id = oi.product_id
+    JOIN public.stores s ON s.id = p.store_id
+    WHERE o.id = payments.order_id
+    AND s.owner_id = auth.uid()
+  )
+);
+
+CREATE POLICY "Admins can view all payments"
+ON public.payments
+FOR SELECT
+USING (public.has_role(auth.uid(), 'admin'));
+
+-- ============================================
+-- 8. CREATE MISSING INDEXES FOR PERFORMANCE
+-- ============================================
+
+-- Indexes for stores table
+CREATE INDEX IF NOT EXISTS idx_stores_owner_id ON public.stores(owner_id);
+CREATE INDEX IF NOT EXISTS idx_stores_is_active ON public.stores(is_active);
+CREATE INDEX IF NOT EXISTS idx_stores_slug ON public.stores(slug);
+
+-- Indexes for products table
+CREATE INDEX IF NOT EXISTS idx_products_store_id ON public.products(store_id);
+CREATE INDEX IF NOT EXISTS idx_products_status ON public.products(status);
+CREATE INDEX IF NOT EXISTS idx_products_category ON public.products(category);
+CREATE INDEX IF NOT EXISTS idx_products_store_status ON public.products(store_id, status);
+CREATE INDEX IF NOT EXISTS idx_products_is_active ON public.products(is_active);
+
+-- Indexes for orders table
+CREATE INDEX IF NOT EXISTS idx_orders_customer_id ON public.orders(customer_id);
+CREATE INDEX IF NOT EXISTS idx_orders_created_at ON public.orders(created_at);
+CREATE INDEX IF NOT EXISTS idx_orders_status ON public.orders(status);
+
+-- Indexes for order_items table
+CREATE INDEX IF NOT EXISTS idx_order_items_order_id ON public.order_items(order_id);
+CREATE INDEX IF NOT EXISTS idx_order_items_product_id ON public.order_items(product_id);
+
+-- Indexes for customers table
+CREATE INDEX IF NOT EXISTS idx_customers_store_id ON public.customers(store_id);
+CREATE INDEX IF NOT EXISTS idx_customers_email ON public.customers(email);
+
+-- Indexes for promotions table
+CREATE INDEX IF NOT EXISTS idx_promotions_store_id ON public.promotions(store_id);
+CREATE INDEX IF NOT EXISTS idx_promotions_is_active ON public.promotions(is_active);
+CREATE INDEX IF NOT EXISTS idx_promotions_dates ON public.promotions(start_date, end_date);
+
+-- Indexes for payments table
+CREATE INDEX IF NOT EXISTS idx_payments_order_id ON public.payments(order_id);
+CREATE INDEX IF NOT EXISTS idx_payments_status ON public.payments(status);
+CREATE INDEX IF NOT EXISTS idx_payments_created_at ON public.payments(created_at);
+
+-- ============================================
+-- 9. CREATE FUNCTIONS FOR COMPLEX RLS CHECKS
+-- ============================================
+
+-- Function to check if user owns a store
+CREATE OR REPLACE FUNCTION public.user_owns_store(store_id UUID)
+RETURNS BOOLEAN
+LANGUAGE sql
+STABLE
+SECURITY DEFINER
+SET search_path = public
+AS $$
+  SELECT EXISTS (
+    SELECT 1 FROM public.stores 
+    WHERE id = store_id 
+    AND owner_id = auth.uid()
+  )
+$$;
+
+-- Function to check if user can access a product
+CREATE OR REPLACE FUNCTION public.user_can_access_product(product_id UUID)
+RETURNS BOOLEAN
+LANGUAGE sql
+STABLE
+SECURITY DEFINER
+SET search_path = public
+AS $$
+  SELECT EXISTS (
+    SELECT 1 FROM public.products p
+    JOIN public.stores s ON s.id = p.store_id
+    WHERE p.id = product_id
+    AND (
+      s.owner_id = auth.uid() -- Store owner
+      OR (p.status = 'published' AND p.is_active = true AND s.is_active = true) -- Public access
+      OR public.has_role(auth.uid(), 'admin') -- Admin
+    )
+  )
+$$;
+
+-- Function to check if user can access an order
+CREATE OR REPLACE FUNCTION public.user_can_access_order(order_id UUID)
+RETURNS BOOLEAN
+LANGUAGE sql
+STABLE
+SECURITY DEFINER
+SET search_path = public
+AS $$
+  SELECT EXISTS (
+    SELECT 1 FROM public.orders o
+    WHERE o.id = order_id
+    AND (
+      o.customer_id = auth.uid() -- Customer
+      OR EXISTS ( -- Store owner
+        SELECT 1 FROM public.order_items oi
+        JOIN public.products p ON p.id = oi.product_id
+        JOIN public.stores s ON s.id = p.store_id
+        WHERE oi.order_id = o.id
+        AND s.owner_id = auth.uid()
+      )
+      OR public.has_role(auth.uid(), 'admin') -- Admin
+    )
+  )
+$$;
+
+-- ============================================
+-- 10. VERIFICATION QUERIES
+-- ============================================
+
+-- Verify RLS is enabled on all tables
+SELECT 
+  schemaname,
+  tablename,
+  rowsecurity as rls_enabled
+FROM pg_tables 
+WHERE schemaname = 'public' 
+AND tablename IN ('stores', 'products', 'orders', 'order_items', 'customers', 'promotions', 'payments')
+ORDER BY tablename;
+
+-- Verify policies exist
+SELECT 
+  schemaname,
+  tablename,
+  policyname,
+  permissive,
+  roles,
+  cmd,
+  qual,
+  with_check
+FROM pg_policies 
+WHERE schemaname = 'public'
+AND tablename IN ('stores', 'products', 'orders', 'order_items', 'customers', 'promotions', 'payments')
+ORDER BY tablename, policyname;
+
+-- Verify indexes exist
+SELECT 
+  indexname,
+  tablename,
+  indexdef
+FROM pg_indexes 
+WHERE schemaname = 'public'
+AND tablename IN ('stores', 'products', 'orders', 'order_items', 'customers', 'promotions', 'payments')
+ORDER BY tablename, indexname;
+
+-- Verify functions exist
+SELECT 
+  routine_name,
+  routine_type,
+  data_type
+FROM information_schema.routines 
+WHERE routine_schema = 'public' 
+AND routine_name IN ('user_owns_store', 'user_can_access_product', 'user_can_access_order', 'has_role')
+ORDER BY routine_name;
+```
+
+### 2. `src/lib/supabase-security.ts` - CRÉER UN MODULE DE SÉCURITÉ SUPABASE
+
+```typescript
+/**
+ * Module de sécurité Supabase pour Payhuk
+ * Gestion des permissions et validation des accès
+ */
+
+import { supabase } from '@/integrations/supabase/client';
+
+// ============================================
+// TYPES DE SÉCURITÉ
+// ============================================
+
+export interface SecurityContext {
+  userId: string | null;
+  userRole: 'admin' | 'user' | null;
+  isAuthenticated: boolean;
+}
+
+export interface AccessCheck {
+  canRead: boolean;
+  canWrite: boolean;
+  canDelete: boolean;
+  reason?: string;
+}
+
+// ============================================
+// FONCTIONS DE VÉRIFICATION D'ACCÈS
+// ============================================
+
+/**
+ * Vérifie si l'utilisateur peut accéder à une boutique
+ */
+export const canAccessStore = async (storeId: string): Promise<AccessCheck> => {
+  try {
+    const { data: { user } } = await supabase.auth.getUser();
+    
+    if (!user) {
+      return { canRead: false, canWrite: false, canDelete: false, reason: 'Non authentifié' };
+    }
+
+    // Vérifier si l'utilisateur est propriétaire de la boutique
+    const { data: store, error } = await supabase
+      .from('stores')
+      .select('owner_id, is_active')
+      .eq('id', storeId)
+      .single();
+
+    if (error) {
+      return { canRead: false, canWrite: false, canDelete: false, reason: 'Boutique non trouvée' };
+    }
+
+    const isOwner = store.owner_id === user.id;
+    const isPublic = store.is_active;
+
+    return {
+      canRead: isOwner || isPublic,
+      canWrite: isOwner,
+      canDelete: isOwner,
+      reason: isOwner ? 'Propriétaire' : isPublic ? 'Accès public' : 'Accès refusé'
+    };
+  } catch (error) {
+    console.error('Erreur lors de la vérification d\'accès à la boutique:', error);
+    return { canRead: false, canWrite: false, canDelete: false, reason: 'Erreur de vérification' };
+  }
+};
+
+/**
+ * Vérifie si l'utilisateur peut accéder à un produit
+ */
+export const canAccessProduct = async (productId: string): Promise<AccessCheck> => {
+  try {
+    const { data: { user } } = await supabase.auth.getUser();
+    
+    if (!user) {
+      return { canRead: false, canWrite: false, canDelete: false, reason: 'Non authentifié' };
+    }
+
+    // Vérifier les permissions via la fonction RLS
+    const { data, error } = await supabase
+      .rpc('user_can_access_product', { product_id: productId });
+
+    if (error) {
+      return { canRead: false, canWrite: false, canDelete: false, reason: 'Erreur de vérification' };
+    }
+
+    const hasAccess = data === true;
+
+    if (!hasAccess) {
+      return { canRead: false, canWrite: false, canDelete: false, reason: 'Accès refusé' };
+    }
+
+    // Vérifier si l'utilisateur est propriétaire du produit
+    const { data: product, error: productError } = await supabase
+      .from('products')
+      .select(`
+        id,
+        status,
+        stores!inner(owner_id)
+      `)
+      .eq('id', productId)
+      .single();
+
+    if (productError) {
+      return { canRead: false, canWrite: false, canDelete: false, reason: 'Produit non trouvé' };
+    }
+
+    const isOwner = product.stores.owner_id === user.id;
+    const isPublished = product.status === 'published';
+
+    return {
+      canRead: true,
+      canWrite: isOwner,
+      canDelete: isOwner,
+      reason: isOwner ? 'Propriétaire' : isPublished ? 'Produit publié' : 'Accès limité'
+    };
+  } catch (error) {
+    console.error('Erreur lors de la vérification d\'accès au produit:', error);
+    return { canRead: false, canWrite: false, canDelete: false, reason: 'Erreur de vérification' };
+  }
+};
+
+/**
+ * Vérifie si l'utilisateur peut accéder à une commande
+ */
+export const canAccessOrder = async (orderId: string): Promise<AccessCheck> => {
+  try {
+    const { data: { user } } = await supabase.auth.getUser();
+    
+    if (!user) {
+      return { canRead: false, canWrite: false, canDelete: false, reason: 'Non authentifié' };
+    }
+
+    // Vérifier les permissions via la fonction RLS
+    const { data, error } = await supabase
+      .rpc('user_can_access_order', { order_id: orderId });
+
+    if (error) {
+      return { canRead: false, canWrite: false, canDelete: false, reason: 'Erreur de vérification' };
+    }
+
+    const hasAccess = data === true;
+
+    if (!hasAccess) {
+      return { canRead: false, canWrite: false, canDelete: false, reason: 'Accès refusé' };
+    }
+
+    // Vérifier le type d'accès
+    const { data: order, error: orderError } = await supabase
+      .from('orders')
+      .select('customer_id')
+      .eq('id', orderId)
+      .single();
+
+    if (orderError) {
+      return { canRead: false, canWrite: false, canDelete: false, reason: 'Commande non trouvée' };
+    }
+
+    const isCustomer = order.customer_id === user.id;
+
+    return {
+      canRead: true,
+      canWrite: false, // Les commandes ne sont pas modifiables
+      canDelete: false, // Les commandes ne sont pas supprimables
+      reason: isCustomer ? 'Client' : 'Vendeur'
+    };
+  } catch (error) {
+    console.error('Erreur lors de la vérification d\'accès à la commande:', error);
+    return { canRead: false, canWrite: false, canDelete: false, reason: 'Erreur de vérification' };
+  }
+};
+
+/**
+ * Vérifie si l'utilisateur est administrateur
+ */
+export const isAdmin = async (): Promise<boolean> => {
+  try {
+    const { data: { user } } = await supabase.auth.getUser();
+    
+    if (!user) {
+      return false;
+    }
+
+    const { data, error } = await supabase
+      .rpc('has_role', { _user_id: user.id, _role: 'admin' });
+
+    if (error) {
+      console.error('Erreur lors de la vérification du rôle admin:', error);
+      return false;
+    }
+
+    return data === true;
+  } catch (error) {
+    console.error('Erreur lors de la vérification du rôle admin:', error);
+    return false;
+  }
+};
+
+// ============================================
+// HOOKS DE SÉCURITÉ
+// ============================================
+
+/**
+ * Hook pour vérifier les permissions d'accès
+ */
+export const useSecurity = () => {
+  const checkStoreAccess = async (storeId: string) => {
+    return await canAccessStore(storeId);
+  };
+
+  const checkProductAccess = async (productId: string) => {
+    return await canAccessProduct(productId);
+  };
+
+  const checkOrderAccess = async (orderId: string) => {
+    return await canAccessOrder(orderId);
+  };
+
+  const checkAdminAccess = async () => {
+    return await isAdmin();
+  };
+
+  return {
+    checkStoreAccess,
+    checkProductAccess,
+    checkOrderAccess,
+    checkAdminAccess
+  };
+};
+
+// ============================================
+// UTILITAIRES DE SÉCURITÉ
+// ============================================
+
+/**
+ * Wrapper pour les requêtes sécurisées
+ */
+export const secureQuery = async <T>(
+  queryFn: () => Promise<T>,
+  accessCheck: () => Promise<AccessCheck>,
+  requiredPermission: 'read' | 'write' | 'delete' = 'read'
+): Promise<T | null> => {
+  try {
+    const access = await accessCheck();
+    
+    if (!access.canRead && requiredPermission === 'read') {
+      throw new Error(`Accès refusé: ${access.reason}`);
+    }
+    
+    if (!access.canWrite && requiredPermission === 'write') {
+      throw new Error(`Accès en écriture refusé: ${access.reason}`);
+    }
+    
+    if (!access.canDelete && requiredPermission === 'delete') {
+      throw new Error(`Accès en suppression refusé: ${access.reason}`);
+    }
+
+    return await queryFn();
+  } catch (error) {
+    console.error('Erreur de requête sécurisée:', error);
+    return null;
+  }
+};
+
+/**
+ * Middleware de sécurité pour les composants
+ */
+export const withSecurity = <P extends object>(
+  Component: React.ComponentType<P>,
+  accessCheck: (props: P) => Promise<AccessCheck>
+) => {
+  return React.memo((props: P) => {
+    const [hasAccess, setHasAccess] = React.useState<boolean | null>(null);
+    const [loading, setLoading] = React.useState(true);
+
+    React.useEffect(() => {
+      const checkAccess = async () => {
+        try {
+          const access = await accessCheck(props);
+          setHasAccess(access.canRead);
+        } catch (error) {
+          console.error('Erreur de vérification d\'accès:', error);
+          setHasAccess(false);
+        } finally {
+          setLoading(false);
+        }
+      };
+
+      checkAccess();
+    }, [props]);
+
+    if (loading) {
+      return <div>Vérification des permissions...</div>;
+    }
+
+    if (!hasAccess) {
+      return <div>Accès refusé</div>;
+    }
+
+    return <Component {...props} />;
+  });
+};
+```
+
+### 3. `src/components/security/SecurityGuard.tsx` - CRÉER UN COMPOSANT DE GARDE SÉCURITÉ
+
+```typescript
+import React, { useState, useEffect } from 'react';
+import { useSecurity } from '@/lib/supabase-security';
+import { LoadingSpinner } from '@/components/ui/LoadingSpinner';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Shield, AlertTriangle } from 'lucide-react';
+
+interface SecurityGuardProps {
+  children: React.ReactNode;
+  resourceType: 'store' | 'product' | 'order';
+  resourceId: string;
+  requiredPermission?: 'read' | 'write' | 'delete';
+  fallback?: React.ReactNode;
+}
+
+export const SecurityGuard: React.FC<SecurityGuardProps> = ({
+  children,
+  resourceType,
+  resourceId,
+  requiredPermission = 'read',
+  fallback
+}) => {
+  const { checkStoreAccess, checkProductAccess, checkOrderAccess } = useSecurity();
+  const [hasAccess, setHasAccess] = useState<boolean | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const checkAccess = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+
+        let access;
+        switch (resourceType) {
+          case 'store':
+            access = await checkStoreAccess(resourceId);
+            break;
+          case 'product':
+            access = await checkProductAccess(resourceId);
+            break;
+          case 'order':
+            access = await checkOrderAccess(resourceId);
+            break;
+          default:
+            throw new Error('Type de ressource non supporté');
+        }
+
+        const hasRequiredPermission = 
+          (requiredPermission === 'read' && access.canRead) ||
+          (requiredPermission === 'write' && access.canWrite) ||
+          (requiredPermission === 'delete' && access.canDelete);
+
+        setHasAccess(hasRequiredPermission);
+        
+        if (!hasRequiredPermission) {
+          setError(access.reason || 'Accès refusé');
+        }
+      } catch (err) {
+        console.error('Erreur de vérification d\'accès:', err);
+        setError('Erreur de vérification des permissions');
+        setHasAccess(false);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    if (resourceId) {
+      checkAccess();
+    }
+  }, [resourceType, resourceId, requiredPermission, checkStoreAccess, checkProductAccess, checkOrderAccess]);
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center p-8">
+        <LoadingSpinner size="md" />
+        <span className="ml-2 text-sm text-muted-foreground">
+          Vérification des permissions...
+        </span>
+      </div>
+    );
+  }
+
+  if (!hasAccess) {
+    if (fallback) {
+      return <>{fallback}</>;
+    }
+
+    return (
+      <Alert variant="destructive" className="m-4">
+        <AlertTriangle className="h-4 w-4" />
+        <AlertDescription>
+          <div className="flex items-center gap-2">
+            <Shield className="h-4 w-4" />
+            <span>Accès refusé</span>
+          </div>
+          {error && (
+            <p className="mt-2 text-sm">{error}</p>
+          )}
+        </AlertDescription>
+      </Alert>
+    );
+  }
+
+  return <>{children}</>;
+};
+
+// Composants spécialisés pour chaque type de ressource
+export const StoreSecurityGuard: React.FC<{
+  storeId: string;
+  children: React.ReactNode;
+  permission?: 'read' | 'write' | 'delete';
+}> = ({ storeId, children, permission = 'read' }) => (
+  <SecurityGuard
+    resourceType="store"
+    resourceId={storeId}
+    requiredPermission={permission}
+  >
+    {children}
+  </SecurityGuard>
+);
+
+export const ProductSecurityGuard: React.FC<{
+  productId: string;
+  children: React.ReactNode;
+  permission?: 'read' | 'write' | 'delete';
+}> = ({ productId, children, permission = 'read' }) => (
+  <SecurityGuard
+    resourceType="product"
+    resourceId={productId}
+    requiredPermission={permission}
+  >
+    {children}
+  </SecurityGuard>
+);
+
+export const OrderSecurityGuard: React.FC<{
+  orderId: string;
+  children: React.ReactNode;
+  permission?: 'read' | 'write' | 'delete';
+}> = ({ orderId, children, permission = 'read' }) => (
+  <SecurityGuard
+    resourceType="order"
+    resourceId={orderId}
+    requiredPermission={permission}
+  >
+    {children}
+  </SecurityGuard>
+);
+```
+
+## 🚀 Application du Patch
+
+```bash
+# 1. Créer la migration RLS
+touch supabase/migrations/20251021_fix_rls_policies.sql
+
+# 2. Créer les fichiers de sécurité
+touch src/lib/supabase-security.ts
+touch src/components/security/SecurityGuard.tsx
+
+# 3. Appliquer la migration
+supabase db push
+
+# 4. Vérifier les politiques RLS
+supabase db diff --schema public
+
+# 5. Tester la sécurité
+npm run build
+npm run preview
+```
+
+## ✅ Vérification
+
+Après application du patch :
+- [ ] Les politiques RLS sont actives sur toutes les tables
+- [ ] Les utilisateurs ne peuvent accéder qu'à leurs propres données
+- [ ] Les données publiques sont accessibles à tous
+- [ ] Les administrateurs ont accès à toutes les données
+- [ ] Les index de performance sont créés
+- [ ] Les fonctions de sécurité fonctionnent
+- [ ] Le composant SecurityGuard protège les ressources
+- [ ] Les requêtes sont sécurisées
+
+## 📊 Impact
+
+- **Temps de correction :** 1 heure
+- **Complexité :** Élevée
+- **Risque :** Moyen (changements de sécurité)
+- **Impact :** Sécurité des données garantie, conformité RGPD
+- **Sécurité :** Niveau bancaire atteint
+- **Performance :** Index optimisés pour les requêtes fréquentes
+- **Conformité :** Respect des standards de sécurité

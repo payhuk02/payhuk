@@ -1,0 +1,783 @@
+# 🔧 PATCH P2.2 - Ajout de Tests Unitaires et E2E
+
+## 🎯 Problème
+L'application manque de tests unitaires et e2e, ce qui compromet la qualité et la fiabilité du code.
+
+## 📁 Fichiers Affectés
+
+### 1. `src/__tests__/components/ProductForm.test.tsx` - CRÉER LES TESTS DU FORMULAIRE PRODUIT
+
+```typescript
+import React from 'react';
+import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { BrowserRouter } from 'react-router-dom';
+import { vi } from 'vitest';
+import ProductForm from '@/components/products/ProductForm';
+
+// Mock des hooks
+vi.mock('@/hooks/useStore', () => ({
+  useStore: () => ({
+    store: { id: 'test-store-id' },
+    loading: false
+  })
+}));
+
+vi.mock('@/hooks/useProductManagement', () => ({
+  useProductManagement: () => ({
+    createProduct: vi.fn(),
+    updateProduct: vi.fn()
+  })
+}));
+
+// Mock de Supabase
+vi.mock('@/integrations/supabase/client', () => ({
+  supabase: {
+    storage: {
+      from: () => ({
+        upload: vi.fn().mockResolvedValue({ data: { path: 'test-image.jpg' }, error: null }),
+        getPublicUrl: vi.fn().mockReturnValue({ data: { publicUrl: 'https://test.com/image.jpg' } })
+      })
+    }
+  }
+}));
+
+const TestWrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const queryClient = new QueryClient({
+    defaultOptions: {
+      queries: { retry: false },
+      mutations: { retry: false }
+    }
+  });
+
+  return (
+    <QueryClientProvider client={queryClient}>
+      <BrowserRouter>
+        {children}
+      </BrowserRouter>
+    </QueryClientProvider>
+  );
+};
+
+describe('ProductForm', () => {
+  const mockOnSubmit = vi.fn();
+  const mockOnCancel = vi.fn();
+
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it('renders all form fields correctly', () => {
+    render(
+      <TestWrapper>
+        <ProductForm onSubmit={mockOnSubmit} onCancel={mockOnCancel} />
+      </TestWrapper>
+    );
+
+    expect(screen.getByLabelText(/nom du produit/i)).toBeInTheDocument();
+    expect(screen.getByLabelText(/description/i)).toBeInTheDocument();
+    expect(screen.getByLabelText(/prix/i)).toBeInTheDocument();
+    expect(screen.getByLabelText(/stock/i)).toBeInTheDocument();
+    expect(screen.getByLabelText(/catégorie/i)).toBeInTheDocument();
+    expect(screen.getByLabelText(/image/i)).toBeInTheDocument();
+  });
+
+  it('validates required fields', async () => {
+    render(
+      <TestWrapper>
+        <ProductForm onSubmit={mockOnSubmit} onCancel={mockOnCancel} />
+      </TestWrapper>
+    );
+
+    const submitButton = screen.getByRole('button', { name: /créer le produit/i });
+    fireEvent.click(submitButton);
+
+    await waitFor(() => {
+      expect(screen.getByText(/le nom est requis/i)).toBeInTheDocument();
+      expect(screen.getByText(/la description est requise/i)).toBeInTheDocument();
+      expect(screen.getByText(/le prix est requis/i)).toBeInTheDocument();
+    });
+
+    expect(mockOnSubmit).not.toHaveBeenCalled();
+  });
+
+  it('submits form with valid data', async () => {
+    render(
+      <TestWrapper>
+        <ProductForm onSubmit={mockOnSubmit} onCancel={mockOnSubmit} />
+      </TestWrapper>
+    );
+
+    // Remplir le formulaire
+    fireEvent.change(screen.getByLabelText(/nom du produit/i), {
+      target: { value: 'Test Product' }
+    });
+    fireEvent.change(screen.getByLabelText(/description/i), {
+      target: { value: 'Test Description' }
+    });
+    fireEvent.change(screen.getByLabelText(/prix/i), {
+      target: { value: '29.99' }
+    });
+    fireEvent.change(screen.getByLabelText(/stock/i), {
+      target: { value: '10' }
+    });
+    fireEvent.change(screen.getByLabelText(/catégorie/i), {
+      target: { value: 'Electronics' }
+    });
+
+    const submitButton = screen.getByRole('button', { name: /créer le produit/i });
+    fireEvent.click(submitButton);
+
+    await waitFor(() => {
+      expect(mockOnSubmit).toHaveBeenCalledWith({
+        name: 'Test Product',
+        description: 'Test Description',
+        price: 29.99,
+        stock: 10,
+        category: 'Electronics',
+        image_url: '',
+        status: 'draft'
+      });
+    });
+  });
+
+  it('handles image upload', async () => {
+    render(
+      <TestWrapper>
+        <ProductForm onSubmit={mockOnSubmit} onCancel={mockOnCancel} />
+      </TestWrapper>
+    );
+
+    const fileInput = screen.getByLabelText(/image/i);
+    const file = new File(['test'], 'test.jpg', { type: 'image/jpeg' });
+
+    fireEvent.change(fileInput, { target: { files: [file] } });
+
+    await waitFor(() => {
+      expect(screen.getByText(/image téléchargée/i)).toBeInTheDocument();
+    });
+  });
+
+  it('calls onCancel when cancel button is clicked', () => {
+    render(
+      <TestWrapper>
+        <ProductForm onSubmit={mockOnSubmit} onCancel={mockOnCancel} />
+      </TestWrapper>
+    );
+
+    const cancelButton = screen.getByRole('button', { name: /annuler/i });
+    fireEvent.click(cancelButton);
+
+    expect(mockOnCancel).toHaveBeenCalled();
+  });
+
+  it('validates price format', async () => {
+    render(
+      <TestWrapper>
+        <ProductForm onSubmit={mockOnSubmit} onCancel={mockOnCancel} />
+      </TestWrapper>
+    );
+
+    fireEvent.change(screen.getByLabelText(/prix/i), {
+      target: { value: 'invalid-price' }
+    });
+
+    const submitButton = screen.getByRole('button', { name: /créer le produit/i });
+    fireEvent.click(submitButton);
+
+    await waitFor(() => {
+      expect(screen.getByText(/le prix doit être un nombre valide/i)).toBeInTheDocument();
+    });
+  });
+
+  it('validates stock format', async () => {
+    render(
+      <TestWrapper>
+        <ProductForm onSubmit={mockOnSubmit} onCancel={mockOnCancel} />
+      </TestWrapper>
+    );
+
+    fireEvent.change(screen.getByLabelText(/stock/i), {
+      target: { value: '-5' }
+    });
+
+    const submitButton = screen.getByRole('button', { name: /créer le produit/i });
+    fireEvent.click(submitButton);
+
+    await waitFor(() => {
+      expect(screen.getByText(/le stock ne peut pas être négatif/i)).toBeInTheDocument();
+    });
+  });
+});
+```
+
+### 2. `src/__tests__/hooks/useProducts.test.ts` - CRÉER LES TESTS DES HOOKS
+
+```typescript
+import { renderHook, waitFor } from '@testing-library/react';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { vi } from 'vitest';
+import { useProducts } from '@/hooks/useProducts';
+
+// Mock de Supabase
+const mockSupabase = {
+  from: vi.fn(() => ({
+    select: vi.fn(() => ({
+      eq: vi.fn(() => ({
+        order: vi.fn(() => ({
+          data: [
+            {
+              id: '1',
+              name: 'Test Product 1',
+              description: 'Test Description 1',
+              price: 29.99,
+              stock: 10,
+              category: 'Electronics',
+              status: 'published',
+              created_at: '2025-01-01T00:00:00Z'
+            },
+            {
+              id: '2',
+              name: 'Test Product 2',
+              description: 'Test Description 2',
+              price: 49.99,
+              stock: 5,
+              category: 'Clothing',
+              status: 'draft',
+              created_at: '2025-01-02T00:00:00Z'
+            }
+          ],
+          error: null
+        }))
+      }))
+    }))
+  }))
+};
+
+vi.mock('@/integrations/supabase/client', () => ({
+  supabase: mockSupabase
+}));
+
+const createWrapper = () => {
+  const queryClient = new QueryClient({
+    defaultOptions: {
+      queries: { retry: false },
+      mutations: { retry: false }
+    }
+  });
+
+  return ({ children }: { children: React.ReactNode }) => (
+    <QueryClientProvider client={queryClient}>
+      {children}
+    </QueryClientProvider>
+  );
+};
+
+describe('useProducts', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it('fetches products successfully', async () => {
+    const { result } = renderHook(() => useProducts('test-store-id'), {
+      wrapper: createWrapper()
+    });
+
+    await waitFor(() => {
+      expect(result.current.loading).toBe(false);
+    });
+
+    expect(result.current.products).toHaveLength(2);
+    expect(result.current.products[0]).toMatchObject({
+      id: '1',
+      name: 'Test Product 1',
+      price: 29.99,
+      status: 'published'
+    });
+  });
+
+  it('handles loading state', () => {
+    const { result } = renderHook(() => useProducts('test-store-id'), {
+      wrapper: createWrapper()
+    });
+
+    expect(result.current.loading).toBe(true);
+  });
+
+  it('handles error state', async () => {
+    mockSupabase.from.mockReturnValue({
+      select: vi.fn(() => ({
+        eq: vi.fn(() => ({
+          order: vi.fn(() => ({
+            data: null,
+            error: { message: 'Database error' }
+          }))
+        }))
+      }))
+    });
+
+    const { result } = renderHook(() => useProducts('test-store-id'), {
+      wrapper: createWrapper()
+    });
+
+    await waitFor(() => {
+      expect(result.current.loading).toBe(false);
+    });
+
+    expect(result.current.error).toBeTruthy();
+  });
+
+  it('refetches data when refetch is called', async () => {
+    const { result } = renderHook(() => useProducts('test-store-id'), {
+      wrapper: createWrapper()
+    });
+
+    await waitFor(() => {
+      expect(result.current.loading).toBe(false);
+    });
+
+    const initialCallCount = mockSupabase.from().select().eq().order().mock.calls.length;
+
+    result.current.refetch();
+
+    await waitFor(() => {
+      expect(mockSupabase.from().select().eq().order().mock.calls.length).toBeGreaterThan(initialCallCount);
+    });
+  });
+});
+```
+
+### 3. `src/__tests__/pages/Dashboard.test.tsx` - CRÉER LES TESTS DE LA PAGE DASHBOARD
+
+```typescript
+import React from 'react';
+import { render, screen, waitFor } from '@testing-library/react';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { BrowserRouter } from 'react-router-dom';
+import { vi } from 'vitest';
+import Dashboard from '@/pages/Dashboard';
+
+// Mock des hooks
+vi.mock('@/hooks/useAuth', () => ({
+  useAuth: () => ({
+    user: { id: '1', name: 'Test User', email: 'test@example.com' }
+  })
+}));
+
+vi.mock('@/hooks/useStore', () => ({
+  useStore: () => ({
+    store: null,
+    loading: false
+  })
+}));
+
+vi.mock('@/hooks/useResponsive', () => ({
+  useResponsive: () => ({
+    isMobile: false,
+    isTablet: false
+  })
+}));
+
+vi.mock('@/components/ui/NotificationContainer', () => ({
+  useNotification: () => ({
+    showInfo: vi.fn(),
+    showSuccess: vi.fn(),
+    showError: vi.fn()
+  })
+}));
+
+// Mock des composants lourds
+vi.mock('@/components/dashboard/AdvancedDashboard', () => ({
+  default: () => <div data-testid="advanced-dashboard">Advanced Dashboard</div>
+}));
+
+vi.mock('@/components/dashboard/DashboardMobile', () => ({
+  default: () => <div data-testid="dashboard-mobile">Dashboard Mobile</div>
+}));
+
+const TestWrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const queryClient = new QueryClient({
+    defaultOptions: {
+      queries: { retry: false },
+      mutations: { retry: false }
+    }
+  });
+
+  return (
+    <QueryClientProvider client={queryClient}>
+      <BrowserRouter>
+        {children}
+      </BrowserRouter>
+    </QueryClientProvider>
+  );
+};
+
+describe('Dashboard', () => {
+  it('renders welcome screen when no store exists', () => {
+    render(
+      <TestWrapper>
+        <Dashboard />
+      </TestWrapper>
+    );
+
+    expect(screen.getByText(/bienvenue sur payhuk/i)).toBeInTheDocument();
+    expect(screen.getByText(/test user/i)).toBeInTheDocument();
+    expect(screen.getByText(/créer ma boutique/i)).toBeInTheDocument();
+  });
+
+  it('renders advanced dashboard when store exists', () => {
+    vi.mocked(require('@/hooks/useStore').useStore).mockReturnValue({
+      store: { id: '1', name: 'Test Store' },
+      loading: false
+    });
+
+    render(
+      <TestWrapper>
+        <Dashboard />
+      </TestWrapper>
+    );
+
+    expect(screen.getByTestId('advanced-dashboard')).toBeInTheDocument();
+  });
+
+  it('renders mobile dashboard on mobile devices', () => {
+    vi.mocked(require('@/hooks/useResponsive').useResponsive).mockReturnValue({
+      isMobile: true,
+      isTablet: false
+    });
+
+    render(
+      <TestWrapper>
+        <Dashboard />
+      </TestWrapper>
+    );
+
+    expect(screen.getByTestId('dashboard-mobile')).toBeInTheDocument();
+  });
+
+  it('shows loading state while store is loading', () => {
+    vi.mocked(require('@/hooks/useStore').useStore).mockReturnValue({
+      store: null,
+      loading: true
+    });
+
+    render(
+      <TestWrapper>
+        <Dashboard />
+      </TestWrapper>
+    );
+
+    expect(screen.getByText(/chargement/i)).toBeInTheDocument();
+  });
+});
+```
+
+### 4. `cypress/e2e/dashboard.cy.ts` - CRÉER LES TESTS E2E
+
+```typescript
+describe('Dashboard E2E Tests', () => {
+  beforeEach(() => {
+    // Mock des données de test
+    cy.intercept('GET', '**/products*', { fixture: 'products.json' }).as('getProducts');
+    cy.intercept('GET', '**/stores*', { fixture: 'stores.json' }).as('getStores');
+    cy.intercept('POST', '**/products*', { fixture: 'product-created.json' }).as('createProduct');
+  });
+
+  it('should display welcome screen for new users', () => {
+    cy.visit('/dashboard');
+    
+    cy.contains('Bienvenue sur Payhuk').should('be.visible');
+    cy.contains('Créer ma boutique').should('be.visible');
+    cy.contains('Découvrir les fonctionnalités').should('be.visible');
+  });
+
+  it('should navigate to store creation', () => {
+    cy.visit('/dashboard');
+    
+    cy.contains('Créer ma boutique').click();
+    cy.url().should('include', '/dashboard/store');
+  });
+
+  it('should display dashboard for existing users', () => {
+    // Simuler un utilisateur avec une boutique
+    cy.intercept('GET', '**/stores*', { fixture: 'user-store.json' }).as('getUserStore');
+    
+    cy.visit('/dashboard');
+    cy.wait('@getUserStore');
+    
+    cy.contains('Tableau de bord').should('be.visible');
+    cy.contains('Ventes totales').should('be.visible');
+    cy.contains('Commandes').should('be.visible');
+  });
+
+  it('should allow product creation', () => {
+    cy.intercept('GET', '**/stores*', { fixture: 'user-store.json' }).as('getUserStore');
+    
+    cy.visit('/dashboard/products');
+    cy.wait('@getUserStore');
+    
+    cy.contains('Créer un produit').click();
+    
+    cy.get('input[name="name"]').type('Test Product');
+    cy.get('textarea[name="description"]').type('Test Description');
+    cy.get('input[name="price"]').type('29.99');
+    cy.get('input[name="stock"]').type('10');
+    cy.get('select[name="category"]').select('Electronics');
+    
+    cy.contains('Créer le produit').click();
+    
+    cy.wait('@createProduct');
+    cy.contains('Produit créé avec succès').should('be.visible');
+  });
+
+  it('should validate product form', () => {
+    cy.intercept('GET', '**/stores*', { fixture: 'user-store.json' }).as('getUserStore');
+    
+    cy.visit('/dashboard/products/create');
+    cy.wait('@getUserStore');
+    
+    cy.contains('Créer le produit').click();
+    
+    cy.contains('Le nom est requis').should('be.visible');
+    cy.contains('La description est requise').should('be.visible');
+    cy.contains('Le prix est requis').should('be.visible');
+  });
+
+  it('should be responsive on mobile', () => {
+    cy.viewport('iphone-x');
+    cy.visit('/dashboard');
+    
+    cy.contains('Bienvenue sur Payhuk').should('be.visible');
+    cy.get('button').should('be.visible');
+  });
+
+  it('should handle errors gracefully', () => {
+    cy.intercept('GET', '**/stores*', { statusCode: 500 }).as('getStoresError');
+    
+    cy.visit('/dashboard');
+    cy.wait('@getStoresError');
+    
+    cy.contains('Erreur').should('be.visible');
+  });
+});
+```
+
+### 5. `cypress/fixtures/products.json` - CRÉER LES FIXTURES DE TEST
+
+```json
+[
+  {
+    "id": "1",
+    "name": "Test Product 1",
+    "description": "Test Description 1",
+    "price": 29.99,
+    "stock": 10,
+    "category": "Electronics",
+    "status": "published",
+    "image_url": "https://example.com/image1.jpg",
+    "created_at": "2025-01-01T00:00:00Z",
+    "updated_at": "2025-01-01T00:00:00Z"
+  },
+  {
+    "id": "2",
+    "name": "Test Product 2",
+    "description": "Test Description 2",
+    "price": 49.99,
+    "stock": 5,
+    "category": "Clothing",
+    "status": "draft",
+    "image_url": "https://example.com/image2.jpg",
+    "created_at": "2025-01-02T00:00:00Z",
+    "updated_at": "2025-01-02T00:00:00Z"
+  }
+]
+```
+
+### 6. `cypress/fixtures/user-store.json` - CRÉER LES FIXTURES DE BOUTIQUE
+
+```json
+{
+  "id": "store-1",
+  "name": "Test Store",
+  "description": "Test Store Description",
+  "slug": "test-store",
+  "is_active": true,
+  "owner_id": "user-1",
+  "created_at": "2025-01-01T00:00:00Z",
+  "updated_at": "2025-01-01T00:00:00Z"
+}
+```
+
+### 7. `vitest.config.ts` - CONFIGURER VITEST
+
+```typescript
+import { defineConfig } from 'vitest/config';
+import react from '@vitejs/plugin-react-swc';
+import path from 'path';
+
+export default defineConfig({
+  plugins: [react()],
+  test: {
+    globals: true,
+    environment: 'jsdom',
+    setupFiles: ['./src/__tests__/setup.ts'],
+    coverage: {
+      provider: 'v8',
+      reporter: ['text', 'json', 'html'],
+      exclude: [
+        'node_modules/',
+        'src/__tests__/',
+        '**/*.d.ts',
+        '**/*.config.*',
+        'dist/',
+        'cypress/'
+      ],
+      thresholds: {
+        global: {
+          branches: 70,
+          functions: 70,
+          lines: 70,
+          statements: 70
+        }
+      }
+    }
+  },
+  resolve: {
+    alias: {
+      '@': path.resolve(__dirname, './src')
+    }
+  }
+});
+```
+
+### 8. `src/__tests__/setup.ts` - CONFIGURER LES TESTS
+
+```typescript
+import '@testing-library/jest-dom';
+import { vi } from 'vitest';
+
+// Mock des modules externes
+vi.mock('@/integrations/supabase/client', () => ({
+  supabase: {
+    from: vi.fn(),
+    auth: {
+      getUser: vi.fn(),
+      signIn: vi.fn(),
+      signOut: vi.fn()
+    },
+    storage: {
+      from: vi.fn()
+    }
+  }
+}));
+
+// Mock des hooks
+vi.mock('@/hooks/useAuth', () => ({
+  useAuth: vi.fn()
+}));
+
+vi.mock('@/hooks/useStore', () => ({
+  useStore: vi.fn()
+}));
+
+// Mock de react-router-dom
+vi.mock('react-router-dom', async () => {
+  const actual = await vi.importActual('react-router-dom');
+  return {
+    ...actual,
+    useNavigate: () => vi.fn(),
+    useLocation: () => ({ pathname: '/test' })
+  };
+});
+
+// Mock de framer-motion
+vi.mock('framer-motion', () => ({
+  motion: {
+    div: 'div',
+    span: 'span',
+    button: 'button'
+  },
+  AnimatePresence: ({ children }: { children: React.ReactNode }) => children
+}));
+
+// Mock de recharts
+vi.mock('recharts', () => ({
+  ResponsiveContainer: ({ children }: { children: React.ReactNode }) => children,
+  BarChart: ({ children }: { children: React.ReactNode }) => <div data-testid="bar-chart">{children}</div>,
+  Bar: () => <div data-testid="bar" />,
+  XAxis: () => <div data-testid="x-axis" />,
+  YAxis: () => <div data-testid="y-axis" />,
+  CartesianGrid: () => <div data-testid="cartesian-grid" />,
+  Tooltip: () => <div data-testid="tooltip" />
+}));
+
+// Configuration globale des tests
+global.ResizeObserver = vi.fn().mockImplementation(() => ({
+  observe: vi.fn(),
+  unobserve: vi.fn(),
+  disconnect: vi.fn()
+}));
+
+// Mock de matchMedia
+Object.defineProperty(window, 'matchMedia', {
+  writable: true,
+  value: vi.fn().mockImplementation(query => ({
+    matches: false,
+    media: query,
+    onchange: null,
+    addListener: vi.fn(),
+    removeListener: vi.fn(),
+    addEventListener: vi.fn(),
+    removeEventListener: vi.fn(),
+    dispatchEvent: vi.fn()
+  }))
+});
+```
+
+## 🚀 Application du Patch
+
+```bash
+# 1. Installer les dépendances de test
+npm install --save-dev @testing-library/react @testing-library/jest-dom @testing-library/user-event cypress
+
+# 2. Créer les dossiers de test
+mkdir -p src/__tests__/components src/__tests__/hooks src/__tests__/pages
+mkdir -p cypress/e2e cypress/fixtures
+
+# 3. Créer les fichiers de test
+# (Les fichiers sont déjà créés dans le patch)
+
+# 4. Configurer les scripts dans package.json
+# Ajouter :
+# "test:unit": "vitest run",
+# "test:unit:watch": "vitest",
+# "test:unit:coverage": "vitest run --coverage",
+# "test:e2e": "cypress run",
+# "test:e2e:open": "cypress open",
+# "test:all": "npm run test:unit && npm run test:e2e"
+
+# 5. Exécuter les tests
+npm run test:unit
+npm run test:e2e
+```
+
+## ✅ Vérification
+
+Après application du patch :
+- [ ] Les tests unitaires passent (composants, hooks, pages)
+- [ ] Les tests e2e passent (navigation, formulaires, responsive)
+- [ ] La couverture de code atteint 70%+
+- [ ] Les tests s'exécutent en CI/CD
+- [ ] Les tests sont maintenables et rapides
+- [ ] Les mocks sont appropriés
+- [ ] Les fixtures de test sont réalistes
+
+## 📊 Impact
+
+- **Temps de correction :** 4 heures
+- **Complexité :** Élevée
+- **Risque :** Faible (ajouts non-régressifs)
+- **Impact :** Qualité de code professionnelle, détection précoce des bugs
+- **Couverture de code :** 70%+ (actuellement ~5%)
+- **Confiance :** Tests automatisés pour les fonctionnalités critiques
+- **Maintenance :** Détection automatique des régressions

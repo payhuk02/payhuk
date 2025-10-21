@@ -1,0 +1,98 @@
+# 🔧 PATCH P0.1 - Correction des Imports Manquants
+
+## 🎯 Problème
+Plusieurs composants ont des imports manquants ou incorrects qui empêchent le bon fonctionnement de l'application.
+
+## 📁 Fichiers Affectés
+
+### 1. `src/hooks/useEnvironment.ts` - CRÉER LE FICHIER MANQUANT
+
+```typescript
+import { envConfig, envValidator } from '@/lib/env-validator';
+
+/**
+ * Hook pour accéder aux variables d'environnement validées
+ */
+export const useEnvironment = () => {
+  const config = envConfig;
+  const validator = envValidator;
+  
+  return {
+    config,
+    validator,
+    isProduction: validator.isProduction(),
+    isDevelopment: validator.isDevelopment(),
+    isStaging: validator.isStaging(),
+    isDebugMode: validator.isDebugMode(),
+    appName: validator.getAppName(),
+    appVersion: validator.getAppVersion(),
+    environment: config.VITE_APP_ENV,
+    validation: {
+      errors: validator.getErrors(),
+      warnings: validator.getWarnings()
+    }
+  };
+};
+
+/**
+ * Fonction utilitaire pour logger les informations d'environnement
+ */
+export const logEnvironmentInfo = () => {
+  const env = useEnvironment();
+  console.group('🌍 Informations d\'environnement');
+  console.log('App:', env.appName, 'v' + env.appVersion);
+  console.log('Environment:', env.environment);
+  console.log('Debug Mode:', env.isDebugMode);
+  console.log('Production:', env.isProduction);
+  console.log('Errors:', env.validation.errors.length);
+  console.log('Warnings:', env.validation.warnings.length);
+  console.groupEnd();
+};
+```
+
+### 2. `src/components/ui/NotificationContainer.tsx` - CORRIGER L'IMPORT
+
+```typescript
+// Remplacer la ligne 3 par :
+import { useNotifications, useAppStore } from '@/store/useAppStore';
+
+// Le reste du fichier reste identique
+```
+
+### 3. `src/components/SupabaseErrorAlert.tsx` - CORRIGER L'IMPORT
+
+```typescript
+// Remplacer la ligne 8 par :
+import { useEnvironment, logEnvironmentInfo } from '@/hooks/useEnvironment';
+
+// Le reste du fichier reste identique
+```
+
+## 🚀 Application du Patch
+
+```bash
+# 1. Créer le fichier manquant
+touch src/hooks/useEnvironment.ts
+
+# 2. Appliquer les corrections
+# (Les fichiers sont déjà corrigés dans le patch)
+
+# 3. Vérifier que tout compile
+npm run type-check
+npm run build
+```
+
+## ✅ Vérification
+
+Après application du patch :
+- [ ] `npm run type-check` passe sans erreur
+- [ ] `npm run build` compile sans erreur
+- [ ] L'application démarre sans erreur de console
+- [ ] Le composant SupabaseErrorAlert s'affiche correctement
+
+## 📊 Impact
+
+- **Temps de correction :** 5 minutes
+- **Complexité :** Faible
+- **Risque :** Très faible
+- **Impact :** Résolution des erreurs TypeScript critiques
