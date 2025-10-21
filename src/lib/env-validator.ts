@@ -47,11 +47,32 @@ class EnvValidator {
     const value = import.meta.env[key];
     
     if (!value || value.trim() === '') {
+      // En production, utiliser des valeurs par défaut pour éviter le crash
+      if (import.meta.env.PROD) {
+        console.warn(`⚠️ ${description} (${key}) manquante, utilisation de la valeur par défaut`);
+        this.config[key] = this.getDefaultValue(key);
+        return;
+      }
       this.errors.push(`❌ ${description} (${key}) est requise mais manquante`);
       return;
     }
 
     this.config[key] = value;
+  }
+
+  private getDefaultValue(key: keyof EnvConfig): string {
+    switch (key) {
+      case 'VITE_SUPABASE_PROJECT_ID':
+        return 'hbdnzajbyjakdhuavrvb';
+      case 'VITE_SUPABASE_URL':
+        return 'https://hbdnzajbyjakdhuavrvb.supabase.co';
+      case 'VITE_SUPABASE_PUBLISHABLE_KEY':
+        return 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhiZG56YWpieWpha2RodWF2cnZiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTc1OTgyMzEsImV4cCI6MjA3MzE3NDIzMX0.myur8r50wIORQwfcCP4D1ZxlhKFxICdVqjUM80CgtnM';
+      case 'VITE_APP_ENV':
+        return 'production';
+      default:
+        return '';
+    }
   }
 
   private validateOptional(key: keyof EnvConfig, description: string): void {
@@ -122,9 +143,9 @@ try {
   if (import.meta.env.PROD) {
     console.warn('⚠️ Utilisation de la configuration de fallback en production');
     envConfig = {
-      VITE_SUPABASE_PROJECT_ID: import.meta.env.VITE_SUPABASE_PROJECT_ID || 'fallback-project-id',
-      VITE_SUPABASE_URL: import.meta.env.VITE_SUPABASE_URL || 'https://fallback.supabase.co',
-      VITE_SUPABASE_PUBLISHABLE_KEY: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY || 'fallback-key',
+      VITE_SUPABASE_PROJECT_ID: import.meta.env.VITE_SUPABASE_PROJECT_ID || 'hbdnzajbyjakdhuavrvb',
+      VITE_SUPABASE_URL: import.meta.env.VITE_SUPABASE_URL || 'https://hbdnzajbyjakdhuavrvb.supabase.co',
+      VITE_SUPABASE_PUBLISHABLE_KEY: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhiZG56YWpieWpha2RodWF2cnZiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTc1OTgyMzEsImV4cCI6MjA3MzE3NDIzMX0.myur8r50wIORQwfcCP4D1ZxlhKFxICdVqjUM80CgtnM',
       VITE_APP_ENV: (import.meta.env.VITE_APP_ENV as any) || 'production',
       VITE_MONEROO_API_KEY: import.meta.env.VITE_MONEROO_API_KEY,
       VITE_SENTRY_DSN: import.meta.env.VITE_SENTRY_DSN,
