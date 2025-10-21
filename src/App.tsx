@@ -16,6 +16,7 @@ import { useThemeManager } from "@/hooks/useThemeManager";
 import { checkEnvironmentVariables, checkSupabaseConnection } from "@/lib/env-checker";
 import { EnvironmentDiagnostic } from "@/components/dashboard/EnvironmentDiagnostic";
 import { OptimizedRoutes } from "@/router/OptimizedRoutes";
+import { SupabaseErrorAlert } from "@/components/SupabaseErrorAlert";
 
 const AppContent = () => {
   useScrollRestoration();
@@ -40,6 +41,7 @@ const AppContent = () => {
       <ScrollToTop />
       <NotificationContainer />
       <EnvironmentDiagnostic />
+      <SupabaseErrorAlert />
       {/* <EnvironmentInfo /> */}
       <OptimizedRoutes />
     </ErrorBoundary>
