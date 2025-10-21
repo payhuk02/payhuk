@@ -1,9 +1,41 @@
 import { z } from 'zod';
-import { isValidEmail, isValidPhone, isValidAmount, isValidUrl } from '@/lib/validation';
+import { isValidEmail, isValidPhone, isValidAmount } from '@/lib/validation';
 
 /**
  * Schémas de validation Zod pour les formulaires
  */
+
+// Schéma simplifié pour les produits (formulaire de base)
+export const productSchema = z.object({
+  name: z.string()
+    .min(2, 'Le nom doit contenir au moins 2 caractères')
+    .max(100, 'Le nom ne peut pas dépasser 100 caractères'),
+  
+  description: z.string()
+    .max(2000, 'La description ne peut pas dépasser 2000 caractères')
+    .optional(),
+  
+  price: z.number()
+    .positive('Le prix doit être positif')
+    .max(1000000, 'Le prix ne peut pas dépasser 1,000,000'),
+  
+  currency: z.string()
+    .length(3, 'La devise doit contenir 3 caractères')
+    .regex(/^[A-Z]{3}$/, 'Format de devise invalide'),
+  
+  category: z.string()
+    .min(2, 'La catégorie doit contenir au moins 2 caractères')
+    .max(50, 'La catégorie ne peut pas dépasser 50 caractères'),
+  
+  product_type: z.enum(['digital', 'physical', 'service'], {
+    errorMap: () => ({ message: 'Type de produit invalide' })
+  }),
+  
+  image_url: z.string()
+    .url('URL d\'image invalide')
+    .optional()
+    .or(z.literal('')),
+});
 
 // Schéma FAQ détaillé
 export const faqItemSchema = z.object({
@@ -76,9 +108,9 @@ export const productCompleteSchema = z.object({
     .optional()
     .or(z.literal('')),
   
-  images: z.array(z.string()).optional(),
+  images: z.array(z.string().url('URL d\'image invalide')).optional(),
   video_url: z.string().url('URL de vidéo invalide').optional().or(z.literal('')),
-  gallery_images: z.array(z.string()).optional(),
+  gallery_images: z.array(z.string().url('URL d\'image invalide')).optional(),
   
   // Fichiers et téléchargements
   downloadable_files: z.array(z.record(z.unknown())).optional(),
@@ -312,7 +344,9 @@ export const authSchema = z.object({
 
 // Types TypeScript dérivés des schémas
 export type ProductFormData = z.infer<typeof productSchema>;
+export type ProductCompleteFormData = z.infer<typeof productCompleteSchema>;
 export type OrderFormData = z.infer<typeof orderSchema>;
 export type StoreFormData = z.infer<typeof storeSchema>;
 export type CustomerFormData = z.infer<typeof customerSchema>;
 export type AuthFormData = z.infer<typeof authSchema>;
+export type FAQItemFormData = z.infer<typeof faqItemSchema>;
